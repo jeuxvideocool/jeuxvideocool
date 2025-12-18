@@ -220,9 +220,9 @@ function update(dt: number) {
   if (!state.running || !config) return;
   state.lastShot += dt;
   state.cooldownPaused = Math.max(0, state.cooldownPaused - dt);
-  const heatCoolRate = 0.28;
+  const heatCoolRate = 0.35;
   state.heat = clamp(state.heat - heatCoolRate * dt, 0, 1.2);
-  if (state.overheat && state.heat < 0.25) {
+  if (state.overheat && state.heat < 0.2) {
     state.overheat = false;
   }
   state.spawnTimer += dt * 1000;
@@ -261,7 +261,7 @@ function update(dt: number) {
     });
     state.lastShot = 0;
     if (state.cooldownPaused <= 0) {
-      const heatPerShot = 0.12;
+      const heatPerShot = 0.18;
       state.heat = clamp(state.heat + heatPerShot, 0, 1.2);
       if (state.heat >= 1) {
         state.overheat = true;
@@ -422,10 +422,15 @@ function render() {
 
   // Bullets
   state.bullets.forEach((b) => {
+    const heatRatio = clamp(state.heat, 0, 1);
     if (bulletImg.complete) {
+      const tint = heatRatio > 0.7 ? theme.colors.accent : theme.colors.primary;
+      ctx.filter = `drop-shadow(0 0 10px ${tint})`;
       ctx.drawImage(bulletImg, b.x - 8, b.y - 18, 16, 30);
+      ctx.filter = "none";
     } else {
-      ctx.fillStyle = theme.colors.secondary;
+      const color = heatRatio > 0.7 ? theme.colors.accent : theme.colors.secondary;
+      ctx.fillStyle = color;
       ctx.fillRect(b.x - 3, b.y - 10, 6, 12);
     }
   });
