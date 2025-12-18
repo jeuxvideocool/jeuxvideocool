@@ -1,5 +1,5 @@
 # Contribuer  
- 
+  
 - Utiliser pnpm et TypeScript.
 - Pas de dépendances réseau dynamiques côté build sans nécessité.
 - Garder les couleurs/thèmes dans `configs/themes/*.json`.
