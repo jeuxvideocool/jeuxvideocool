@@ -138,7 +138,9 @@ function prepareLevel() {
   const itemCount = state.baseItemCount;
   const trapCount = state.baseTrapCount + Math.min(levelFactor, 4);
   const enemyCount = state.baseEnemyCount + Math.min(levelFactor, 6);
-  state.enemySpeed = state.baseEnemySpeed + levelFactor * 0.15;
+  const playerSpeed = config.difficultyParams.playerSpeed;
+  const maxEnemySpeed = Math.max(0.5, playerSpeed * 0.9);
+  state.enemySpeed = Math.min(state.baseEnemySpeed + levelFactor * 0.2, maxEnemySpeed);
   state.attackTimer = 0;
   spawnItems(itemCount);
   spawnTraps(trapCount);
@@ -242,7 +244,7 @@ function update(dt: number) {
     const dirY = dy / dist;
     const swayX = rand(-0.05, 0.05);
     const swayY = rand(-0.05, 0.05);
-    const speed = state.enemySpeed + Math.min(state.level * 0.05, 1);
+    const speed = state.enemySpeed;
     enemy.vx = clamp(enemy.vx * 0.8 + (dirX + swayX) * 0.6, -1.8, 1.8);
     enemy.vy = clamp(enemy.vy * 0.8 + (dirY + swayY) * 0.6, -1.6, 1.6);
     enemy.x += enemy.vx * speed * (dt * 60);
