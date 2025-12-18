@@ -107,3 +107,8 @@ canvas {
   background: linear-gradient(120deg, var(--color-primary), var(--color-accent));
   color: #050814;
 }
+
+.pill.danger {
+  border-color: rgba(255, 123, 95, 0.6);
+  color: #ffc0b6;
+}

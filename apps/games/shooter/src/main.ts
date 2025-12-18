@@ -97,9 +97,10 @@ const state = {
   combo: 0,
   comboTimer: 0,
   lastShot: 0,
-  fireHeld: false,
   fireCooldown: 0.28,
   cooldownPaused: 0,
+  heat: 0,
+  overheat: false,
   spawnTimer: 0,
   wave: 1,
   waveTimer: config?.difficultyParams.waveLength ?? 30,
@@ -154,7 +155,8 @@ function startGame() {
   state.heartSpawnRate = preset.heartRate;
   state.boostSpawnRate = preset.boostRate;
   state.cooldownPaused = 0;
-  state.fireHeld = false;
+  state.heat = 0;
+  state.overheat = false;
   overlay.style.display = "none";
   emitEvent({ type: "SESSION_START", gameId: GAME_ID });
   loop.start();
@@ -218,6 +220,11 @@ function update(dt: number) {
   if (!state.running || !config) return;
   state.lastShot += dt;
   state.cooldownPaused = Math.max(0, state.cooldownPaused - dt);
+  const heatCoolRate = 0.28;
+  state.heat = clamp(state.heat - heatCoolRate * dt, 0, 1.2);
+  if (state.overheat && state.heat < 0.25) {
+    state.overheat = false;
+  }
   state.spawnTimer += dt * 1000;
   state.comboTimer = Math.max(0, state.comboTimer - dt);
   if (state.comboTimer <= 0) state.combo = 0;
@@ -245,17 +252,21 @@ function update(dt: number) {
   const shootKey = controls.shoot;
   const shootingNow = isDownAny(shootKey, controls.altShoot);
   const cooldown = state.cooldownPaused > 0 ? 0 : state.fireCooldown;
-  if (shootingNow && !state.fireHeld && state.lastShot > cooldown) {
+  const heatBlocked = state.overheat && state.cooldownPaused <= 0;
+  if (shootingNow && !heatBlocked && state.lastShot > cooldown) {
     state.bullets.push({
       x: state.player.x,
       y: state.player.y - 8,
       speed: config.difficultyParams.bulletSpeed,
     });
     state.lastShot = 0;
-    state.fireHeld = true;
-  }
-  if (!shootingNow) {
-    state.fireHeld = false;
+    if (state.cooldownPaused <= 0) {
+      const heatPerShot = 0.12;
+      state.heat = clamp(state.heat + heatPerShot, 0, 1.2);
+      if (state.heat >= 1) {
+        state.overheat = true;
+      }
+    }
   }
 
   // Spawn enemies
@@ -463,6 +474,7 @@ function renderHUD() {
   const hud = document.createElement("div");
   hud.className = "hud";
   const waveLabel = state.maxWave === Infinity ? "∞" : state.maxWave;
+  const heatPercent = Math.round(state.heat * 100);
   hud.innerHTML = `
     <div class="pill">Score ${state.score}</div>
     <div class="pill">Wave ${state.wave}/${waveLabel}</div>
@@ -473,6 +485,7 @@ function renderHUD() {
         ? `<div class="pill">Cooldown off ${state.cooldownPaused.toFixed(1)}s</div>`
         : ""
     }
+    <div class="pill ${state.overheat ? "danger" : ""}">Chaleur ${heatPercent}%${state.overheat ? " (Overheat)" : ""}</div>
   `;
   ui.appendChild(hud);
 }
