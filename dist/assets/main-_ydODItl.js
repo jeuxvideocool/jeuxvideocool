@@ -1,10 +1,19 @@
-import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3ZrJi4.js";import{g as z,a as K,b as Y,c as Q,w as W}from"./loaders-C9UKxqwl.js";import{g as Z,c as I,s as ee,l as se,a as te}from"./cloud-B4CuE7-U.js";const ae=document.getElementById("app"),$=z(),x=K(),D=Y(),R=Q();let P="hub",v=T(),M=v.save.globalLevel,n=Z(),A="",E="all",w=!1;X();O(G($.hubTheme));te(e=>{n=e,y()});F("ACHIEVEMENT_UNLOCKED",e=>{var o;const s=(o=e.payload)==null?void 0:o.achievementId,t=x.achievements.find(l=>l.id===s);t&&p(`Succès débloqué : ${t.title}`,"success")});function G(e){return e?R.find(s=>s.id===e):R[0]}function O(e){if(!e)return;const s=document.documentElement.style;s.setProperty("--color-primary",e.colors.primary),s.setProperty("--color-secondary",e.colors.secondary),s.setProperty("--color-accent",e.colors.accent),s.setProperty("--color-bg",e.colors.background),s.setProperty("--color-surface",e.colors.surface),s.setProperty("--color-text",e.colors.text),s.setProperty("--color-muted",e.colors.muted),e.gradient&&s.setProperty("--hero-gradient",e.gradient)}function p(e,s="info"){const t=document.createElement("div");t.className=`toast ${s}`,t.textContent=e,document.body.appendChild(t),requestAnimationFrame(()=>t.classList.add("visible")),setTimeout(()=>{t.classList.remove("visible"),setTimeout(()=>t.remove(),300)},2600)}function B(e){return e?new Date(e).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"Jamais"}function k(e){if(!e)return"0m";const s=Math.floor(e/1e3),t=Math.floor(s/3600),o=Math.floor(s%3600/60),l=s%60;return t?`${t}h ${o}m`:o?`${o}m ${l}s`:`${l}s`}function U(e,s){const t=e.trim()||"Joueur",o=s.trim()||"🎮";q(l=>{l.playerProfile.name=t.slice(0,18),l.playerProfile.avatar=o.slice(0,4)}),L()}function oe(){const e=V(),s=new Blob([e],{type:"application/json"}),t=URL.createObjectURL(s),o=document.createElement("a");o.href=t,o.download="nintendo-hub-save.json",o.click(),URL.revokeObjectURL(t),p("Sauvegarde exportée","success")}function ne(e){const s=J(e);s.success?(p("Import réussi","success"),L()):p(s.error||"Import impossible","error")}function N(e){e?(_(e),p(`Progression de ${e} réinitialisée`,"info")):(H(),p("Progression globale réinitialisée","info")),L()}function ie(e){q(s=>{const t=new Set(s.favorites||[]);t.has(e)?t.delete(e):t.add(e),s.favorites=Array.from(t)}),L()}async function le(){const e=T();await ee(e.save)?(v=e,p("Sauvegarde envoyée sur le cloud","success")):n.error&&p(n.error,"error")}async function ce(){const e=await se();e!=null&&e.state?(J(JSON.stringify(e.state)),p("Sauvegarde cloud importée","success"),L()):e!=null&&e.error&&p(e.error,"error")}function re(){return`
+import{g as T,a as _,o as F,c as V,u as X,e as H,r as z,b as K,i as q,A as Y}from"./index-CclJQuS1.js";import{g as Q,a as W,b as Z,c as ee,w as J}from"./loaders-Bj0CnEmo.js";import{g as se,c as I,s as te,l as ae,a as oe}from"./cloud-B4CuE7-U.js";const ne=document.getElementById("app"),$=Q(),L=W(),O=Z(),R=ee();let P="hub",v=T(),U=v.save.globalLevel,n=se(),C="",E="all",w=!1;_();G(D($.hubTheme));oe(e=>{n=e,y()});F("ACHIEVEMENT_UNLOCKED",e=>{var o;const s=(o=e.payload)==null?void 0:o.achievementId,t=L.achievements.find(l=>l.id===s);t&&p(`Succès débloqué : ${t.title}`,"success"),s===Y.achievementId&&x()});function D(e){return e?R.find(s=>s.id===e):R[0]}function G(e){if(!e)return;const s=document.documentElement.style;s.setProperty("--color-primary",e.colors.primary),s.setProperty("--color-secondary",e.colors.secondary),s.setProperty("--color-accent",e.colors.accent),s.setProperty("--color-bg",e.colors.background),s.setProperty("--color-surface",e.colors.surface),s.setProperty("--color-text",e.colors.text),s.setProperty("--color-muted",e.colors.muted),e.gradient&&s.setProperty("--hero-gradient",e.gradient)}function p(e,s="info"){const t=document.createElement("div");t.className=`toast ${s}`,t.textContent=e,document.body.appendChild(t),requestAnimationFrame(()=>t.classList.add("visible")),setTimeout(()=>{t.classList.remove("visible"),setTimeout(()=>t.remove(),300)},2600)}function B(e){return e?new Date(e).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"Jamais"}function k(e){if(!e)return"0m";const s=Math.floor(e/1e3),t=Math.floor(s/3600),o=Math.floor(s%3600/60),l=s%60;return t?`${t}h ${o}m`:o?`${o}m ${l}s`:`${l}s`}function M(e,s){const t=e.trim()||"Joueur",o=s.trim()||"🎮";X(l=>{l.playerProfile.name=t.slice(0,18),l.playerProfile.avatar=o.slice(0,4)}),x()}function ie(){const e=H(),s=new Blob([e],{type:"application/json"}),t=URL.createObjectURL(s),o=document.createElement("a");o.href=t,o.download="nintendo-hub-save.json",o.click(),URL.revokeObjectURL(t),p("Sauvegarde exportée","success")}function le(e){const s=q(e);s.success?(p("Import réussi","success"),x()):p(s.error||"Import impossible","error")}function N(e){e?(z(e),p(`Progression de ${e} réinitialisée`,"info")):(K(),p("Progression globale réinitialisée","info")),x()}function ce(e){X(s=>{const t=new Set(s.favorites||[]);t.has(e)?t.delete(e):t.add(e),s.favorites=Array.from(t)}),x()}async function re(){const e=T();await te(e.save)?(v=e,p("Sauvegarde envoyée sur le cloud","success")):n.error&&p(n.error,"error")}async function de(){const e=await ae();e!=null&&e.state?(q(JSON.stringify(e.state)),p("Sauvegarde cloud importée","success"),x()):e!=null&&e.error&&p(e.error,"error")}function ue(){return`
     <nav class="nav">
       <button class="nav-btn ${P==="hub"?"active":""}" data-tab="hub">Hub</button>
       <button class="nav-btn ${P==="achievements"?"active":""}" data-tab="achievements">Succès</button>
       <button class="nav-btn ${P==="saves"?"active":""}" data-tab="saves">Saves</button>
     </nav>
-  `}function de(){var b;const e=v.save,s=e.achievementsUnlocked.length,t=x.achievements.length,o=e.globalLevel>M,l=`--progress:${v.levelProgress*100}%`,g=k(e.globalStats.timePlayedMs),h=e.globalStats.totalSessions,f=e.playerProfile.lastPlayedGameId&&((b=$.games.find(a=>a.id===e.playerProfile.lastPlayedGameId))==null?void 0:b.title);M=e.globalLevel;const S=n.user?`<span class="chip success">Cloud : ${n.user.email||"connecté"}</span>`:n.ready?'<span class="chip ghost">Mode invité · données locales</span>':'<span class="chip warning">Supabase non configuré (.env)</span>';return`
+  `}function ve(e){return V(e)?`
+    <div class="alex-banner">
+      <div>
+        <p class="eyebrow">Succès secret</p>
+        <strong>31 000 XP validés pour Alex</strong>
+        <p class="muted small">Un message d'anniversaire se cache derrière ce bouton.</p>
+      </div>
+      <a class="btn primary" href="${J("/apps/alex/")}">Ouvrir la page</a>
+    </div>
+  `:""}function pe(){var b;const e=v.save,s=e.achievementsUnlocked.length,t=L.achievements.length,o=e.globalLevel>U,l=`--progress:${v.levelProgress*100}%`,g=k(e.globalStats.timePlayedMs),h=e.globalStats.totalSessions,f=e.playerProfile.lastPlayedGameId&&((b=$.games.find(a=>a.id===e.playerProfile.lastPlayedGameId))==null?void 0:b.title);U=e.globalLevel;const S=n.user?`<span class="chip success">Cloud : ${n.user.email||"connecté"}</span>`:n.ready?'<span class="chip ghost">Mode invité · données locales</span>':'<span class="chip warning">Supabase non configuré (.env)</span>';return`
     <header class="card hero">
       <div class="hero-glow"></div>
       <div class="hero-top">
@@ -39,6 +48,7 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
           </div>
         </div>
       </div>
+      ${ve(e)}
       <div class="level-row ${o?"level-up":""}">
         <div class="level-label">Progression niveau</div>
         <div class="xp-bar" style="${l}">
@@ -57,7 +67,7 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
         </label>
       </div>
     </header>
-  `}function ue(){const e=$.games.length?[]:["games.registry.json vide ou invalide"],s=new Set(v.save.favorites||[]),t=Array.from(new Set($.games.flatMap(a=>a.tags||[]).filter(Boolean))).sort((a,m)=>a.localeCompare(m,"fr")),o=A.trim().toLowerCase(),l=A.replace(/"/g,"&quot;"),g=$.games.filter(a=>w?s.has(a.id):!0).filter(a=>E==="all"?!0:(a.tags||[]).includes(E)).filter(a=>o?a.title.toLowerCase().includes(o)||a.description.toLowerCase().includes(o)||a.id.toLowerCase().includes(o):!0).sort((a,m)=>{const c=Number(s.has(m.id))-Number(s.has(a.id));return c!==0?c:(a.order??0)-(m.order??0)}),h=g.map(a=>{D.find(u=>u.id===a.id)||e.push(`Config manquante pour ${a.id}`);const c=v.save.games[a.id],j=c!=null&&c.lastPlayedAt?B(c.lastPlayedAt):"Jamais",C=(c==null?void 0:c.bestScore)??null,i=k(c==null?void 0:c.timePlayedMs),r=W(`/apps/games/${a.id}/`),d=s.has(a.id);return`
+  `}function me(){const e=$.games.length?[]:["games.registry.json vide ou invalide"],s=new Set(v.save.favorites||[]),t=Array.from(new Set($.games.flatMap(a=>a.tags||[]).filter(Boolean))).sort((a,m)=>a.localeCompare(m,"fr")),o=C.trim().toLowerCase(),l=C.replace(/"/g,"&quot;"),g=$.games.filter(a=>w?s.has(a.id):!0).filter(a=>E==="all"?!0:(a.tags||[]).includes(E)).filter(a=>o?a.title.toLowerCase().includes(o)||a.description.toLowerCase().includes(o)||a.id.toLowerCase().includes(o):!0).sort((a,m)=>{const c=Number(s.has(m.id))-Number(s.has(a.id));return c!==0?c:(a.order??0)-(m.order??0)}),h=g.map(a=>{O.find(u=>u.id===a.id)||e.push(`Config manquante pour ${a.id}`);const c=v.save.games[a.id],j=c!=null&&c.lastPlayedAt?B(c.lastPlayedAt):"Jamais",A=(c==null?void 0:c.bestScore)??null,i=k(c==null?void 0:c.timePlayedMs),r=J(`/apps/games/${a.id}/`),d=s.has(a.id);return`
         <article class="card game-card">
           <div class="card-top">
             <div class="pill accent">${a.previewEmoji||"🎮"} ${a.title}</div>
@@ -72,7 +82,7 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
           <div class="tags">${a.tags.map(u=>`<span class="tag">${u}</span>`).join("")}</div>
           <div class="meta-row">
             <span class="chip ghost">⏱ ${i}</span>
-            <span class="chip ghost">🏆 ${C??"—"}</span>
+            <span class="chip ghost">🏆 ${A??"—"}</span>
             <span class="chip ghost">🕘 ${j}</span>
           </div>
           <div class="game-actions">
@@ -113,13 +123,13 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
       ${b}
       <div class="grid">${h||"<p class='muted'>Aucun jeu ne correspond aux filtres.</p>"}</div>
     </section>
-  `}function ve(){const e=new Set(v.save.achievementsUnlocked),s=x.achievements.map(t=>`
+  `}function ge(){const e=new Set(v.save.achievementsUnlocked),s=L.achievements.map(t=>`
         <article class="card achievement ${e.has(t.id)?"unlocked":""}">
           <div class="pill accent">${t.icon||"⭐️"}</div>
           <div>
             <h3>${t.title}</h3>
             <p>${t.description}</p>
-            <p class="muted">${pe(t)}</p>
+            <p class="muted">${he(t)}</p>
           </div>
           <div class="reward">+${t.rewardXP??0} XP</div>
         </article>
@@ -129,12 +139,12 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
         <div>
           <p class="eyebrow">Succès</p>
           <h2>Collection</h2>
-          <p class="muted">${e.size} / ${x.achievements.length} débloqués</p>
+          <p class="muted">${e.size} / ${L.achievements.length} débloqués</p>
         </div>
       </div>
       <div class="stack">${s}</div>
     </section>
-  `}function pe(e){const s=e.condition;return s.type==="eventCount"?`${s.count}x ${s.event}`:s.type==="xpReached"?`${s.xp} XP globaux`:s.type==="gamesPlayed"?`${s.count} jeux différents`:s.type==="streak"?`${s.count} ${s.event} d'affilée`:""}function me(){return n.ready?n.user?`
+  `}function he(e){const s=e.condition;return s.type==="eventCount"?`${s.count}x ${s.event}`:s.type==="xpReached"?`${s.xp} XP globaux`:s.type==="gamesPlayed"?`${s.count} jeux différents`:s.type==="streak"?`${s.count} ${s.event} d'affilée`:s.type==="playerXpName"?`${s.xp} XP et pseudo "${s.name}"`:""}function fe(){return n.ready?n.user?`
       <section class="card cloud">
         <div class="section-head">
           <div>
@@ -182,7 +192,7 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
           <span class="chip warning">Inactif</span>
         </div>
       </section>
-    `}function ge(){const e=v.save,t=Object.entries(e.games).map(([o,l])=>`
+    `}function be(){const e=v.save,t=Object.entries(e.games).map(([o,l])=>`
         <div class="save-row">
           <div>
             <strong>${o}</strong>
@@ -227,7 +237,7 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
           <button class="btn primary" id="import-btn">Importer</button>
         </label>
       </section>
-      ${me()}
+      ${fe()}
     </div>
     <section class="card">
       <div class="section-head">
@@ -240,12 +250,12 @@ import{g as T,a as X,o as F,u as q,e as V,r as _,b as H,i as J}from"./index-PQ3Z
         ${t||"<p class='muted'>Aucune save par jeu pour le moment.</p>"}
       </div>
     </section>
-  `}function y(){ae.innerHTML=`
+  `}function y(){ne.innerHTML=`
     <div class="layout">
-      ${re()}
-      ${de()}
-      ${P==="hub"?ue():""}
-      ${P==="achievements"?ve():""}
-      ${P==="saves"?ge():""}
+      ${ue()}
+      ${pe()}
+      ${P==="hub"?me():""}
+      ${P==="achievements"?ge():""}
+      ${P==="saves"?be():""}
     </div>
-  `,he()}function he(){document.querySelectorAll(".nav-btn").forEach(i=>{i.addEventListener("click",()=>{P=i.dataset.tab,y()})});const e=document.getElementById("player-name"),s=document.getElementById("player-avatar");e==null||e.addEventListener("change",()=>U(e.value,(s==null?void 0:s.value)||"🎮")),s==null||s.addEventListener("change",()=>U((e==null?void 0:e.value)||"Joueur",s.value)),document.querySelectorAll(".help-btn").forEach(i=>{i.addEventListener("click",()=>{const r=i.dataset.help,d=D.find(u=>u.id===r);d&&p(d.uiText.help,"info")})}),document.querySelectorAll(".favorite-btn").forEach(i=>{i.addEventListener("click",()=>{const r=i.dataset.game;r&&ie(r)})});const t=document.getElementById("export-save");t==null||t.addEventListener("click",oe);const o=document.getElementById("reset-save");o==null||o.addEventListener("click",()=>N()),document.querySelectorAll(".reset-game").forEach(i=>{i.addEventListener("click",()=>{const r=i.dataset.game;N(r)})});const l=document.getElementById("import-btn"),g=document.getElementById("import-text");l==null||l.addEventListener("click",()=>g&&ne(g.value));const h=document.getElementById("cloud-login"),f=document.getElementById("cloud-register"),S=document.getElementById("cloud-logout"),b=document.getElementById("cloud-save"),a=document.getElementById("cloud-load");h==null||h.addEventListener("click",async()=>{var d,u;const i=((d=document.getElementById("cloud-email"))==null?void 0:d.value)||"",r=((u=document.getElementById("cloud-password"))==null?void 0:u.value)||"";await I("login",{email:i,password:r})}),f==null||f.addEventListener("click",async()=>{var d,u;const i=((d=document.getElementById("cloud-email"))==null?void 0:d.value)||"",r=((u=document.getElementById("cloud-password"))==null?void 0:u.value)||"";await I("register",{email:i,password:r})}),S==null||S.addEventListener("click",async()=>{await I("logout")}),b==null||b.addEventListener("click",le),a==null||a.addEventListener("click",ce);const m=document.getElementById("search-games"),c=document.getElementById("filter-fav"),j=Array.from(document.querySelectorAll(".chip-btn[data-category]")),C=document.getElementById("clear-filters");m==null||m.addEventListener("input",()=>{A=m.value,y()}),j.forEach(i=>{i.addEventListener("click",()=>{E=i.dataset.category||"all",y()})}),c==null||c.addEventListener("click",()=>{w=!w,y()}),C==null||C.addEventListener("click",()=>{A="",E="all",w=!1,y()})}function L(){v=T(),O(G($.hubTheme)),y()}y();
+  `,ye()}function ye(){document.querySelectorAll(".nav-btn").forEach(i=>{i.addEventListener("click",()=>{P=i.dataset.tab,y()})});const e=document.getElementById("player-name"),s=document.getElementById("player-avatar");e==null||e.addEventListener("change",()=>M(e.value,(s==null?void 0:s.value)||"🎮")),s==null||s.addEventListener("change",()=>M((e==null?void 0:e.value)||"Joueur",s.value)),document.querySelectorAll(".help-btn").forEach(i=>{i.addEventListener("click",()=>{const r=i.dataset.help,d=O.find(u=>u.id===r);d&&p(d.uiText.help,"info")})}),document.querySelectorAll(".favorite-btn").forEach(i=>{i.addEventListener("click",()=>{const r=i.dataset.game;r&&ce(r)})});const t=document.getElementById("export-save");t==null||t.addEventListener("click",ie);const o=document.getElementById("reset-save");o==null||o.addEventListener("click",()=>N()),document.querySelectorAll(".reset-game").forEach(i=>{i.addEventListener("click",()=>{const r=i.dataset.game;N(r)})});const l=document.getElementById("import-btn"),g=document.getElementById("import-text");l==null||l.addEventListener("click",()=>g&&le(g.value));const h=document.getElementById("cloud-login"),f=document.getElementById("cloud-register"),S=document.getElementById("cloud-logout"),b=document.getElementById("cloud-save"),a=document.getElementById("cloud-load");h==null||h.addEventListener("click",async()=>{var d,u;const i=((d=document.getElementById("cloud-email"))==null?void 0:d.value)||"",r=((u=document.getElementById("cloud-password"))==null?void 0:u.value)||"";await I("login",{email:i,password:r})}),f==null||f.addEventListener("click",async()=>{var d,u;const i=((d=document.getElementById("cloud-email"))==null?void 0:d.value)||"",r=((u=document.getElementById("cloud-password"))==null?void 0:u.value)||"";await I("register",{email:i,password:r})}),S==null||S.addEventListener("click",async()=>{await I("logout")}),b==null||b.addEventListener("click",re),a==null||a.addEventListener("click",de);const m=document.getElementById("search-games"),c=document.getElementById("filter-fav"),j=Array.from(document.querySelectorAll(".chip-btn[data-category]")),A=document.getElementById("clear-filters");m==null||m.addEventListener("input",()=>{C=m.value,y()}),j.forEach(i=>{i.addEventListener("click",()=>{E=i.dataset.category||"all",y()})}),c==null||c.addEventListener("click",()=>{w=!w,y()}),A==null||A.addEventListener("click",()=>{C="",E="all",w=!1,y()})}function x(){v=T(),G(D($.hubTheme)),y()}y();

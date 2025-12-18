@@ -103,6 +103,14 @@
       "icon": "🎮",
       "condition": { "type": "gamesPlayed", "count": 4 },
       "rewardXP": 90
+    },
+    {
+      "id": "alex-birthday-31",
+      "title": "Surprise pour Alex",
+      "description": "Pseudo Alex et 31 000 XP globaux : une page secrète t'attend.",
+      "icon": "🎂",
+      "condition": { "type": "playerXpName", "xp": 31000, "name": "Alex" },
+      "rewardXP": 0
     }
   ]
 }

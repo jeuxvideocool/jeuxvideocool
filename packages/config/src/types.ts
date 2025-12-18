@@ -66,7 +66,8 @@ export type AchievementCondition =
   | { type: "eventCount"; event: string; count: number }
   | { type: "xpReached"; xp: number }
   | { type: "gamesPlayed"; count: number }
-  | { type: "streak"; event: string; count: number };
+  | { type: "streak"; event: string; count: number }
+  | { type: "playerXpName"; xp: number; name: string };
 
 export type Achievement = {
   id: string;

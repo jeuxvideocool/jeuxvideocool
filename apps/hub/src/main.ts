@@ -8,7 +8,7 @@ import {
   getThemes,
   ThemeConfig,
 } from "@config";
-import { attachProgressionListener, getProgressionSnapshot } from "@progression";
+import { ALEX_SECRET, attachProgressionListener, canAccessAlexPage, getProgressionSnapshot } from "@progression";
 import { exportSave, importSave, resetGameSave, resetSave, updateSave } from "@storage";
 import {
   connectCloud,
@@ -17,6 +17,7 @@ import {
   saveCloud,
   subscribe as subscribeCloud,
 } from "@storage/cloud";
+import type { SaveState } from "@storage";
 
 type Tab = "hub" | "achievements" | "saves";
 
@@ -48,6 +49,9 @@ onEvent("ACHIEVEMENT_UNLOCKED", (event) => {
   const achievement = achievementsConfig.achievements.find((a) => a.id === achievementId);
   if (achievement) {
     showToast(`Succès débloqué : ${achievement.title}`, "success");
+  }
+  if (achievementId === ALEX_SECRET.achievementId) {
+    refresh();
   }
 });
 
@@ -187,6 +191,21 @@ function renderNav() {
   `;
 }
 
+function renderAlexBanner(save: SaveState) {
+  if (!canAccessAlexPage(save)) return "";
+  const alexLink = withBasePath("/apps/alex/", basePath);
+  return `
+    <div class="alex-banner">
+      <div>
+        <p class="eyebrow">Succès secret</p>
+        <strong>31 000 XP validés pour Alex</strong>
+        <p class="muted small">Un message d'anniversaire se cache derrière ce bouton.</p>
+      </div>
+      <a class="btn primary" href="${alexLink}">Ouvrir la page</a>
+    </div>
+  `;
+}
+
 function renderHero() {
   const save = snapshot.save;
   const unlocked = save.achievementsUnlocked.length;
@@ -241,6 +260,7 @@ function renderHero() {
           </div>
         </div>
       </div>
+      ${renderAlexBanner(save)}
       <div class="level-row ${levelUp ? "level-up" : ""}">
         <div class="level-label">Progression niveau</div>
         <div class="xp-bar" style="${xpBarStyle}">
@@ -425,6 +445,7 @@ function describeCondition(achievement: (typeof achievementsConfig.achievements)
   if (c.type === "xpReached") return `${c.xp} XP globaux`;
   if (c.type === "gamesPlayed") return `${c.count} jeux différents`;
   if (c.type === "streak") return `${c.count} ${c.event} d'affilée`;
+  if (c.type === "playerXpName") return `${c.xp} XP et pseudo "${c.name}"`;
   return "";
 }
 

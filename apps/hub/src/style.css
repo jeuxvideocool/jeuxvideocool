@@ -125,6 +125,33 @@ a {
   justify-content: space-between;
 }
 
+.alex-banner {
+  margin: 8px 0 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(255, 126, 219, 0.18), rgba(124, 248, 255, 0.18));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+.alex-banner strong {
+  display: block;
+  font-size: 18px;
+  letter-spacing: -0.2px;
+}
+
+.alex-banner .btn {
+  background: #fefefe;
+  color: #051125;
+  border: none;
+}
+
 .profile {
   display: flex;
   gap: 14px;
@@ -535,6 +562,13 @@ textarea:focus {
   }
   .stat-grid.compact {
     max-width: 100%;
+  }
+  .alex-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .alex-banner .btn {
+    width: 100%;
   }
   .actions {
     flex-wrap: wrap;

@@ -74,6 +74,11 @@ const achievementsSchema = z.object({
         z.object({ type: z.literal("xpReached"), xp: z.number() }),
         z.object({ type: z.literal("gamesPlayed"), count: z.number() }),
         z.object({ type: z.literal("streak"), event: z.string(), count: z.number() }),
+        z.object({
+          type: z.literal("playerXpName"),
+          xp: z.number(),
+          name: z.string(),
+        }),
       ]),
       rewardXP: z.number().optional(),
     }),

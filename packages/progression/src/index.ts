@@ -43,6 +43,12 @@ const ctx: ProgressionContext = {
   gameConfigs: getGameConfigs(),
 };
 
+export const ALEX_SECRET = {
+  achievementId: "alex-birthday-31",
+  minXP: 31000,
+  requiredName: "alex",
+};
+
 export function getGameConfigById(id: string): GameConfig | undefined {
   return ctx.gameConfigs.find((g) => g.id === id) || getGameConfig(id);
 }
@@ -75,24 +81,38 @@ function computeLevel(xp: number, xpConfig: XPConfig) {
   return { level, nextLevelXP: next, currentLevelXP, levelProgress };
 }
 
-function applyAchievements(state: SaveState, event: GameEvent, achievements: AchievementsConfig["achievements"]) {
+function isAchievementUnlockedByState(state: SaveState, achievement: Achievement) {
+  const condition = achievement.condition as any;
+  const normalizedName = state.playerProfile.name?.trim().toLowerCase();
+
+  if (condition.type === "eventCount") {
+    const count = state.globalStats.events[condition.event] ?? 0;
+    return count >= condition.count;
+  }
+  if (condition.type === "xpReached") {
+    return state.globalXP >= condition.xp;
+  }
+  if (condition.type === "gamesPlayed") {
+    const uniqueGames = Object.keys(state.games).length;
+    return uniqueGames >= condition.count;
+  }
+  if (condition.type === "streak") {
+    const streak = state.globalStats.streaks[condition.event] ?? 0;
+    return streak >= condition.count;
+  }
+  if (condition.type === "playerXpName") {
+    return state.globalXP >= condition.xp && normalizedName === condition.name.trim().toLowerCase();
+  }
+  return false;
+}
+
+function unlockEligibleAchievements(
+  state: SaveState,
+  achievements: AchievementsConfig["achievements"],
+) {
   achievements.forEach((achievement) => {
     if (state.achievementsUnlocked.includes(achievement.id)) return;
-    const condition = achievement.condition;
-    let unlocked = false;
-    if (condition.type === "eventCount") {
-      const count = state.globalStats.events[condition.event] ?? 0;
-      unlocked = count >= condition.count;
-    } else if (condition.type === "xpReached") {
-      unlocked = state.globalXP >= condition.xp;
-    } else if (condition.type === "gamesPlayed") {
-      const uniqueGames = Object.keys(state.games).length;
-      unlocked = uniqueGames >= condition.count;
-    } else if (condition.type === "streak") {
-      const streak = state.globalStats.streaks[condition.event] ?? 0;
-      unlocked = streak >= condition.count;
-    }
-
+    const unlocked = isAchievementUnlockedByState(state, achievement);
     if (unlocked) {
       state.achievementsUnlocked.push(achievement.id);
       if (achievement.rewardXP) {
@@ -101,6 +121,12 @@ function applyAchievements(state: SaveState, event: GameEvent, achievements: Ach
       emitEvent({ type: "ACHIEVEMENT_UNLOCKED", payload: { achievementId: achievement.id } });
     }
   });
+}
+
+export function canAccessAlexPage(state: SaveState): boolean {
+  const normalizedName = state.playerProfile.name?.trim().toLowerCase();
+  const hasAchievement = state.achievementsUnlocked.includes(ALEX_SECRET.achievementId);
+  return hasAchievement && state.globalXP >= ALEX_SECRET.minXP && normalizedName === ALEX_SECRET.requiredName;
 }
 
 function handleStreaks(state: SaveState, event: GameEvent) {
@@ -180,7 +206,7 @@ function applyLevelFromXP(state: SaveState) {
 export function handleProgressionEvent(event: GameEvent): SaveState {
   const state = updateSave((draft) => {
     applyEventToState(draft, event);
-    applyAchievements(draft, event, ctx.achievements);
+    unlockEligibleAchievements(draft, ctx.achievements);
     applyLevelFromXP(draft);
   });
   return state;
@@ -194,6 +220,7 @@ export function attachProgressionListener() {
 
 export function getProgressionSnapshot(): ProgressionSnapshot {
   const save = loadSave();
+  unlockEligibleAchievements(save, ctx.achievements);
   applyLevelFromXP(save);
   const { levelProgress, currentLevelXP, nextLevelXP } = computeLevel(save.globalXP, ctx.xpConfig);
   const snapshot: ProgressionSnapshot = {
