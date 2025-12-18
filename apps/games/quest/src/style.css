@@ -95,3 +95,14 @@ canvas {
 .btn.secondary {
   background: var(--color-accent);
 }
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn.ghost.active {
+  background: linear-gradient(120deg, var(--color-primary), var(--color-accent));
+  color: #0c1410;
+}

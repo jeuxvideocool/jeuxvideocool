@@ -21,6 +21,8 @@ const trapImg = new Image();
 trapImg.src = new URL("../assets/trap.svg", import.meta.url).href;
 const gateImg = new Image();
 gateImg.src = new URL("../assets/gate.svg", import.meta.url).href;
+const enemyImg = new Image();
+enemyImg.src = new URL("../assets/enemy.svg", import.meta.url).href;
 
 if (theme) {
   const root = document.documentElement.style;
@@ -48,6 +50,48 @@ const controls = {
   right: config?.input.keys.right || "ArrowRight",
 };
 
+const difficultyPresets = {
+  easy: {
+    label: "Facile",
+    timeLimit: 80,
+    itemCount: 6,
+    trapCount: 3,
+    enemyCount: 2,
+    enemySpeed: 1.1,
+    hitPenalty: 5,
+  },
+  medium: {
+    label: "Moyen",
+    timeLimit: config?.difficultyParams.timeLimitSeconds ?? 60,
+    itemCount: config?.difficultyParams.itemCount ?? 6,
+    trapCount: config?.difficultyParams.trapCount ?? 4,
+    enemyCount: config?.difficultyParams.enemyCount ?? 3,
+    enemySpeed: config?.difficultyParams.enemySpeed ?? 1.5,
+    hitPenalty: config?.difficultyParams.hitPenalty ?? 6,
+  },
+  hard: {
+    label: "Difficile",
+    timeLimit: 55,
+    itemCount: 7,
+    trapCount: 5,
+    enemyCount: 4,
+    enemySpeed: 1.8,
+    hitPenalty: 8,
+  },
+  extreme: {
+    label: "Extrême",
+    timeLimit: 50,
+    itemCount: 8,
+    trapCount: 6,
+    enemyCount: 5,
+    enemySpeed: 2.1,
+    hitPenalty: 10,
+  },
+} as const;
+
+type DifficultyKey = keyof typeof difficultyPresets;
+let selectedDifficulty: DifficultyKey = "medium";
+
 createMobileControls({
   container: document.body,
   input,
@@ -62,6 +106,7 @@ createMobileControls({
 type Point = { x: number; y: number };
 type Item = Point & { collected: boolean };
 type Trap = Point & { active: boolean };
+type Enemy = Point & { vx: number; vy: number };
 
 const state = {
   running: false,
@@ -70,9 +115,13 @@ const state = {
   player: { x: 0, y: 0, r: 12 },
   items: [] as Item[],
   traps: [] as Trap[],
+  enemies: [] as Enemy[],
   gate: { x: 0, y: 0, open: false },
   timer: config?.difficultyParams.timeLimitSeconds ?? 60,
   collected: 0,
+  enemySpeed: config?.difficultyParams.enemySpeed ?? 1.5,
+  hitPenalty: config?.difficultyParams.hitPenalty ?? 6,
+  invulnerable: 0,
 };
 
 function resize() {
@@ -100,18 +149,24 @@ function startGame() {
   state.player.y = state.height / 2;
   state.items = [];
   state.traps = [];
+  state.enemies = [];
   state.collected = 0;
   state.gate = { x: state.width * 0.85, y: state.height / 2, open: false };
-  state.timer = config.difficultyParams.timeLimitSeconds;
-  spawnItems();
-  spawnTraps();
+  const preset = difficultyPresets[selectedDifficulty] || difficultyPresets.medium;
+  state.timer = preset.timeLimit;
+  state.enemySpeed = preset.enemySpeed;
+  state.hitPenalty = preset.hitPenalty;
+  spawnItems(preset.itemCount);
+  spawnTraps(preset.trapCount);
+  spawnEnemies(preset.enemyCount);
+  state.invulnerable = 1;
   overlay.style.display = "none";
   emitEvent({ type: "SESSION_START", gameId: GAME_ID });
   loop.start();
 }
 
-function spawnItems() {
-  for (let i = 0; i < (config?.difficultyParams.itemCount ?? 6); i++) {
+function spawnItems(count: number) {
+  for (let i = 0; i < count; i++) {
     state.items.push({
       x: rand(state.width * 0.25, state.width * 0.8),
       y: rand(50, state.height - 50),
@@ -120,12 +175,23 @@ function spawnItems() {
   }
 }
 
-function spawnTraps() {
-  for (let i = 0; i < (config?.difficultyParams.trapCount ?? 4); i++) {
+function spawnTraps(count: number) {
+  for (let i = 0; i < count; i++) {
     state.traps.push({
       x: rand(state.width * 0.2, state.width * 0.8),
       y: rand(60, state.height - 60),
       active: true,
+    });
+  }
+}
+
+function spawnEnemies(count: number) {
+  for (let i = 0; i < count; i++) {
+    state.enemies.push({
+      x: rand(state.width * 0.3, state.width * 0.8),
+      y: rand(80, state.height - 80),
+      vx: rand(-1, 1) || 0.5,
+      vy: rand(-0.6, 0.6),
     });
   }
 }
@@ -146,13 +212,25 @@ function endGame(win: boolean) {
 }
 
 function showOverlay(title: string, body: string, showStart = true) {
+  const preset = difficultyPresets[selectedDifficulty] || difficultyPresets.medium;
   overlay.style.display = "grid";
   overlay.innerHTML = `
     <div class="panel">
-      <p class="pill">Mini Quest</p>
+      <p class="pill">Mini Quest · ${preset.label}</p>
       <h2>${title}</h2>
       <p>${body}</p>
-      <div style="display:flex; gap:10px; justify-content:center; margin-top:12px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:10px 0 6px;">
+        ${Object.entries(difficultyPresets)
+          .map(
+            ([key, p]) => `
+              <button class="btn ghost diff-btn ${key === selectedDifficulty ? "active" : ""}" data-diff="${key}">
+                ${p.label} · ${p.itemCount} items · ${p.timeLimit}s
+              </button>
+            `,
+          )
+          .join("")}
+      </div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
         ${showStart ? `<button class="btn" id="play-btn">Lancer</button>` : ""}
         <a class="btn secondary" href="${withBasePath("/apps/hub/", import.meta.env.BASE_URL)}">Hub</a>
       </div>
@@ -160,6 +238,15 @@ function showOverlay(title: string, body: string, showStart = true) {
   `;
   const play = document.getElementById("play-btn");
   play?.addEventListener("click", startGame);
+  document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const diff = btn.dataset.diff as DifficultyKey | undefined;
+      if (diff && difficultyPresets[diff]) {
+        selectedDifficulty = diff;
+        showOverlay(title, body, showStart);
+      }
+    });
+  });
 }
 
 showOverlay(config?.uiText.title || "Mini Quest", config?.uiText.help || "");
@@ -167,6 +254,7 @@ showOverlay(config?.uiText.title || "Mini Quest", config?.uiText.help || "");
 function update(dt: number) {
   if (!state.running || !config) return;
   state.timer -= dt;
+  state.invulnerable = Math.max(0, state.invulnerable - dt);
   if (state.timer <= 0) {
     endGame(false);
     return;
@@ -178,6 +266,36 @@ function update(dt: number) {
   state.player.y += moveY * config.difficultyParams.playerSpeed * (dt * 60);
   state.player.x = clamp(state.player.x, state.player.r, state.width - state.player.r);
   state.player.y = clamp(state.player.y, state.player.r, state.height - state.player.r);
+
+  // Enemies
+  state.enemies.forEach((enemy) => {
+    enemy.x += enemy.vx * state.enemySpeed * (dt * 60);
+    enemy.y += enemy.vy * state.enemySpeed * (dt * 60);
+    if (enemy.x < 20 || enemy.x > state.width - 20) enemy.vx *= -1;
+    if (enemy.y < 40 || enemy.y > state.height - 40) enemy.vy *= -1;
+    if (Math.random() < 0.01) {
+      enemy.vx += rand(-0.2, 0.2);
+      enemy.vy += rand(-0.2, 0.2);
+    }
+    enemy.vx = clamp(enemy.vx, -1.4, 1.4);
+    enemy.vy = clamp(enemy.vy, -1.2, 1.2);
+  });
+
+  // Enemy collisions
+  if (state.invulnerable <= 0) {
+    for (const enemy of state.enemies) {
+      const dx = enemy.x - state.player.x;
+      const dy = enemy.y - state.player.y;
+      if (Math.sqrt(dx * dx + dy * dy) < state.player.r + 14) {
+        state.timer = Math.max(0, state.timer - state.hitPenalty);
+        state.invulnerable = 1.2;
+        state.player.x = state.width * 0.15;
+        state.player.y = state.height / 2;
+        emitEvent({ type: "PLAYER_HIT", gameId: GAME_ID });
+        break;
+      }
+    }
+  }
 
   // Items
   state.items.forEach((item) => {
@@ -262,6 +380,18 @@ function render() {
     }
   });
 
+  // Enemies
+  state.enemies.forEach((enemy) => {
+    if (enemyImg.complete) {
+      ctx.drawImage(enemyImg, enemy.x - 18, enemy.y - 18, 36, 36);
+    } else {
+      ctx.fillStyle = theme.colors.accent;
+      ctx.beginPath();
+      ctx.arc(enemy.x, enemy.y, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
   // Player
   const playerSize = state.player.r * 2.6;
   if (playerImg.complete) {
@@ -286,6 +416,8 @@ function renderHUD() {
     <div class="pill">Temps ${state.timer.toFixed(1)}s</div>
     <div class="pill">Objets ${state.collected}/${state.items.length}</div>
     <div class="pill">Porte ${state.gate.open ? "ouverte" : "fermée"}</div>
+    <div class="pill">Ennemis ${state.enemies.length}</div>
+    <div class="pill">Difficulté ${difficultyPresets[selectedDifficulty].label}</div>
   `;
   ui.appendChild(hud);
 }
