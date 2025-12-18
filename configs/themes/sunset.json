@@ -1,0 +1,14 @@
+{
+  "id": "sunset",
+  "name": "Coucher de soleil",
+  "colors": {
+    "primary": "#ff5f6d",
+    "secondary": "#ffc371",
+    "accent": "#7cf5ff",
+    "background": "#0f1224",
+    "surface": "#1c2136",
+    "text": "#f7f7ff",
+    "muted": "#9aa1b8"
+  },
+  "gradient": "linear-gradient(160deg, #ff5f6d 0%, #ffc371 60%, #7cf5ff 100%)"
+}

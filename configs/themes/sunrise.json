@@ -1,0 +1,14 @@
+{
+  "id": "sunrise",
+  "name": "Aurore",
+  "colors": {
+    "primary": "#ff7b5f",
+    "secondary": "#ffd089",
+    "accent": "#4dddbb",
+    "background": "#0f1729",
+    "surface": "#14213d",
+    "text": "#f8fafc",
+    "muted": "#8aa0c2"
+  },
+  "gradient": "linear-gradient(135deg, #ff7b5f 0%, #ffd089 60%, #4dddbb 100%)"
+}

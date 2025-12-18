@@ -1,0 +1,35 @@
+{
+  "id": "dodge",
+  "saveSchemaVersion": 1,
+  "themeId": "sunset",
+  "xpRules": {
+    "SESSION_START": 3,
+    "OBSTACLE_DODGED": 2,
+    "POWERUP_COLLECTED": 6,
+    "DASH_USED": 1,
+    "SESSION_WIN": 40,
+    "SESSION_FAIL": 8
+  },
+  "uiText": {
+    "title": "Dodge Rush",
+    "shortDescription": "Esquive les débris et reste en vie.",
+    "help": "Utilise ton dash pour traverser les couloirs encombrés. Récupère les orbes cyan pour une invulnérabilité courte et garde un œil sur ta jauge de dash.",
+    "controls": ["Flèches pour bouger", "Espace pour dasher"]
+  },
+  "difficultyParams": {
+    "playerSpeed": 3.4,
+    "obstacleSpeed": 2.1,
+    "spawnIntervalMs": 850,
+    "powerupChance": 0.15,
+    "winTimeSeconds": 60
+  },
+  "input": {
+    "keys": {
+      "up": "ArrowUp",
+      "down": "ArrowDown",
+      "left": "ArrowLeft",
+      "right": "ArrowRight",
+      "dash": "Space"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "moduleResolution": "Node",
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@core": ["packages/core/src/index.ts"],
+      "@core/*": ["packages/core/src/*"],
+      "@storage": ["packages/storage/src/index.ts"],
+      "@storage/*": ["packages/storage/src/*"],
+      "@progression": ["packages/progression/src/index.ts"],
+      "@progression/*": ["packages/progression/src/*"],
+      "@config": ["packages/config/src/index.ts"],
+      "@config/*": ["packages/config/src/*"]
+    }
+  },
+  "include": ["apps", "packages", "scripts", "configs", "vite.config.ts"]
+}

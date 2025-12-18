@@ -1,0 +1,37 @@
+{
+  "id": "shooter",
+  "saveSchemaVersion": 1,
+  "themeId": "neon",
+  "xpRules": {
+    "SESSION_START": 3,
+    "ENEMY_KILLED": 4,
+    "WAVE_CLEARED": 20,
+    "PLAYER_HIT": 1,
+    "COMBO_REACHED": 10,
+    "SESSION_WIN": 45,
+    "SESSION_FAIL": 8
+  },
+  "uiText": {
+    "title": "Pixel Shooter",
+    "shortDescription": "Enchaîne les vagues, garde le combo.",
+    "help": "Déplace-toi en carré, tire vers l'avant et fais monter le multiplicateur en évitant les impacts. Les vagues deviennent plus rapides à chaque rotation.",
+    "controls": ["Z/Q/S/D pour bouger", "Espace pour tirer"]
+  },
+  "difficultyParams": {
+    "playerSpeed": 3.2,
+    "bulletSpeed": 6,
+    "enemySpeed": 1.8,
+    "enemySpawnIntervalMs": 1000,
+    "waveLength": 30,
+    "wavesToWin": 3
+  },
+  "input": {
+    "keys": {
+      "up": "KeyZ",
+      "down": "KeyS",
+      "left": "KeyQ",
+      "right": "KeyD",
+      "shoot": "Space"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "defaults": {
+    "SESSION_START": 2,
+    "SESSION_WIN": 40,
+    "SESSION_FAIL": 10,
+    "OBJECT_COLLECTED": 3,
+    "COMBO_REACHED": 8,
+    "BOSS_DEFEATED": 80,
+    "STREAK_10": 20
+  }
+}

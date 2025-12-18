@@ -1,0 +1,34 @@
+{
+  "id": "quest",
+  "saveSchemaVersion": 1,
+  "themeId": "forest",
+  "xpRules": {
+    "SESSION_START": 3,
+    "ITEM_COLLECTED": 5,
+    "GATE_UNLOCKED": 15,
+    "QUEST_COMPLETE": 50,
+    "TRAP_TRIGGERED": 2,
+    "SESSION_FAIL": 8
+  },
+  "uiText": {
+    "title": "Mini Quest",
+    "shortDescription": "Récupère les totems et sors.",
+    "help": "Parcours la clairière, ramasse les fragments pour ouvrir la porte, évite les pièges. Termine avant la fin du timer pour un bonus XP.",
+    "controls": ["Flèches pour bouger", "Espace pour interagir"]
+  },
+  "difficultyParams": {
+    "playerSpeed": 2.8,
+    "itemCount": 6,
+    "trapCount": 4,
+    "timeLimitSeconds": 90
+  },
+  "input": {
+    "keys": {
+      "up": "ArrowUp",
+      "down": "ArrowDown",
+      "left": "ArrowLeft",
+      "right": "ArrowRight",
+      "interact": "Space"
+    }
+  }
+}

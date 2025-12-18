@@ -1,0 +1,35 @@
+{
+  "hubTheme": "sunrise",
+  "games": [
+    {
+      "id": "dodge",
+      "title": "Dodge Rush",
+      "description": "Esquive sans fin dans les couloirs spatiaux.",
+      "tags": ["arcade", "réflexes"],
+      "themeId": "sunset",
+      "previewEmoji": "🛰️",
+      "order": 1,
+      "lastUpdated": "2024-03-01"
+    },
+    {
+      "id": "shooter",
+      "title": "Pixel Shooter",
+      "description": "Vague de drones, tirs précis, combos XP.",
+      "tags": ["action", "score"],
+      "themeId": "neon",
+      "previewEmoji": "🎯",
+      "order": 2,
+      "lastUpdated": "2024-03-01"
+    },
+    {
+      "id": "quest",
+      "title": "Mini Quest",
+      "description": "Collecte, portes, et totems cachés.",
+      "tags": ["aventure", "exploration"],
+      "themeId": "forest",
+      "previewEmoji": "🗺️",
+      "order": 3,
+      "lastUpdated": "2024-03-01"
+    }
+  ]
+}

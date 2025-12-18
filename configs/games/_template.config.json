@@ -1,0 +1,20 @@
+{
+  "id": "template-id",
+  "saveSchemaVersion": 1,
+  "themeId": "sunrise",
+  "xpRules": {
+    "SESSION_START": 3,
+    "SESSION_WIN": 40,
+    "SESSION_FAIL": 8
+  },
+  "uiText": {
+    "title": "Nouveau jeu",
+    "shortDescription": "Description courte.",
+    "help": "Ajoute ici les instructions du jeu.",
+    "controls": ["Flèche gauche/droite", "Espace"]
+  },
+  "difficultyParams": {},
+  "input": {
+    "keys": {}
+  }
+}

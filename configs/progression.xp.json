@@ -1,0 +1,14 @@
+{
+  "levels": [
+    { "level": 1, "requiredXP": 0 },
+    { "level": 2, "requiredXP": 120 },
+    { "level": 3, "requiredXP": 300 },
+    { "level": 4, "requiredXP": 550 },
+    { "level": 5, "requiredXP": 900 },
+    { "level": 6, "requiredXP": 1300 },
+    { "level": 7, "requiredXP": 1800 },
+    { "level": 8, "requiredXP": 2400 },
+    { "level": 9, "requiredXP": 3100 },
+    { "level": 10, "requiredXP": 3900 }
+  ]
+}

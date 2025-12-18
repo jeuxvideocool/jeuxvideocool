@@ -1,0 +1,14 @@
+{
+  "id": "forest",
+  "name": "Forêt",
+  "colors": {
+    "primary": "#5ad271",
+    "secondary": "#9be15d",
+    "accent": "#2ed8a7",
+    "background": "#0f1a14",
+    "surface": "#15231b",
+    "text": "#f0fdf4",
+    "muted": "#7fa48e"
+  },
+  "gradient": "linear-gradient(150deg, #5ad271 0%, #9be15d 50%, #2ed8a7 100%)"
+}

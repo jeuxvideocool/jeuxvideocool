@@ -1,0 +1,14 @@
+{
+  "id": "neon",
+  "name": "Néon",
+  "colors": {
+    "primary": "#00f5a0",
+    "secondary": "#00d9f5",
+    "accent": "#ff5afc",
+    "background": "#0a0f1f",
+    "surface": "#0f1a32",
+    "text": "#e8f5ff",
+    "muted": "#7c8aa5"
+  },
+  "gradient": "linear-gradient(145deg, #00f5a0 0%, #00d9f5 45%, #ff5afc 100%)"
+}

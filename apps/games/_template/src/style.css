@@ -1,0 +1,92 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Space+Grotesk:wght@500;700&display=swap");
+
+:root {
+  --color-bg: #0f1729;
+  --color-surface: rgba(255, 255, 255, 0.05);
+  --color-primary: #ff7b5f;
+  --color-secondary: #ffd089;
+  --color-text: #f8fafc;
+  --color-muted: #8aa0c2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 123, 95, 0.1), transparent 35%),
+    radial-gradient(circle at 70% 70%, rgba(77, 221, 187, 0.08), transparent 35%),
+    var(--color-bg);
+  font-family: "Fredoka", "Space Grotesk", system-ui, -apple-system, sans-serif;
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+#game-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03), transparent 60%),
+    var(--color-bg);
+}
+
+#ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: 14px;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pill {
+  padding: 8px 12px;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.btn {
+  pointer-events: all;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: #0f1729;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--color-text);
+  pointer-events: all;
+}
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 18px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}

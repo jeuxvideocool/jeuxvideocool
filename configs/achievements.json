@@ -1,0 +1,60 @@
+{
+  "achievements": [
+    {
+      "id": "first-steps",
+      "title": "Premiers pas",
+      "description": "Lance une première partie.",
+      "icon": "🚀",
+      "condition": { "type": "eventCount", "event": "SESSION_START", "count": 1 },
+      "rewardXP": 20
+    },
+    {
+      "id": "steady-hands",
+      "title": "Réflexes d'acier",
+      "description": "Esquive 30 obstacles.",
+      "icon": "🛡️",
+      "condition": { "type": "eventCount", "event": "OBSTACLE_DODGED", "count": 30 },
+      "rewardXP": 35
+    },
+    {
+      "id": "sharp-shooter",
+      "title": "Tir chirurgical",
+      "description": "Élimine 40 drones.",
+      "icon": "🎯",
+      "condition": { "type": "eventCount", "event": "ENEMY_KILLED", "count": 40 },
+      "rewardXP": 40
+    },
+    {
+      "id": "collector",
+      "title": "Explorateur",
+      "description": "Ramasse 15 artefacts.",
+      "icon": "🧭",
+      "condition": { "type": "eventCount", "event": "ITEM_COLLECTED", "count": 15 },
+      "rewardXP": 30
+    },
+    {
+      "id": "xp-collector",
+      "title": "Bourré d'XP",
+      "description": "Atteins 600 XP globaux.",
+      "icon": "💎",
+      "condition": { "type": "xpReached", "xp": 600 },
+      "rewardXP": 60
+    },
+    {
+      "id": "triathlon",
+      "title": "Tour des jeux",
+      "description": "Joue aux 3 jeux au moins une fois.",
+      "icon": "🏅",
+      "condition": { "type": "gamesPlayed", "count": 3 },
+      "rewardXP": 45
+    },
+    {
+      "id": "streak-hero",
+      "title": "Série gagnante",
+      "description": "Enchaîne 3 victoires d'affilée.",
+      "icon": "🔥",
+      "condition": { "type": "streak", "event": "SESSION_WIN", "count": 3 },
+      "rewardXP": 70
+    }
+  ]
+}
