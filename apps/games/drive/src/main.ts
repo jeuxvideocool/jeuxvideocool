@@ -127,9 +127,9 @@ function endGame(win: boolean) {
 
 function spawnTraffic() {
   const lane = lanes[rand(0, lanes.length - 1)];
-  const speed =
-    (config?.difficultyParams.trafficSpeed ?? 220) +
-    rand(-config?.difficultyParams.trafficSpeedVariance ?? -40, config?.difficultyParams.trafficSpeedVariance ?? 40);
+  const baseSpeed = config?.difficultyParams.trafficSpeed ?? 220;
+  const variance = config?.difficultyParams.trafficSpeedVariance ?? 40;
+  const speed = baseSpeed + rand(-variance, variance);
   state.traffic.push({ lane, y: -0.3, speed });
 }
 

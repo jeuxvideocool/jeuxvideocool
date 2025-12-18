@@ -34,6 +34,14 @@ ui.appendChild(overlay);
 
 type Obstacle = { x: number; y: number; size: number; speed: number };
 type Powerup = { x: number; y: number; size: number; duration: number };
+type Star = { x: number; y: number; size: number; speed: number; alpha: number };
+
+const playerImg = new Image();
+playerImg.src = new URL("../assets/player.svg", import.meta.url).href;
+const obstacleImg = new Image();
+obstacleImg.src = new URL("../assets/obstacle.svg", import.meta.url).href;
+const powerupImg = new Image();
+powerupImg.src = new URL("../assets/powerup.svg", import.meta.url).href;
 
 const state = {
   running: false,
@@ -46,6 +54,7 @@ const state = {
   powerupTimer: 0,
   obstacles: [] as Obstacle[],
   powerups: [] as Powerup[],
+  stars: [] as Star[],
 };
 
 function resize() {
@@ -55,6 +64,7 @@ function resize() {
   canvas.style.height = "100%";
   state.width = canvas.width / devicePixelRatio;
   state.height = canvas.height / devicePixelRatio;
+  buildStars();
 }
 
 resize();
@@ -82,6 +92,7 @@ function startGame() {
   state.powerupTimer = 0;
   state.obstacles = [];
   state.powerups = [];
+  buildStars();
   overlay.style.display = "none";
   emitEvent({ type: "SESSION_START", gameId: GAME_ID });
   loop.start();
@@ -226,26 +237,41 @@ function render() {
   ctx.scale(devicePixelRatio, devicePixelRatio);
   ctx.clearRect(0, 0, state.width, state.height);
 
+  // Stars / décor
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  state.stars.forEach((s) => {
+    ctx.globalAlpha = s.alpha;
+    ctx.fillRect(s.x, s.y, s.size, s.size);
+    ctx.globalAlpha = 1;
+    s.x -= s.speed;
+    if (s.x < -s.size) {
+      s.x = state.width + rand(0, 40);
+      s.y = rand(0, state.height);
+    }
+  });
+
   // Player
-  ctx.fillStyle = state.invulnerable > 0 ? "#7cf5ff" : "#ff5f6d";
-  ctx.beginPath();
-  ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
-  ctx.fill();
+  const playerW = state.player.r * 3;
+  const playerH = state.player.r * 2.4;
+  drawSprite(playerImg, state.player.x - playerW / 2, state.player.y - playerH / 2, playerW, playerH);
+  if (state.invulnerable > 0) {
+    ctx.strokeStyle = "rgba(122, 240, 255, 0.6)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(state.player.x, state.player.y, state.player.r * 1.3, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 
   // Obstacles
-  ctx.fillStyle = "rgba(255,255,255,0.8)";
   state.obstacles.forEach((obs) => {
-    ctx.beginPath();
-    ctx.rect(obs.x - obs.size, obs.y - obs.size, obs.size * 2, obs.size * 2);
-    ctx.fill();
+    const size = obs.size * 2.2;
+    drawSprite(obstacleImg, obs.x - size / 2, obs.y - size / 2, size, size);
   });
 
   // Powerups
-  ctx.fillStyle = "#7cf5ff";
   state.powerups.forEach((p) => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
+    const size = p.size * 2.2;
+    drawSprite(powerupImg, p.x - size / 2, p.y - size / 2, size, size);
   });
 
   ctx.restore();
@@ -263,4 +289,24 @@ function renderHUD() {
     <div class="pill">Invuln ${state.invulnerable.toFixed(1)}s</div>
   `;
   ui.appendChild(hud);
+}
+
+function drawSprite(img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  if (img.complete) {
+    ctx.drawImage(img, x, y, w, h);
+  } else {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(x, y, w, h);
+  }
+}
+
+function buildStars() {
+  const count = Math.floor((state.width * state.height) / 12000);
+  state.stars = Array.from({ length: count }, () => ({
+    x: rand(0, state.width),
+    y: rand(0, state.height),
+    size: rand(1, 3),
+    speed: rand(0.6, 1.6),
+    alpha: rand(0.3, 0.8),
+  }));
 }
