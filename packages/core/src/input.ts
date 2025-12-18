@@ -147,6 +147,7 @@ type MobileControlsOptions = {
   autoShow?: boolean;
   showFullscreenToggle?: boolean;
   showPad?: boolean;
+  gestureEnabled?: boolean;
 };
 
 let mobileStylesInjected = false;
@@ -341,6 +342,7 @@ export function createMobileControls(options: MobileControlsOptions) {
     autoShow = true,
     showFullscreenToggle = true,
     showPad = false,
+    gestureEnabled = true,
   } = options;
   if (!container) return { dispose: () => {} };
   injectMobileStyles();
@@ -412,7 +414,7 @@ export function createMobileControls(options: MobileControlsOptions) {
 
   let gestureCleanup: (() => void) | undefined;
   let gestureEl: HTMLDivElement | undefined;
-  if (hasDirections) {
+  if (hasDirections && gestureEnabled) {
     gestureEl = document.createElement("div");
     gestureEl.className = "mobile-gesture";
     gestureEl.style.background = "transparent";
