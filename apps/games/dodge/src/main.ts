@@ -49,6 +49,7 @@ const state = {
   height: 0,
   player: { x: 0, y: 0, r: 14, dash: 0, dashCooldown: 0 },
   invulnerable: 0,
+  dashIFrames: 0,
   time: 0,
   spawnTimer: 0,
   powerupTimer: 0,
@@ -154,6 +155,7 @@ function update(dt: number) {
   if (keyboard.isDown(dashKey) && dashReady) {
     state.player.dash = 0.45;
     state.player.dashCooldown = 2.5;
+    state.dashIFrames = 0.35;
     emitEvent({ type: "DASH_USED", gameId: GAME_ID });
   }
 
@@ -166,6 +168,7 @@ function update(dt: number) {
   state.player.dash = Math.max(0, state.player.dash - dt);
   state.player.dashCooldown = Math.max(0, state.player.dashCooldown - dt);
   state.invulnerable = Math.max(0, state.invulnerable - dt);
+  state.dashIFrames = Math.max(0, state.dashIFrames - dt);
 
   // Spawn obstacles
   if (state.spawnTimer >= config.difficultyParams.spawnIntervalMs) {
@@ -201,8 +204,9 @@ function update(dt: number) {
     const dx = obs.x - state.player.x;
     const dy = obs.y - state.player.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
+    const invulnActive = state.invulnerable > 0 || state.player.dash > 0 || state.dashIFrames > 0;
     if (dist < obs.size + state.player.r) {
-      if (state.invulnerable > 0 || state.player.dash > 0) {
+      if (invulnActive) {
         emitEvent({ type: "OBSTACLE_DODGED", gameId: GAME_ID });
         return false;
       }
@@ -220,7 +224,8 @@ function update(dt: number) {
     const dist = Math.sqrt(dx * dx + dy * dy);
     if (dist < p.size + state.player.r) {
       emitEvent({ type: "POWERUP_COLLECTED", gameId: GAME_ID });
-      state.invulnerable = p.duration;
+      state.invulnerable = Math.max(state.invulnerable, p.duration);
+      state.dashIFrames = Math.max(state.dashIFrames, 0.35);
       state.player.dashCooldown = Math.max(0, state.player.dashCooldown - 1);
       return false;
     }
@@ -254,11 +259,12 @@ function render() {
   const playerW = state.player.r * 3;
   const playerH = state.player.r * 2.4;
   drawSprite(playerImg, state.player.x - playerW / 2, state.player.y - playerH / 2, playerW, playerH);
-  if (state.invulnerable > 0) {
-    ctx.strokeStyle = "rgba(122, 240, 255, 0.6)";
+  if (state.invulnerable > 0 || state.dashIFrames > 0) {
+    const glow = state.invulnerable > 0 ? "rgba(122, 240, 255, 0.7)" : "rgba(255, 255, 255, 0.5)";
+    ctx.strokeStyle = glow;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(state.player.x, state.player.y, state.player.r * 1.3, 0, Math.PI * 2);
+    ctx.arc(state.player.x, state.player.y, state.player.r * 1.4, 0, Math.PI * 2);
     ctx.stroke();
   }
 
