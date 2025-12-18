@@ -21,3 +21,4 @@
   - `SESSION_START`, `SESSION_WIN`, `SESSION_FAIL`
   - Events métiers : `ITEM_COLLECTED`, `ENEMY_KILLED`, `POWERUP_COLLECTED`, etc.
 - Le moteur progression (`packages/progression`) consomme ces events pour l'XP et les achievements.
+ 
