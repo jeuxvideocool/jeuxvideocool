@@ -97,6 +97,7 @@ const state = {
   combo: 0,
   comboTimer: 0,
   lastShot: 0,
+  fireHeld: false,
   fireCooldown: 0.28,
   cooldownPaused: 0,
   spawnTimer: 0,
@@ -153,6 +154,7 @@ function startGame() {
   state.heartSpawnRate = preset.heartRate;
   state.boostSpawnRate = preset.boostRate;
   state.cooldownPaused = 0;
+  state.fireHeld = false;
   overlay.style.display = "none";
   emitEvent({ type: "SESSION_START", gameId: GAME_ID });
   loop.start();
@@ -241,14 +243,19 @@ function update(dt: number) {
 
   // Shooting
   const shootKey = controls.shoot;
+  const shootingNow = isDownAny(shootKey, controls.altShoot);
   const cooldown = state.cooldownPaused > 0 ? 0 : state.fireCooldown;
-  if (isDownAny(shootKey, controls.altShoot) && state.lastShot > cooldown) {
+  if (shootingNow && !state.fireHeld && state.lastShot > cooldown) {
     state.bullets.push({
       x: state.player.x,
       y: state.player.y - 8,
       speed: config.difficultyParams.bulletSpeed,
     });
     state.lastShot = 0;
+    state.fireHeld = true;
+  }
+  if (!shootingNow) {
+    state.fireHeld = false;
   }
 
   // Spawn enemies
