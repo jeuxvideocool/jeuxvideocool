@@ -13,6 +13,11 @@ const themes = getThemes();
 const theme = config ? themes.find((t) => t.id === config.themeId) || themes[0] : themes[0];
 attachProgressionListener();
 
+const playerImg = new Image();
+playerImg.src = new URL("../assets/player.svg", import.meta.url).href;
+const pickupImg = new Image();
+pickupImg.src = new URL("../assets/pickup.svg", import.meta.url).href;
+
 if (theme) {
   const root = document.documentElement.style;
   root.setProperty("--color-primary", theme.colors.primary);
@@ -171,18 +176,27 @@ function render() {
   ctx.clearRect(0, 0, state.width, state.height);
 
   // Player
-  ctx.fillStyle = theme.colors.primary;
-  ctx.beginPath();
-  ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
-  ctx.fill();
+  const playerSize = state.player.r * 2.4;
+  if (playerImg.complete) {
+    ctx.drawImage(playerImg, state.player.x - playerSize / 2, state.player.y - playerSize / 2, playerSize, playerSize);
+  } else {
+    ctx.fillStyle = theme.colors.primary;
+    ctx.beginPath();
+    ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // Pickups
-  ctx.fillStyle = theme.colors.secondary;
   state.pickups.forEach((p) => {
-    ctx.globalAlpha = p.collected ? 0.2 : 1;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.globalAlpha = p.collected ? 0.25 : 1;
+    if (pickupImg.complete) {
+      ctx.drawImage(pickupImg, p.x - 12, p.y - 12, 24, 24);
+    } else {
+      ctx.fillStyle = theme.colors.secondary;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.globalAlpha = 1;
   });
 

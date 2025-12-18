@@ -1,0 +1,16 @@
+<svg width="120" height="140" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shipBody" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7CFFE1" />
+      <stop offset="1" stop-color="#7B8CFF" />
+    </linearGradient>
+    <linearGradient id="shipGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ffffff" stop-opacity="0.8" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.1" />
+    </linearGradient>
+  </defs>
+  <path d="M60 8L92 120H28L60 8Z" fill="url(#shipBody)" stroke="#0AF0FF" stroke-width="4" />
+  <path d="M60 24L78 118H42L60 24Z" fill="url(#shipGlow)" />
+  <circle cx="60" cy="86" r="10" fill="#0A1224" />
+  <path d="M44 122h32l-16 12-16-12Z" fill="#0A1224" opacity="0.8" />
+</svg>

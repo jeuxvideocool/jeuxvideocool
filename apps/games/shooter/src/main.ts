@@ -13,6 +13,13 @@ const themes = getThemes();
 const theme = themes.find((t) => t.id === config?.themeId) || themes[0];
 attachProgressionListener();
 
+const playerImg = new Image();
+playerImg.src = new URL("../assets/player.svg", import.meta.url).href;
+const enemyImg = new Image();
+enemyImg.src = new URL("../assets/enemy.svg", import.meta.url).href;
+const bulletImg = new Image();
+bulletImg.src = new URL("../assets/bullet.svg", import.meta.url).href;
+
 if (theme) {
   const root = document.documentElement.style;
   root.setProperty("--color-primary", theme.colors.primary);
@@ -243,26 +250,34 @@ function render() {
   ctx.clearRect(0, 0, state.width, state.height);
 
   // Player
-  ctx.fillStyle = theme.colors.primary;
-  ctx.beginPath();
-  ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = theme.colors.accent;
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  const shipSize = state.player.r * 3;
+  if (playerImg.complete) {
+    ctx.drawImage(playerImg, state.player.x - shipSize / 2, state.player.y - shipSize / 2, shipSize, shipSize);
+  } else {
+    ctx.fillStyle = theme.colors.primary;
+    ctx.beginPath();
+    ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // Bullets
-  ctx.fillStyle = theme.colors.secondary;
   state.bullets.forEach((b) => {
-    ctx.fillRect(b.x - 3, b.y - 10, 6, 12);
+    if (bulletImg.complete) {
+      ctx.drawImage(bulletImg, b.x - 8, b.y - 18, 16, 30);
+    } else {
+      ctx.fillStyle = theme.colors.secondary;
+      ctx.fillRect(b.x - 3, b.y - 10, 6, 12);
+    }
   });
 
   // Enemies
-  ctx.fillStyle = "#ff5afc";
   state.enemies.forEach((e) => {
-    ctx.beginPath();
-    ctx.rect(e.x - 12, e.y - 12, 24, 24);
-    ctx.fill();
+    if (enemyImg.complete) {
+      ctx.drawImage(enemyImg, e.x - 16, e.y - 16, 32, 32);
+    } else {
+      ctx.fillStyle = "#ff5afc";
+      ctx.fillRect(e.x - 12, e.y - 12, 24, 24);
+    }
   });
 
   ctx.restore();

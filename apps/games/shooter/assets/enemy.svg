@@ -1,0 +1,13 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="eye" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(60 60) scale(52)">
+      <stop stop-color="#FF7EE2"/>
+      <stop offset="1" stop-color="#320726"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="54" fill="url(#eye)" stroke="#FF7EE2" stroke-width="6" />
+  <rect x="40" y="32" width="40" height="56" rx="12" fill="#0A0F1F" stroke="#FFB6F2" stroke-width="4"/>
+  <rect x="52" y="46" width="16" height="28" rx="8" fill="#00F5A0"/>
+  <rect x="22" y="54" width="8" height="12" rx="4" fill="#FF7EE2"/>
+  <rect x="90" y="54" width="8" height="12" rx="4" fill="#FF7EE2"/>
+</svg>

@@ -13,6 +13,13 @@ const themes = getThemes();
 const theme = config ? themes.find((t) => t.id === config.themeId) || themes[0] : themes[0];
 attachProgressionListener();
 
+const blockSprites = Array.from({ length: 8 }, (_, idx) => {
+  if (idx === 0) return null;
+  const img = new Image();
+  img.src = new URL(`../assets/block${idx}.svg`, import.meta.url).href;
+  return img;
+});
+
 if (theme) {
   const root = document.documentElement.style;
   root.setProperty("--color-primary", theme.colors.primary);
@@ -71,17 +78,6 @@ const shapes: PieceShape[] = [
     [0, 7, 7],
     [0, 0, 0],
   ],
-];
-
-const colors = [
-  "#000000",
-  theme.colors.primary,
-  theme.colors.secondary,
-  "#ff8fb2",
-  "#ffc36a",
-  "#7af0ff",
-  "#7cffa5",
-  "#a987ff",
 ];
 
 const state = {
@@ -387,7 +383,7 @@ function render() {
     for (let x = 0; x < state.boardWidth; x++) {
       const val = state.board[y][x];
       if (!val) continue;
-      drawCell(x, y, colors[val], gridOffsetX, gridOffsetY);
+      drawCell(x, y, val, gridOffsetX, gridOffsetY);
     }
   }
 
@@ -396,8 +392,8 @@ function render() {
     for (let y = 0; y < m.length; y++) {
       for (let x = 0; x < m[y].length; x++) {
         if (!m[y][x]) continue;
-        const color = colors[m[y][x]];
-        drawCell(state.current.x + x, state.current.y + y, color, gridOffsetX, gridOffsetY, true);
+        const val = m[y][x];
+        drawCell(state.current.x + x, state.current.y + y, val, gridOffsetX, gridOffsetY, true);
       }
     }
   }
@@ -409,15 +405,20 @@ function render() {
 function drawCell(
   x: number,
   y: number,
-  color: string,
+  val: number,
   offsetX: number,
   offsetY: number,
   active = false,
 ) {
   const px = offsetX + x * state.cell;
   const py = offsetY + y * state.cell;
-  ctx.fillStyle = color;
-  ctx.fillRect(px + 1, py + 1, state.cell - 2, state.cell - 2);
+  const sprite = blockSprites[val];
+  if (sprite?.complete) {
+    ctx.drawImage(sprite, px + 1, py + 1, state.cell - 2, state.cell - 2);
+  } else {
+    ctx.fillStyle = theme.colors.primary;
+    ctx.fillRect(px + 1, py + 1, state.cell - 2, state.cell - 2);
+  }
   ctx.strokeStyle = active ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.2)";
   ctx.strokeRect(px + 0.5, py + 0.5, state.cell - 1, state.cell - 1);
 }

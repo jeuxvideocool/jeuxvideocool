@@ -13,6 +13,15 @@ const themes = getThemes();
 const theme = themes.find((t) => t.id === config?.themeId) || themes[0];
 attachProgressionListener();
 
+const playerImg = new Image();
+playerImg.src = new URL("../assets/player.svg", import.meta.url).href;
+const itemImg = new Image();
+itemImg.src = new URL("../assets/item.svg", import.meta.url).href;
+const trapImg = new Image();
+trapImg.src = new URL("../assets/trap.svg", import.meta.url).href;
+const gateImg = new Image();
+gateImg.src = new URL("../assets/gate.svg", import.meta.url).href;
+
 if (theme) {
   const root = document.documentElement.style;
   root.setProperty("--color-primary", theme.colors.primary);
@@ -212,34 +221,57 @@ function render() {
   ctx.clearRect(0, 0, state.width, state.height);
 
   // Gate
-  ctx.fillStyle = state.gate.open ? theme.colors.accent : "rgba(255,255,255,0.1)";
-  ctx.fillRect(state.gate.x - 14, state.gate.y - 24, 28, 48);
+  if (gateImg.complete) {
+    ctx.globalAlpha = state.gate.open ? 1 : 0.65;
+    ctx.drawImage(gateImg, state.gate.x - 20, state.gate.y - 50, 40, 100);
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.fillStyle = state.gate.open ? theme.colors.accent : "rgba(255,255,255,0.1)";
+    ctx.fillRect(state.gate.x - 14, state.gate.y - 24, 28, 48);
+  }
 
   // Items
   state.items.forEach((item) => {
-    ctx.fillStyle = item.collected ? "rgba(255,255,255,0.2)" : theme.colors.secondary;
-    ctx.beginPath();
-    ctx.arc(item.x, item.y, 10, 0, Math.PI * 2);
-    ctx.fill();
+    if (item.collected) {
+      ctx.globalAlpha = 0.35;
+    }
+    if (itemImg.complete) {
+      ctx.drawImage(itemImg, item.x - 16, item.y - 16, 32, 32);
+    } else {
+      ctx.fillStyle = item.collected ? "rgba(255,255,255,0.2)" : theme.colors.secondary;
+      ctx.beginPath();
+      ctx.arc(item.x, item.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   });
 
   // Traps
-  ctx.fillStyle = "rgba(255,95,109,0.9)";
   state.traps.forEach((trap) => {
     if (!trap.active) return;
-    ctx.beginPath();
-    ctx.moveTo(trap.x, trap.y - 10);
-    ctx.lineTo(trap.x - 10, trap.y + 10);
-    ctx.lineTo(trap.x + 10, trap.y + 10);
-    ctx.closePath();
-    ctx.fill();
+    if (trapImg.complete) {
+      ctx.drawImage(trapImg, trap.x - 22, trap.y - 16, 44, 32);
+    } else {
+      ctx.fillStyle = "rgba(255,95,109,0.9)";
+      ctx.beginPath();
+      ctx.moveTo(trap.x, trap.y - 10);
+      ctx.lineTo(trap.x - 10, trap.y + 10);
+      ctx.lineTo(trap.x + 10, trap.y + 10);
+      ctx.closePath();
+      ctx.fill();
+    }
   });
 
   // Player
-  ctx.fillStyle = theme.colors.primary;
-  ctx.beginPath();
-  ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
-  ctx.fill();
+  const playerSize = state.player.r * 2.6;
+  if (playerImg.complete) {
+    ctx.drawImage(playerImg, state.player.x - playerSize / 2, state.player.y - playerSize / 2, playerSize, playerSize);
+  } else {
+    ctx.fillStyle = theme.colors.primary;
+    ctx.beginPath();
+    ctx.arc(state.player.x, state.player.y, state.player.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   ctx.restore();
   renderHUD();
