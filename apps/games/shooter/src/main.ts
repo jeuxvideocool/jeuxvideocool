@@ -81,19 +81,6 @@ const difficultyPresets = {
 type DifficultyKey = keyof typeof difficultyPresets;
 let selectedDifficulty: DifficultyKey = "medium";
 
-createMobileControls({
-  container: document.body,
-  input,
-  mapping: {
-    up: controls.up,
-    down: controls.down,
-    left: controls.left,
-    right: controls.right,
-    actionA: controls.shoot,
-    actionALabel: "Tir",
-  },
-});
-
 type Bullet = { x: number; y: number; speed: number };
 type Enemy = { x: number; y: number; speed: number; vx: number };
 type Heart = { x: number; y: number; vy: number };

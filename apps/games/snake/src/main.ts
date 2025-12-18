@@ -125,19 +125,6 @@ const difficultyPresets = {
 type DifficultyKey = keyof typeof difficultyPresets;
 let selectedDifficulty: DifficultyKey = "medium";
 
-createMobileControls({
-  container: document.body,
-  input,
-  mapping: {
-    up: controls.up,
-    down: controls.down,
-    left: controls.left,
-    right: controls.right,
-    actionA: controls.dash,
-    actionALabel: "Boost",
-  },
-});
-
 const state = {
   running: false,
   boardSize: clamp(config?.difficultyParams.boardSize ?? 20, 12, 32),
