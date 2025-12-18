@@ -494,9 +494,6 @@ function render() {
 function renderHUD() {
   ui.innerHTML = "";
   ui.appendChild(overlay);
-  const overlayVisible = overlay.style.display !== "none";
-  ui.style.pointerEvents = overlayVisible ? "auto" : "none";
-  canvas.style.pointerEvents = overlayVisible ? "none" : "auto";
   const hudTop = document.createElement("div");
   hudTop.className = "hud";
   hudTop.innerHTML = `
