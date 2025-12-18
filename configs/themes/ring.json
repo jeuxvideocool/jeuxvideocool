@@ -1,0 +1,14 @@
+{
+  "id": "ring",
+  "name": "Ring Neon",
+  "colors": {
+    "primary": "#ff7b5f",
+    "secondary": "#7af0ff",
+    "accent": "#ffd166",
+    "background": "#0b0e1b",
+    "surface": "#11182a",
+    "text": "#f5f7ff",
+    "muted": "#93a6c8"
+  },
+  "gradient": "linear-gradient(145deg, #0b0e1b 0%, #0f1730 40%, #ff7b5f 100%)"
+}

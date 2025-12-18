@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "firebase": "^11.0.2",
-    "@supabase/supabase-js": "^2.45.4"
+    "@supabase/supabase-js": "^2.45.4",
+    "matter-js": "^0.20.0"
   }
 }

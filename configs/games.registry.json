@@ -50,6 +50,16 @@
       "previewEmoji": "🚗",
       "order": 5,
       "lastUpdated": "2024-06-02"
+    },
+    {
+      "id": "wrestle",
+      "title": "Rope Wrestle",
+      "description": "Deux catcheurs liés : saute et fais cogner la tête de l'autre.",
+      "tags": ["duo", "physique"],
+      "themeId": "ring",
+      "previewEmoji": "🤼",
+      "order": 6,
+      "lastUpdated": "2024-06-03"
     }
   ]
 }

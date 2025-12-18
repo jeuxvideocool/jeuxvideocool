@@ -1,0 +1,30 @@
+{
+  "id": "wrestle",
+  "saveSchemaVersion": 1,
+  "themeId": "ring",
+  "xpRules": {
+    "SESSION_START": 4,
+    "SESSION_WIN": 70,
+    "SESSION_FAIL": 14,
+    "HEAD_HIT": 20,
+    "BOOST_USED": 6
+  },
+  "uiText": {
+    "title": "Rope Wrestle",
+    "shortDescription": "Deux catcheurs liés par les mains. Saute et retourne l'autre.",
+    "help": "P1 (W) et P2 (Flèche Haut) sautent uniquement. Les corps sont liés par les mains, profite de l'élan pour faire toucher la tête de ton adversaire au sol.",
+    "controls": ["P1 : W pour sauter", "P2 : Flèche haut pour sauter"]
+  },
+  "difficultyParams": {
+    "jumpForce": 0.08,
+    "boostForce": 0.12,
+    "gravity": 1.1,
+    "ropeStiffness": 0.6
+  },
+  "input": {
+    "keys": {
+      "p1Jump": "KeyW",
+      "p2Jump": "ArrowUp"
+    }
+  }
+}
