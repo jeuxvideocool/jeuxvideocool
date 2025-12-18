@@ -90,6 +90,8 @@ const state = {
   baseEnemyCount: config?.difficultyParams.enemyCount ?? 3,
   baseEnemySpeed: config?.difficultyParams.enemySpeed ?? 1.5,
   attackTimer: 0,
+  chaseTimer: 0,
+  chaseActive: false,
 };
 
 function resize() {
@@ -118,6 +120,8 @@ function startGame() {
   state.level = 1;
   state.invulnerable = 0;
   state.attackTimer = 0;
+  state.chaseTimer = 0;
+  state.chaseActive = false;
   prepareLevel();
   overlay.style.display = "none";
   emitEvent({ type: "SESSION_START", gameId: GAME_ID });
@@ -142,6 +146,8 @@ function prepareLevel() {
   const maxEnemySpeed = Math.max(0.5, playerSpeed * 0.9);
   state.enemySpeed = Math.min(state.baseEnemySpeed + levelFactor * 0.2, maxEnemySpeed);
   state.attackTimer = 0;
+  state.chaseTimer = 0;
+  state.chaseActive = false;
   spawnItems(itemCount);
   spawnTraps(trapCount);
   spawnEnemies(enemyCount);
@@ -223,6 +229,16 @@ function update(dt: number) {
   state.timer -= dt;
   state.invulnerable = Math.max(0, state.invulnerable - dt);
   state.attackTimer = Math.max(0, state.attackTimer - dt);
+  state.chaseTimer += dt;
+  const chaseOff = 10;
+  const chaseOn = 3;
+  if (state.chaseActive && state.chaseTimer >= chaseOn) {
+    state.chaseActive = false;
+    state.chaseTimer = 0;
+  } else if (!state.chaseActive && state.chaseTimer >= chaseOff) {
+    state.chaseActive = true;
+    state.chaseTimer = 0;
+  }
   if (state.timer <= 0) {
     endGame(false);
     return;
@@ -240,13 +256,14 @@ function update(dt: number) {
     const dx = state.player.x - enemy.x;
     const dy = state.player.y - enemy.y;
     const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-    const dirX = dx / dist;
-    const dirY = dy / dist;
-    const swayX = rand(-0.05, 0.05);
-    const swayY = rand(-0.05, 0.05);
+    const dirX = state.chaseActive ? dx / dist : 0;
+    const dirY = state.chaseActive ? dy / dist : 0;
+    const swayX = rand(-0.08, 0.08);
+    const swayY = rand(-0.08, 0.08);
     const speed = state.enemySpeed;
-    enemy.vx = clamp(enemy.vx * 0.8 + (dirX + swayX) * 0.6, -1.8, 1.8);
-    enemy.vy = clamp(enemy.vy * 0.8 + (dirY + swayY) * 0.6, -1.6, 1.6);
+    const followWeight = state.chaseActive ? 0.7 : 0.25;
+    enemy.vx = clamp(enemy.vx * 0.8 + (dirX * followWeight + swayX) * 0.8, -1.8, 1.8);
+    enemy.vy = clamp(enemy.vy * 0.8 + (dirY * followWeight + swayY) * 0.8, -1.6, 1.6);
     enemy.x += enemy.vx * speed * (dt * 60);
     enemy.y += enemy.vy * speed * (dt * 60);
     enemy.x = clamp(enemy.x, 20, state.width - 20);
@@ -409,6 +426,7 @@ function renderHUD() {
     <div class="pill">Objets ${state.collected}/${state.items.length}</div>
     <div class="pill">Porte ${state.gate.open ? "ouverte" : "fermée"}</div>
     <div class="pill">Ennemis ${state.enemies.length}</div>
+    <div class="pill">${state.chaseActive ? "Chasse en cours" : "Repérage"}</div>
   `;
   ui.appendChild(hud);
 }
