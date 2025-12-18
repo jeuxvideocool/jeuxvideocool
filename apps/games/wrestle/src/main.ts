@@ -67,6 +67,7 @@ const state = {
   rope: null as Matter.Constraint | null,
   round: 1,
   winner: "",
+  decor: [] as { x: number; y: number; r: number; alpha: number }[],
 };
 
 const keys = {
@@ -90,19 +91,22 @@ window.addEventListener("resize", resize);
 function createFighter(x: number, label: string, img: HTMLImageElement, color: string): Fighter {
   const body = Bodies.rectangle(x, state.height * 0.45, 50, 70, {
     friction: 0.8,
-    restitution: 0.05,
+    restitution: 0.02,
+    frictionAir: 0.015,
     density: 0.002,
     label: `${label}-body`,
   });
   const head = Bodies.circle(x, state.height * 0.35, 16, {
     friction: 0.2,
-    restitution: 0.2,
+    restitution: 0.1,
+    frictionAir: 0.02,
     density: 0.001,
     label: `${label}-head`,
   });
   const hand = Bodies.circle(x + rand(-10, 10), state.height * 0.48, 10, {
     friction: 0.3,
-    restitution: 0.1,
+    restitution: 0.05,
+    frictionAir: 0.02,
     density: 0.001,
     label: `${label}-hand`,
   });
@@ -142,6 +146,11 @@ function buildWorld() {
       isStatic: true,
       label: "wall",
     }),
+    Bodies.rectangle(state.width / 2, -40, state.width, 80, {
+      isStatic: true,
+      label: "ceiling",
+      restitution: 0,
+    }),
   ];
   World.add(engine.world, [ground, ...walls]);
 
@@ -158,15 +167,24 @@ function buildWorld() {
   Composite.add(engine.world, [rope]);
   state.fighters = [f1, f2];
   state.rope = rope;
+
+  // décor aléatoire
+  state.decor = Array.from({ length: 8 }, () => ({
+    x: rand(state.width * 0.18, state.width * 0.82),
+    y: rand(state.height * 0.25, state.height * 0.6),
+    r: rand(30, 80),
+    alpha: rand(0.08, 0.2),
+  }));
 }
 
 function jump(fighter: Fighter) {
   const jumpForce = config?.difficultyParams.jumpForce ?? 0.08;
   const boostForce = config?.difficultyParams.boostForce ?? 0.12;
   const forceY = jumpForce + (fighter.head.position.y > fighter.body.position.y ? boostForce : 0);
-  Body.applyForce(fighter.body, fighter.body.position, { x: rand(-0.005, 0.005), y: -forceY });
-  Body.applyForce(fighter.head, fighter.head.position, { x: 0, y: -forceY * 0.6 });
-  Body.applyForce(fighter.hand, fighter.hand.position, { x: 0, y: -forceY * 0.4 });
+  const cappedForce = clamp(forceY, 0, 0.12);
+  Body.applyForce(fighter.body, fighter.body.position, { x: rand(-0.005, 0.005), y: -cappedForce });
+  Body.applyForce(fighter.head, fighter.head.position, { x: 0, y: -cappedForce * 0.6 });
+  Body.applyForce(fighter.hand, fighter.hand.position, { x: 0, y: -cappedForce * 0.4 });
 }
 
 function handleInput() {
@@ -230,6 +248,16 @@ function render() {
   ctx.strokeStyle = "rgba(255,255,255,0.2)";
   ctx.lineWidth = 3;
   ctx.strokeRect(state.width * 0.1, state.height * 0.2, state.width * 0.8, state.height * 0.7);
+
+  state.decor.forEach((d) => {
+    const grad = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r);
+    grad.addColorStop(0, `rgba(255,255,255,${d.alpha})`);
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
   const drawFighter = (f: Fighter) => {
     drawBody(f.body, f.img, f.color);
