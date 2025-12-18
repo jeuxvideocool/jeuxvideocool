@@ -1,5 +1,5 @@
 import "./style.css";
-import { emitEvent, onEvent } from "@core/events";
+import { onEvent } from "@core/events";
 import { withBasePath } from "@core/utils";
 import {
   getAchievementsConfig,
@@ -10,6 +10,13 @@ import {
 } from "@config";
 import { attachProgressionListener, getProgressionSnapshot } from "@progression";
 import { exportSave, importSave, resetGameSave, resetSave, updateSave } from "@storage";
+import {
+  connectCloud,
+  getAuthState,
+  loadCloudSave,
+  saveCloud,
+  subscribe as subscribeCloud,
+} from "@storage/cloud";
 
 type Tab = "hub" | "achievements" | "saves";
 
@@ -23,9 +30,15 @@ const basePath = import.meta.env.BASE_URL || "/";
 let activeTab: Tab = "hub";
 let snapshot = getProgressionSnapshot();
 let lastLevel = snapshot.save.globalLevel;
+let cloudState = getAuthState();
 
 attachProgressionListener();
 applyTheme(findTheme(registry.hubTheme));
+
+subscribeCloud((state) => {
+  cloudState = state;
+  renderHub();
+});
 
 onEvent("ACHIEVEMENT_UNLOCKED", (event) => {
   const achievementId = event.payload?.achievementId;
@@ -72,6 +85,17 @@ function formatDate(timestamp?: number) {
   return new Date(timestamp).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
 }
 
+function formatDuration(ms?: number) {
+  if (!ms) return "0m";
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours) return `${hours}h ${minutes}m`;
+  if (minutes) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
 function handleProfileChange(name: string, avatar: string) {
   const trimmedName = name.trim() || "Joueur";
   const trimmedAvatar = avatar.trim() || "🎮";
@@ -115,6 +139,28 @@ function handleReset(gameId?: string) {
   refresh();
 }
 
+async function handleCloudSaveAction() {
+  const current = getProgressionSnapshot();
+  const ok = await saveCloud(current.save);
+  if (ok) {
+    snapshot = current;
+    showToast("Sauvegarde envoyée sur le cloud", "success");
+  } else if (cloudState.error) {
+    showToast(cloudState.error, "error");
+  }
+}
+
+async function handleCloudLoadAction() {
+  const res = await loadCloudSave();
+  if (res?.state) {
+    importSave(JSON.stringify(res.state));
+    showToast("Sauvegarde cloud importée", "success");
+    refresh();
+  } else if (res?.error) {
+    showToast(res.error, "error");
+  }
+}
+
 function renderNav() {
   return `
     <nav class="nav">
@@ -125,26 +171,58 @@ function renderNav() {
   `;
 }
 
-function renderProfileCard() {
+function renderHero() {
   const save = snapshot.save;
   const unlocked = save.achievementsUnlocked.length;
   const total = achievementsConfig.achievements.length;
   const levelUp = save.globalLevel > lastLevel;
   const xpBarStyle = `--progress:${snapshot.levelProgress * 100}%`;
+  const totalTime = formatDuration(save.globalStats.timePlayedMs);
+  const sessionCount = save.globalStats.totalSessions;
+  const lastGame =
+    save.playerProfile.lastPlayedGameId &&
+    registry.games.find((g) => g.id === save.playerProfile.lastPlayedGameId)?.title;
   lastLevel = save.globalLevel;
 
+  const cloudBadge = cloudState.user
+    ? `<span class="chip success">Cloud : ${cloudState.user.email || "connecté"}</span>`
+    : cloudState.ready
+      ? `<span class="chip ghost">Mode invité · données locales</span>`
+      : `<span class="chip warning">Supabase non configuré (.env)</span>`;
+
   return `
-    <section class="card hero">
+    <header class="card hero">
+      <div class="hero-glow"></div>
       <div class="hero-top">
-        <div class="avatar">${save.playerProfile.avatar || "🎮"}</div>
-        <div class="hero-text">
-          <p class="eyebrow">Profil</p>
-          <h1>${save.playerProfile.name || "Joueur"}</h1>
-          <p class="subtitle">Niveau ${save.globalLevel} · ${save.globalXP} XP</p>
+        <div class="profile">
+          <div class="avatar">${save.playerProfile.avatar || "🎮"}</div>
+          <div>
+            <p class="eyebrow">Arcade Galaxy</p>
+            <h1>${save.playerProfile.name || "Joueur"}</h1>
+            <p class="muted">${lastGame ? `Dernier jeu : ${lastGame}` : "Aucun jeu lancé"}</p>
+            <div class="chips">
+              ${cloudBadge}
+              <span class="chip">⏱ ${totalTime}</span>
+              <span class="chip">🎮 ${sessionCount} sessions</span>
+            </div>
+          </div>
         </div>
-        <div class="stats-pill">
-          <span>${unlocked}/${total} succès</span>
-          <span>Schema v${save.schemaVersion}</span>
+        <div class="stat-grid compact">
+          <div class="stat-card">
+            <p class="label">Niveau</p>
+            <strong>${save.globalLevel}</strong>
+            <p class="muted small">${save.globalXP} XP</p>
+          </div>
+          <div class="stat-card">
+            <p class="label">Succès</p>
+            <strong>${unlocked}/${total}</strong>
+            <p class="muted small">Schema v${save.schemaVersion}</p>
+          </div>
+          <div class="stat-card">
+            <p class="label">Temps global</p>
+            <strong>${totalTime}</strong>
+            <p class="muted small">Sessions ${sessionCount}</p>
+          </div>
         </div>
       </div>
       <div class="level-row ${levelUp ? "level-up" : ""}">
@@ -152,7 +230,9 @@ function renderProfileCard() {
         <div class="xp-bar" style="${xpBarStyle}">
           <div class="xp-fill"></div>
         </div>
-        <div class="xp-values">${Math.floor(snapshot.levelProgress * 100)}% · ${snapshot.nextLevelXP - save.globalXP} XP restants</div>
+        <div class="xp-values">${Math.floor(snapshot.levelProgress * 100)}% · ${
+          snapshot.nextLevelXP - save.globalXP
+        } XP restants</div>
       </div>
       <div class="profile-form">
         <label>
@@ -164,7 +244,7 @@ function renderProfileCard() {
           <input id="player-avatar" type="text" value="${save.playerProfile.avatar}" maxlength="4" />
         </label>
       </div>
-    </section>
+    </header>
   `;
 }
 
@@ -181,18 +261,20 @@ function renderGameGrid() {
       const save = snapshot.save.games[game.id];
       const lastPlayed = save?.lastPlayedAt ? formatDate(save.lastPlayedAt) : "Jamais";
       const bestScore = save?.bestScore ?? null;
+      const timePlayed = formatDuration(save?.timePlayedMs);
       const gameLink = withBasePath(`/apps/games/${game.id}/`, basePath);
       return `
         <article class="card game-card">
           <div class="card-top">
-            <div class="pill">${game.previewEmoji || "🎮"} ${game.title}</div>
+            <div class="pill accent">${game.previewEmoji || "🎮"} ${game.title}</div>
             <span class="muted">MAJ ${game.lastUpdated || "N/A"}</span>
           </div>
           <p class="game-desc">${game.description}</p>
           <div class="tags">${game.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
-          <div class="game-meta">
-            <div><span class="label">Dernière partie</span><strong>${lastPlayed}</strong></div>
-            <div><span class="label">Meilleur score</span><strong>${bestScore ?? "—"}</strong></div>
+          <div class="meta-row">
+            <span class="chip ghost">⏱ ${timePlayed}</span>
+            <span class="chip ghost">🏆 ${bestScore ?? "—"}</span>
+            <span class="chip ghost">🕘 ${lastPlayed}</span>
           </div>
           <div class="game-actions">
             <a class="btn primary" href="${gameLink}" data-game="${game.id}">Jouer</a>
@@ -228,7 +310,7 @@ function renderAchievements() {
       const isUnlocked = unlocked.has(ach.id);
       return `
         <article class="card achievement ${isUnlocked ? "unlocked" : ""}">
-          <div class="pill">${ach.icon || "⭐️"}</div>
+          <div class="pill accent">${ach.icon || "⭐️"}</div>
           <div>
             <h3>${ach.title}</h3>
             <p>${ach.description}</p>
@@ -263,6 +345,74 @@ function describeCondition(achievement: (typeof achievementsConfig.achievements)
   return "";
 }
 
+function renderCloudPanel() {
+  if (!cloudState.ready) {
+    return `
+      <section class="card cloud">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Cloud</p>
+            <h2>Supabase</h2>
+            <p class="muted">Ajoute VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY pour activer la synchro.</p>
+          </div>
+          <span class="chip warning">Inactif</span>
+        </div>
+      </section>
+    `;
+  }
+
+  if (cloudState.user) {
+    return `
+      <section class="card cloud">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Cloud</p>
+            <h2>Connecté</h2>
+            <p class="muted">${cloudState.user.email || "Compte sans email"}</p>
+          </div>
+          <span class="chip ghost">Dernière sync ${cloudState.lastSyncedAt ? formatDate(cloudState.lastSyncedAt) : "Jamais"}</span>
+        </div>
+        <div class="actions wrap">
+          <button class="btn primary" id="cloud-save" ${cloudState.loading ? "disabled" : ""}>Sauvegarder vers cloud</button>
+          <button class="btn ghost" id="cloud-load" ${cloudState.loading ? "disabled" : ""}>Charger depuis cloud</button>
+          <button class="btn ghost danger" id="cloud-logout" ${cloudState.loading ? "disabled" : ""}>Déconnexion</button>
+        </div>
+        ${
+          cloudState.message
+            ? `<p class="status ok">${cloudState.message}</p>`
+            : `<p class="status info">Synchronise tes saves entre appareils.</p>`
+        }
+        ${cloudState.error ? `<p class="status error">${cloudState.error}</p>` : ""}
+      </section>
+    `;
+  }
+
+  return `
+    <section class="card cloud">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Cloud</p>
+          <h2>Supabase</h2>
+          <p class="muted small">Créé pour rester optionnel : invité/local ou compte cloud.</p>
+        </div>
+      </div>
+      <div class="profile-form two-cols">
+        <label>Email <input id="cloud-email" type="email" placeholder="mail@example.com" /></label>
+        <label>Mot de passe <input id="cloud-password" type="password" placeholder="8+ caractères" /></label>
+      </div>
+      <div class="actions wrap">
+        <button class="btn primary" id="cloud-login" ${cloudState.loading ? "disabled" : ""}>Connexion</button>
+        <button class="btn ghost" id="cloud-register" ${cloudState.loading ? "disabled" : ""}>Créer un compte</button>
+      </div>
+      ${
+        cloudState.error
+          ? `<p class="status error">${cloudState.error}</p>`
+          : `<p class="status info">Aucune donnée n'est envoyée sans action manuelle.</p>`
+      }
+    </section>
+  `;
+}
+
 function renderSaves() {
   const save = snapshot.save;
   const games = Object.entries(save.games);
@@ -274,30 +424,58 @@ function renderSaves() {
             <strong>${id}</strong>
             <p class="muted">v${game.saveSchemaVersion} · Dernier : ${formatDate(game.lastPlayedAt)}</p>
           </div>
-          <button class="btn ghost reset-game" data-game="${id}">Reset</button>
+          <div class="row-meta">
+            <span class="chip ghost">⏱ ${formatDuration(game.timePlayedMs)}</span>
+            <button class="btn ghost reset-game" data-game="${id}">Reset</button>
+          </div>
         </div>
       `;
     })
     .join("");
 
   return `
+    <div class="panel-grid">
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Saves</p>
+            <h2>Gestion</h2>
+            <p class="muted">Schema v${save.schemaVersion}</p>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" id="export-save">Exporter</button>
+            <button class="btn ghost danger" id="reset-save">Reset global</button>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <p class="label">Temps global</p>
+            <strong>${formatDuration(save.globalStats.timePlayedMs)}</strong>
+          </div>
+          <div class="stat-card">
+            <p class="label">Jeux joués</p>
+            <strong>${Object.keys(save.games).length}/${registry.games.length}</strong>
+          </div>
+          <div class="stat-card">
+            <p class="label">Sessions</p>
+            <strong>${save.globalStats.totalSessions}</strong>
+          </div>
+        </div>
+        <label class="import">
+          Import JSON
+          <textarea id="import-text" placeholder="Colle ici ta sauvegarde"></textarea>
+          <button class="btn primary" id="import-btn">Importer</button>
+        </label>
+      </section>
+      ${renderCloudPanel()}
+    </div>
     <section class="card">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Saves</p>
-          <h2>Gestion</h2>
-          <p class="muted">Schema v${save.schemaVersion}</p>
-        </div>
-        <div class="actions">
-          <button class="btn ghost" id="export-save">Exporter</button>
-          <button class="btn ghost danger" id="reset-save">Reset global</button>
+          <p class="eyebrow">Par jeu</p>
+          <h2>Saves détaillées</h2>
         </div>
       </div>
-      <label class="import">
-        Import JSON
-        <textarea id="import-text" placeholder="Colle ici ta sauvegarde"></textarea>
-        <button class="btn primary" id="import-btn">Importer</button>
-      </label>
       <div class="save-list">
         ${gameRows || "<p class='muted'>Aucune save par jeu pour le moment.</p>"}
       </div>
@@ -309,7 +487,8 @@ function renderHub() {
   app.innerHTML = `
     <div class="layout">
       ${renderNav()}
-      ${activeTab === "hub" ? renderProfileCard() + renderGameGrid() : ""}
+      ${renderHero()}
+      ${activeTab === "hub" ? renderGameGrid() : ""}
       ${activeTab === "achievements" ? renderAchievements() : ""}
       ${activeTab === "saves" ? renderSaves() : ""}
     </div>
@@ -361,6 +540,30 @@ function wireEvents() {
   const importBtn = document.getElementById("import-btn");
   const importText = document.getElementById("import-text") as HTMLTextAreaElement | null;
   importBtn?.addEventListener("click", () => importText && handleImport(importText.value));
+
+  const loginBtn = document.getElementById("cloud-login");
+  const registerBtn = document.getElementById("cloud-register");
+  const logoutBtn = document.getElementById("cloud-logout");
+  const cloudSaveBtn = document.getElementById("cloud-save");
+  const cloudLoadBtn = document.getElementById("cloud-load");
+
+  loginBtn?.addEventListener("click", async () => {
+    const email = (document.getElementById("cloud-email") as HTMLInputElement | null)?.value || "";
+    const password =
+      (document.getElementById("cloud-password") as HTMLInputElement | null)?.value || "";
+    await connectCloud("login", { email, password });
+  });
+  registerBtn?.addEventListener("click", async () => {
+    const email = (document.getElementById("cloud-email") as HTMLInputElement | null)?.value || "";
+    const password =
+      (document.getElementById("cloud-password") as HTMLInputElement | null)?.value || "";
+    await connectCloud("register", { email, password });
+  });
+  logoutBtn?.addEventListener("click", async () => {
+    await connectCloud("logout");
+  });
+  cloudSaveBtn?.addEventListener("click", handleCloudSaveAction);
+  cloudLoadBtn?.addEventListener("click", handleCloudLoadAction);
 }
 
 function refresh() {

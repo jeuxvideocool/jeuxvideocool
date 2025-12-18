@@ -46,11 +46,12 @@ npm run build
 - `localStorage` (`nintendo-hub-save`) avec `schemaVersion` global + `saveSchemaVersion` par jeu.
 - Import/export JSON (validation), reset global ou par jeu.
 - Progression XP/levels et achievements réagissent aux events émis par les jeux (`packages/core/events`).
+- Compteur de temps global et par jeu (enregistré dans la save, visible dans le hub).
 - Synchronisation cloud (optionnelle) via Supabase :
   - Crée un projet Supabase (Spark gratuit), active Auth (email/password).
   - Ajoute une table `saves` (user_id uuid PK FK auth.users, save jsonb, updated_at timestamptz).
   - Règles RLS : `user_id = auth.uid()`.
-  - Renseigne `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` (voir `.env.example`), puis utilise la page Profil pour login/register et sync.
+  - Renseigne `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` (voir `.env.example`), puis utilise le hub ou la page Profil pour login/register et sync.
 
 ## Déploiement GitHub Pages
 - Build MPA dans `dist/` (hub + pages jeux).

@@ -113,6 +113,34 @@ function handleStreaks(state: SaveState, event: GameEvent) {
   }
 }
 
+function trackSessionTime(state: SaveState, event: GameEvent, gameState?: GameSaveState) {
+  const ts = event.timestamp ?? Date.now();
+  if (event.type === "SESSION_START") {
+    state.globalStats.currentSessionStartedAt = ts;
+    if (gameState) {
+      // Close any dangling session to avoid losing time if start is spammed.
+      if (gameState.sessionStartedAt && gameState.sessionStartedAt < ts) {
+        const delta = ts - gameState.sessionStartedAt;
+        gameState.timePlayedMs = (gameState.timePlayedMs ?? 0) + Math.max(0, delta);
+        state.globalStats.timePlayedMs = (state.globalStats.timePlayedMs ?? 0) + Math.max(0, delta);
+      }
+      gameState.sessionStartedAt = ts;
+    }
+    return;
+  }
+
+  if (event.type === "SESSION_WIN" || event.type === "SESSION_FAIL") {
+    const start = gameState?.sessionStartedAt ?? state.globalStats.currentSessionStartedAt;
+    const duration = start ? Math.max(0, ts - start) : 0;
+    state.globalStats.timePlayedMs = (state.globalStats.timePlayedMs ?? 0) + duration;
+    if (gameState) {
+      gameState.timePlayedMs = (gameState.timePlayedMs ?? 0) + duration;
+      gameState.sessionStartedAt = undefined;
+    }
+    state.globalStats.currentSessionStartedAt = undefined;
+  }
+}
+
 function applyEventToState(state: SaveState, event: GameEvent) {
   const xpGain = xpForEvent(event);
   if (xpGain > 0) {
@@ -130,6 +158,7 @@ function applyEventToState(state: SaveState, event: GameEvent) {
   if (event.gameId) {
     const existed = Boolean(state.games[event.gameId]);
     const gameState: GameSaveState = getGameState(state, event.gameId);
+    trackSessionTime(state, event, gameState);
     if (event.type === "SESSION_START") {
       state.globalStats.gamesPlayed += existed ? 0 : 1;
     }

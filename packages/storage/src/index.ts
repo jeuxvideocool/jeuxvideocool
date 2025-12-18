@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 export const LOCAL_STORAGE_KEY = "nintendo-hub-save";
 
 export type GameSaveState = {
@@ -8,6 +8,8 @@ export type GameSaveState = {
   state: Record<string, any>;
   lastPlayedAt?: number;
   bestScore?: number;
+  timePlayedMs?: number;
+  sessionStartedAt?: number;
 };
 
 export type SaveState = {
@@ -25,6 +27,8 @@ export type SaveState = {
     gamesPlayed: number;
     totalSessions: number;
     streaks: Record<string, number>;
+    timePlayedMs: number;
+    currentSessionStartedAt?: number;
   };
   games: Record<string, GameSaveState>;
 };
@@ -34,6 +38,8 @@ const GameSaveSchema = z.object({
   state: z.record(z.any()).default({}),
   lastPlayedAt: z.number().optional(),
   bestScore: z.number().optional(),
+  timePlayedMs: z.number().default(0),
+  sessionStartedAt: z.number().optional(),
 });
 
 const SaveSchema = z.object({
@@ -54,8 +60,10 @@ const SaveSchema = z.object({
       gamesPlayed: z.number().default(0),
       totalSessions: z.number().default(0),
       streaks: z.record(z.number()).default({}),
+      timePlayedMs: z.number().default(0),
+      currentSessionStartedAt: z.number().optional(),
     })
-    .default({ events: {}, gamesPlayed: 0, totalSessions: 0, streaks: {} }),
+    .default({ events: {}, gamesPlayed: 0, totalSessions: 0, streaks: {}, timePlayedMs: 0 }),
   games: z.record(GameSaveSchema).default({}),
 });
 
@@ -71,6 +79,7 @@ export function createEmptySave(): SaveState {
       gamesPlayed: 0,
       totalSessions: 0,
       streaks: {},
+      timePlayedMs: 0,
     },
     games: {},
   };
@@ -81,7 +90,18 @@ function migrateSave(save: SaveState): SaveState {
   if (!current.schemaVersion || current.schemaVersion < 1) {
     current.schemaVersion = 1;
   }
-  // Future migrations will go here.
+  if (current.schemaVersion < 2) {
+    current.globalStats.timePlayedMs = current.globalStats.timePlayedMs ?? 0;
+    current.globalStats.currentSessionStartedAt = undefined;
+    Object.values(current.games || {}).forEach((game) => {
+      game.timePlayedMs = game.timePlayedMs ?? 0;
+      game.sessionStartedAt = undefined;
+    });
+    current.schemaVersion = 2;
+  }
+  if (current.schemaVersion < CURRENT_SCHEMA_VERSION) {
+    current.schemaVersion = CURRENT_SCHEMA_VERSION;
+  }
   return current;
 }
 
@@ -141,7 +161,7 @@ export function resetGameSave(gameId: string) {
 
 export function getGameState(state: SaveState, gameId: string, saveSchemaVersion = 1): GameSaveState {
   if (!state.games[gameId]) {
-    state.games[gameId] = { saveSchemaVersion, state: {} };
+    state.games[gameId] = { saveSchemaVersion, state: {}, timePlayedMs: 0 };
   }
   return state.games[gameId];
 }
