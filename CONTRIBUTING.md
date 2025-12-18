@@ -1,4 +1,4 @@
-# Contribuer
+# Contribuer  
  
 - Utiliser pnpm et TypeScript.
 - Pas de dépendances réseau dynamiques côté build sans nécessité.
