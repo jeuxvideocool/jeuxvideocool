@@ -1,0 +1,19 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="prism-core" x1="30" y1="40" x2="190" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7EE2" />
+      <stop offset="0.45" stop-color="#7B8CFF" />
+      <stop offset="1" stop-color="#7CFFE1" />
+    </linearGradient>
+    <radialGradient id="prism-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(110 110) rotate(90) scale(110)">
+      <stop stop-color="#ffffff" stop-opacity="0.7" />
+      <stop offset="1" stop-color="#050712" />
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="100" fill="url(#prism-glow)" />
+  <path d="M110 18 190 110 110 202 30 110 110 18z" fill="url(#prism-core)" />
+  <path d="M110 18 190 110 110 202 30 110 110 18z" stroke="#ffffff" stroke-opacity="0.4" stroke-width="6" />
+  <circle cx="110" cy="110" r="46" fill="#0A0F24" fill-opacity="0.5" />
+  <circle cx="110" cy="110" r="38" stroke="#ffffff" stroke-opacity="0.4" stroke-width="4" />
+  <circle cx="110" cy="84" r="14" fill="#ffffff" fill-opacity="0.6" />
+</svg>

@@ -1,0 +1,1 @@
+function i(e){const u=1e3/(e.fps??60);let t=performance.now(),n=null,r=!1;const l=c=>{var f;if(!r)return;const a=c-t;a>=u&&(t=c-a%u,e.update(a/1e3),(f=e.render)==null||f.call(e)),n=requestAnimationFrame(l)};return{start(){r||(r=!0,t=performance.now(),n=requestAnimationFrame(l))},stop(){r=!1,n!==null&&cancelAnimationFrame(n)},isRunning(){return r}}}export{i as c};

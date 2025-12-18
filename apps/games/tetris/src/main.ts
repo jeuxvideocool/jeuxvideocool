@@ -1,5 +1,5 @@
 import "./style.css";
-import { createKeyboardInput } from "@core/input";
+import { createHybridInput, createMobileControls } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -26,7 +26,7 @@ if (theme) {
 const canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
 const ui = document.getElementById("ui") as HTMLDivElement;
 const ctx = canvas.getContext("2d")!;
-const keyboard = createKeyboardInput();
+const input = createHybridInput();
 const overlay = document.createElement("div");
 overlay.className = "overlay";
 overlay.style.display = "none";
@@ -111,6 +111,21 @@ const keys = {
   rotate: config?.input.keys.rotate || "ArrowUp",
   drop: config?.input.keys.drop || "Space",
 };
+
+createMobileControls({
+  container: document.body,
+  input,
+  mapping: {
+    left: keys.left,
+    right: keys.right,
+    down: keys.down,
+    up: keys.rotate,
+    actionA: keys.rotate,
+    actionALabel: "Rotate",
+    actionB: keys.drop,
+    actionBLabel: "Drop",
+  },
+});
 
 const keyLatch: Record<string, boolean> = {};
 
@@ -320,11 +335,11 @@ function endGame(win: boolean) {
 }
 
 function handleInput(dt: number) {
-  const left = keyboard.isDown(keys.left);
-  const right = keyboard.isDown(keys.right);
-  const rotateKey = keyboard.isDown(keys.rotate);
-  const dropKey = keyboard.isDown(keys.drop);
-  const downKey = keyboard.isDown(keys.down);
+  const left = input.isDown(keys.left);
+  const right = input.isDown(keys.right);
+  const rotateKey = input.isDown(keys.rotate);
+  const dropKey = input.isDown(keys.drop);
+  const downKey = input.isDown(keys.down);
 
   if (left && !keyLatch.left) movePiece(-1);
   if (right && !keyLatch.right) movePiece(1);

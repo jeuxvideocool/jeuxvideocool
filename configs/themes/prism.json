@@ -1,0 +1,14 @@
+{
+  "id": "prism",
+  "name": "Prism",
+  "colors": {
+    "primary": "#7cffe1",
+    "secondary": "#7b8cff",
+    "accent": "#ff7ee2",
+    "background": "#050712",
+    "surface": "#0c1024",
+    "text": "#f6f9ff",
+    "muted": "#9fb3d1"
+  },
+  "gradient": "radial-gradient(circle at 18% 22%, rgba(124, 255, 225, 0.12), transparent 35%), radial-gradient(circle at 82% 28%, rgba(123, 140, 255, 0.14), transparent 36%), linear-gradient(135deg, #0a0f24 0%, #050712 60%, #03040c 100%)"
+}

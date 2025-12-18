@@ -1,5 +1,5 @@
 import "./style.css";
-import { createKeyboardInput } from "@core/input";
+import { createHybridInput, createMobileControls } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -26,11 +26,29 @@ if (theme) {
 const canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
 const ui = document.getElementById("ui") as HTMLDivElement;
 const ctx = canvas.getContext("2d")!;
-const keyboard = createKeyboardInput();
+const input = createHybridInput();
 const overlay = document.createElement("div");
 overlay.className = "overlay";
 overlay.style.display = "none";
 ui.appendChild(overlay);
+
+const controls = {
+  up: config?.input.keys.up || "ArrowUp",
+  down: config?.input.keys.down || "ArrowDown",
+  left: config?.input.keys.left || "ArrowLeft",
+  right: config?.input.keys.right || "ArrowRight",
+};
+
+createMobileControls({
+  container: document.body,
+  input,
+  mapping: {
+    up: controls.up,
+    down: controls.down,
+    left: controls.left,
+    right: controls.right,
+  },
+});
 
 type Point = { x: number; y: number };
 type Item = Point & { collected: boolean };
@@ -145,12 +163,8 @@ function update(dt: number) {
     return;
   }
 
-  const moveX =
-    (keyboard.isDown(config.input.keys.right || "ArrowRight") ? 1 : 0) +
-    (keyboard.isDown(config.input.keys.left || "ArrowLeft") ? -1 : 0);
-  const moveY =
-    (keyboard.isDown(config.input.keys.down || "ArrowDown") ? 1 : 0) +
-    (keyboard.isDown(config.input.keys.up || "ArrowUp") ? -1 : 0);
+  const moveX = (input.isDown(controls.right) ? 1 : 0) + (input.isDown(controls.left) ? -1 : 0);
+  const moveY = (input.isDown(controls.down) ? 1 : 0) + (input.isDown(controls.up) ? -1 : 0);
   state.player.x += moveX * config.difficultyParams.playerSpeed * (dt * 60);
   state.player.y += moveY * config.difficultyParams.playerSpeed * (dt * 60);
   state.player.x = clamp(state.player.x, state.player.r, state.width - state.player.r);

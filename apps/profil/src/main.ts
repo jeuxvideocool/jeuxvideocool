@@ -26,7 +26,7 @@ function render() {
         </div>
         <div class="actions">
           <a class="btn ghost" href="${withBasePath("/apps/home/", basePath)}">Accueil</a>
-          <a class="btn primary" href="${withBasePath("/apps/hub_de_jeux/", basePath)}">Hub de jeux</a>
+          <a class="btn primary" href="${withBasePath("/", basePath)}">Hub de jeux</a>
         </div>
       </header>
 

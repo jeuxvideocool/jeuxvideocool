@@ -329,6 +329,38 @@ textarea:focus {
   gap: 16px;
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 6px;
+}
+
+.filter {
+  min-width: 180px;
+}
+
+.filter.search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.filter select,
+.filter input {
+  width: 100%;
+}
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-toggle.active {
+  background: linear-gradient(120deg, var(--color-primary), var(--color-secondary));
+  color: #061329;
+}
+
 .game-card {
   position: relative;
   overflow: hidden;
@@ -347,6 +379,12 @@ textarea:focus {
 .card-top {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-actions {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
 }
@@ -429,6 +467,29 @@ textarea:focus {
 .btn.danger {
   border-color: rgba(255, 123, 95, 0.4);
   color: #ffc0b6;
+}
+
+.icon-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-muted);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 800;
+  min-width: 44px;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border 0.2s ease;
+}
+
+.icon-btn:hover {
+  transform: translateY(-1px);
+}
+
+.favorite-btn.active {
+  background: linear-gradient(120deg, var(--color-primary), var(--color-secondary));
+  color: #061329;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
 }
 
 .help-btn {

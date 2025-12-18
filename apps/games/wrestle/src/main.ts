@@ -1,6 +1,7 @@
 import "./style.css";
 import Matter from "matter-js";
 import { clamp, rand, withBasePath } from "@core/utils";
+import { createHybridInput, createMobileControls } from "@core/input";
 import { emitEvent } from "@core/events";
 import { getGameConfig, getThemes } from "@config";
 import { attachProgressionListener } from "@progression";
@@ -25,6 +26,7 @@ if (theme) {
 const canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
 const ui = document.getElementById("ui") as HTMLDivElement;
 const ctx = canvas.getContext("2d")!;
+const input = createHybridInput();
 const overlay = document.createElement("div");
 overlay.className = "overlay";
 overlay.style.display = "none";
@@ -77,9 +79,16 @@ const keys = {
   p2: config?.input.keys.p2Jump || "ArrowUp",
 };
 
-const pressed = new Set<string>();
-window.addEventListener("keydown", (e) => pressed.add(e.code));
-window.addEventListener("keyup", (e) => pressed.delete(e.code));
+createMobileControls({
+  container: document.body,
+  input,
+  mapping: {
+    actionA: keys.p1,
+    actionALabel: "P1",
+    actionB: keys.p2,
+    actionBLabel: "P2",
+  },
+});
 
 function resize() {
   canvas.width = window.innerWidth * devicePixelRatio;
@@ -199,8 +208,8 @@ function jump(fighter: Fighter) {
 }
 
 function handleInput() {
-  if (pressed.has(keys.p1)) jump(state.fighters[0]);
-  if (pressed.has(keys.p2)) jump(state.fighters[1]);
+  if (input.isDown(keys.p1)) jump(state.fighters[0]);
+  if (input.isDown(keys.p2)) jump(state.fighters[1]);
 }
 
 function detectHeadHit() {

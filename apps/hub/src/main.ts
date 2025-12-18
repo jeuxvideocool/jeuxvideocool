@@ -31,6 +31,9 @@ let activeTab: Tab = "hub";
 let snapshot = getProgressionSnapshot();
 let lastLevel = snapshot.save.globalLevel;
 let cloudState = getAuthState();
+let searchTerm = "";
+let categoryFilter = "all";
+let favoritesOnly = false;
 
 attachProgressionListener();
 applyTheme(findTheme(registry.hubTheme));
@@ -136,6 +139,19 @@ function handleReset(gameId?: string) {
     resetSave();
     showToast("Progression globale réinitialisée", "info");
   }
+  refresh();
+}
+
+function toggleFavorite(gameId: string) {
+  updateSave((state) => {
+    const current = new Set(state.favorites || []);
+    if (current.has(gameId)) {
+      current.delete(gameId);
+    } else {
+      current.add(gameId);
+    }
+    state.favorites = Array.from(current);
+  });
   refresh();
 }
 
@@ -250,9 +266,34 @@ function renderHero() {
 
 function renderGameGrid() {
   const errors: string[] = registry.games.length ? [] : ["games.registry.json vide ou invalide"];
-  const cards = registry.games
-    .slice()
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  const favorites = new Set(snapshot.save.favorites || []);
+  const categories = Array.from(
+    new Set(registry.games.flatMap((g) => g.tags || []).filter(Boolean)),
+  ).sort((a, b) => a.localeCompare(b, "fr"));
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const safeSearch = searchTerm.replace(/"/g, "&quot;");
+  const filtered = registry.games
+    .filter((game) => (favoritesOnly ? favorites.has(game.id) : true))
+    .filter((game) => {
+      if (categoryFilter === "all") return true;
+      return (game.tags || []).includes(categoryFilter);
+    })
+    .filter((game) => {
+      if (!normalizedSearch) return true;
+      return (
+        game.title.toLowerCase().includes(normalizedSearch) ||
+        game.description.toLowerCase().includes(normalizedSearch) ||
+        game.id.toLowerCase().includes(normalizedSearch)
+      );
+    })
+    .sort((a, b) => {
+      const favDelta = Number(favorites.has(b.id)) - Number(favorites.has(a.id));
+      if (favDelta !== 0) return favDelta;
+      return (a.order ?? 0) - (b.order ?? 0);
+    });
+
+  const cards = filtered
     .map((game) => {
       const config = gameConfigs.find((cfg) => cfg.id === game.id);
       if (!config) {
@@ -263,11 +304,19 @@ function renderGameGrid() {
       const bestScore = save?.bestScore ?? null;
       const timePlayed = formatDuration(save?.timePlayedMs);
       const gameLink = withBasePath(`/apps/games/${game.id}/`, basePath);
+      const isFavorite = favorites.has(game.id);
       return `
         <article class="card game-card">
           <div class="card-top">
             <div class="pill accent">${game.previewEmoji || "🎮"} ${game.title}</div>
-            <span class="muted">MAJ ${game.lastUpdated || "N/A"}</span>
+            <div class="card-actions">
+              <button class="icon-btn favorite-btn ${isFavorite ? "active" : ""}" data-game="${
+                game.id
+              }" title="${isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}">
+                ${isFavorite ? "★" : "☆"}
+              </button>
+              <span class="muted">MAJ ${game.lastUpdated || "N/A"}</span>
+            </div>
           </div>
           <p class="game-desc">${game.description}</p>
           <div class="tags">${game.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
@@ -297,8 +346,22 @@ function renderGameGrid() {
           <h2>Choisis ton mini-jeu</h2>
         </div>
       </div>
+      <div class="filters">
+        <label class="filter search">
+          <input id="search-games" type="text" placeholder="Rechercher par nom..." value="${safeSearch}" />
+        </label>
+        <label class="filter">
+          <select id="category-filter">
+            <option value="all">Toutes les catégories</option>
+            ${categories.map((cat) => `<option value="${cat}" ${cat === categoryFilter ? "selected" : ""}>${cat}</option>`).join("")}
+          </select>
+        </label>
+        <button class="btn ghost filter-toggle ${favoritesOnly ? "active" : ""}" id="filter-fav">
+          ${favoritesOnly ? "★" : "☆"} Favoris
+        </button>
+      </div>
       ${errorBox}
-      <div class="grid">${cards}</div>
+      <div class="grid">${cards || "<p class='muted'>Aucun jeu ne correspond aux filtres.</p>"}</div>
     </section>
   `;
 }
@@ -524,6 +587,13 @@ function wireEvents() {
     });
   });
 
+  document.querySelectorAll<HTMLButtonElement>(".favorite-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.game;
+      if (id) toggleFavorite(id);
+    });
+  });
+
   const exportBtn = document.getElementById("export-save");
   exportBtn?.addEventListener("click", handleExport);
 
@@ -564,6 +634,25 @@ function wireEvents() {
   });
   cloudSaveBtn?.addEventListener("click", handleCloudSaveAction);
   cloudLoadBtn?.addEventListener("click", handleCloudLoadAction);
+
+  const searchInput = document.getElementById("search-games") as HTMLInputElement | null;
+  const categorySelect = document.getElementById("category-filter") as HTMLSelectElement | null;
+  const favoritesBtn = document.getElementById("filter-fav");
+
+  searchInput?.addEventListener("input", () => {
+    searchTerm = searchInput.value;
+    renderHub();
+  });
+
+  categorySelect?.addEventListener("change", () => {
+    categoryFilter = categorySelect.value;
+    renderHub();
+  });
+
+  favoritesBtn?.addEventListener("click", () => {
+    favoritesOnly = !favoritesOnly;
+    renderHub();
+  });
 }
 
 function refresh() {

@@ -60,6 +60,16 @@
       "previewEmoji": "🤼",
       "order": 6,
       "lastUpdated": "2024-06-03"
+    },
+    {
+      "id": "snake",
+      "title": "Prism Snake",
+      "description": "Serpent néon ultra stylé, combos prismatiques et boost fluide.",
+      "tags": ["arcade", "réflexes"],
+      "themeId": "prism",
+      "previewEmoji": "🧬",
+      "order": 0,
+      "lastUpdated": "2024-11-01"
     }
   ]
 }

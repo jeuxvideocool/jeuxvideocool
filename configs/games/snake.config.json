@@ -1,0 +1,41 @@
+{
+  "id": "snake",
+  "saveSchemaVersion": 1,
+  "themeId": "prism",
+  "xpRules": {
+    "SESSION_START": 3,
+    "FRUIT_EATEN": 5,
+    "PRISM_FRUIT_EATEN": 10,
+    "STREAK_BONUS": 8,
+    "SESSION_WIN": 50,
+    "SESSION_FAIL": 8
+  },
+  "uiText": {
+    "title": "Prism Snake",
+    "shortDescription": "Serpent néon, flux rapide et fruits prismatiques.",
+    "help": "Attrape les fruits, garde le flow sans heurter tes propres segments et déclenche les fruits prismatiques pour accélérer. Les murs sont solides : anticipe tes virages.",
+    "controls": ["Flèches ou ZQSD pour tourner", "Espace pour micro-boost"]
+  },
+  "difficultyParams": {
+    "boardSize": 21,
+    "baseTickMs": 140,
+    "speedRamp": 0.985,
+    "boostDurationMs": 3200,
+    "prismChance": 0.18,
+    "targetLength": 46,
+    "wallIsSolid": 1
+  },
+  "input": {
+    "keys": {
+      "up": "ArrowUp",
+      "down": "ArrowDown",
+      "left": "ArrowLeft",
+      "right": "ArrowRight",
+      "altUp": "KeyZ",
+      "altDown": "KeyS",
+      "altLeft": "KeyQ",
+      "altRight": "KeyD",
+      "dash": "Space"
+    }
+  }
+}

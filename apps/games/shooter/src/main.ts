@@ -1,5 +1,5 @@
 import "./style.css";
-import { createKeyboardInput } from "@core/input";
+import { createHybridInput, createMobileControls } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -26,11 +26,32 @@ if (theme) {
 const canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
 const ui = document.getElementById("ui") as HTMLDivElement;
 const ctx = canvas.getContext("2d")!;
-const keyboard = createKeyboardInput();
+const input = createHybridInput();
 const overlay = document.createElement("div");
 overlay.className = "overlay";
 overlay.style.display = "none";
 ui.appendChild(overlay);
+
+const controls = {
+  up: config?.input.keys.up || "ArrowUp",
+  down: config?.input.keys.down || "ArrowDown",
+  left: config?.input.keys.left || "ArrowLeft",
+  right: config?.input.keys.right || "ArrowRight",
+  shoot: config?.input.keys.shoot || "Space",
+};
+
+createMobileControls({
+  container: document.body,
+  input,
+  mapping: {
+    up: controls.up,
+    down: controls.down,
+    left: controls.left,
+    right: controls.right,
+    actionA: controls.shoot,
+    actionALabel: "Tir",
+  },
+});
 
 type Bullet = { x: number; y: number; speed: number };
 type Enemy = { x: number; y: number; speed: number; vx: number };
@@ -142,20 +163,16 @@ function update(dt: number) {
   }
 
   // Movement
-  const moveX =
-    (keyboard.isDown(config.input.keys.right || "KeyD") ? 1 : 0) +
-    (keyboard.isDown(config.input.keys.left || "KeyQ") ? -1 : 0);
-  const moveY =
-    (keyboard.isDown(config.input.keys.down || "KeyS") ? 1 : 0) +
-    (keyboard.isDown(config.input.keys.up || "KeyZ") ? -1 : 0);
+  const moveX = (input.isDown(controls.right) ? 1 : 0) + (input.isDown(controls.left) ? -1 : 0);
+  const moveY = (input.isDown(controls.down) ? 1 : 0) + (input.isDown(controls.up) ? -1 : 0);
   state.player.x += moveX * config.difficultyParams.playerSpeed * (dt * 60);
   state.player.y += moveY * config.difficultyParams.playerSpeed * (dt * 60);
   state.player.x = clamp(state.player.x, state.player.r, state.width - state.player.r);
   state.player.y = clamp(state.player.y, state.height * 0.35, state.height - state.player.r);
 
   // Shooting
-  const shootKey = config.input.keys.shoot || "Space";
-  if (keyboard.isDown(shootKey) && state.lastShot > 0.18) {
+  const shootKey = controls.shoot;
+  if (input.isDown(shootKey) && state.lastShot > 0.18) {
     state.bullets.push({ x: state.player.x, y: state.player.y - 8, speed: config.difficultyParams.bulletSpeed });
     state.lastShot = 0;
   }

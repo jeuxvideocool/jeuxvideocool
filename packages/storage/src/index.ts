@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 export const LOCAL_STORAGE_KEY = "nintendo-hub-save";
 
 export type GameSaveState = {
@@ -30,6 +30,7 @@ export type SaveState = {
     timePlayedMs: number;
     currentSessionStartedAt?: number;
   };
+  favorites: string[];
   games: Record<string, GameSaveState>;
 };
 
@@ -64,6 +65,7 @@ const SaveSchema = z.object({
       currentSessionStartedAt: z.number().optional(),
     })
     .default({ events: {}, gamesPlayed: 0, totalSessions: 0, streaks: {}, timePlayedMs: 0 }),
+  favorites: z.array(z.string()).default([]),
   games: z.record(GameSaveSchema).default({}),
 });
 
@@ -81,6 +83,7 @@ export function createEmptySave(): SaveState {
       streaks: {},
       timePlayedMs: 0,
     },
+    favorites: [],
     games: {},
   };
 }
@@ -98,6 +101,12 @@ function migrateSave(save: SaveState): SaveState {
       game.sessionStartedAt = undefined;
     });
     current.schemaVersion = 2;
+  }
+  if (current.schemaVersion < 3) {
+    current.favorites = Array.isArray(current.favorites)
+      ? Array.from(new Set(current.favorites.filter((id) => typeof id === "string")))
+      : [];
+    current.schemaVersion = 3;
   }
   if (current.schemaVersion < CURRENT_SCHEMA_VERSION) {
     current.schemaVersion = CURRENT_SCHEMA_VERSION;

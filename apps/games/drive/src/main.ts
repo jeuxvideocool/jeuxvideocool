@@ -1,5 +1,5 @@
 import "./style.css";
-import { createKeyboardInput } from "@core/input";
+import { createHybridInput, createMobileControls } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -26,11 +26,29 @@ if (theme) {
 const canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
 const ui = document.getElementById("ui") as HTMLDivElement;
 const ctx = canvas.getContext("2d")!;
-const keyboard = createKeyboardInput();
+const input = createHybridInput();
 const overlay = document.createElement("div");
 overlay.className = "overlay";
 overlay.style.display = "none";
 ui.appendChild(overlay);
+
+const controls = {
+  left: config?.input.keys.left || "ArrowLeft",
+  right: config?.input.keys.right || "ArrowRight",
+  boost: config?.input.keys.boost || "ArrowUp",
+};
+
+createMobileControls({
+  container: document.body,
+  input,
+  mapping: {
+    left: controls.left,
+    right: controls.right,
+    up: controls.boost,
+    actionA: controls.boost,
+    actionALabel: "Boost",
+  },
+});
 
 const carSprite = new Image();
 carSprite.src = new URL("../assets/car.svg", import.meta.url).href;
@@ -59,12 +77,6 @@ const state = {
   speed: 120,
   trafficTimer: 0,
   pickupTimer: 0,
-};
-
-const keys = {
-  left: config?.input.keys.left || "ArrowLeft",
-  right: config?.input.keys.right || "ArrowRight",
-  boost: config?.input.keys.boost || "ArrowUp",
 };
 
 function resize() {
@@ -146,7 +158,7 @@ function handleBoost(dt: number) {
   state.player.cooldown = Math.max(0, state.player.cooldown - dt * 1000);
   state.player.boost = Math.max(0, state.player.boost - dt * 1000);
   if (state.player.boost > 0) return;
-  const wantsBoost = keyboard.isDown(keys.boost);
+  const wantsBoost = input.isDown(controls.boost);
   if (wantsBoost && state.player.cooldown <= 0) {
     state.player.boost = config?.difficultyParams.boostDurationMs ?? 2600;
     state.player.cooldown = config?.difficultyParams.boostCooldownMs ?? 4200;
@@ -155,8 +167,8 @@ function handleBoost(dt: number) {
 }
 
 function handleInput() {
-  if (keyboard.isDown(keys.left)) moveLane(-1);
-  if (keyboard.isDown(keys.right)) moveLane(1);
+  if (input.isDown(controls.left)) moveLane(-1);
+  if (input.isDown(controls.right)) moveLane(1);
 }
 
 function updateEntities(dt: number) {

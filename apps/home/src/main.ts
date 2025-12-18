@@ -6,7 +6,7 @@ const basePath = import.meta.env.BASE_URL || "/";
 const app = document.getElementById("app")!;
 const registry = getRegistry();
 
-const hubLink = withBasePath("/apps/hub_de_jeux/", basePath);
+const hubLink = withBasePath("/", basePath);
 const profileLink = withBasePath("/apps/profil/", basePath);
 
 const games = registry.games.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, 3);

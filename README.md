@@ -1,7 +1,7 @@
 # arcade-galaxy
 
 Monorepo Vite + TypeScript pour un hub de mini-jeux déployable sur GitHub Pages. Le hub, la progression (XP/levels), les achievements et les jeux sont pilotés par des JSON.
-Jeux inclus : Dodge Rush, Pixel Shooter, Mini Quest, Tetris Mini, Neon Drive, Rope Wrestle (duo physique).
+Jeux inclus : Dodge Rush, Pixel Shooter, Mini Quest, Tetris Mini, Neon Drive, Rope Wrestle (duo physique), Prism Snake.
 
 ## Prérequis
 - Node 18+
@@ -16,7 +16,7 @@ npm install
 ```bash
 npm run dev
 ```
-Le hub est accessible sur `/apps/hub/`. Les pages jeux sont générées automatiquement à partir de `configs/games.registry.json`.
+Le hub est accessible à la racine (`/`, alias `/apps/hub/`). Les pages jeux sont générées automatiquement à partir de `configs/games.registry.json`.
 
 ## Build
 ```bash
