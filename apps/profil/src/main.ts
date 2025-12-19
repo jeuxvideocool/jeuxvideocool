@@ -41,6 +41,7 @@ function render() {
   const registry = getRegistry();
   const authState = getAuthState();
   const games = Object.entries(snapshot.save.games);
+  const nameDisabled = authState?.user ? "disabled" : "";
 
   app.innerHTML = `
     <div class="shell">
@@ -51,7 +52,7 @@ function render() {
           <p class="muted">Niveau ${snapshot.save.globalLevel} · ${snapshot.save.globalXP} XP · ${unlocked.size}/${achievements.length} succès</p>
         </div>
         <div class="actions">
-          <a class="btn ghost" href="${withBasePath("/apps/home/", basePath)}">Accueil</a>
+          <a class="btn ghost" href="${withBasePath("/apps/hub/", basePath)}">Accueil</a>
           <a class="btn primary" href="${withBasePath("/", basePath)}">Hub de jeux</a>
         </div>
       </header>
@@ -59,9 +60,10 @@ function render() {
       <section class="panel">
         <h2>Identité</h2>
         <div class="form">
-          <label>Pseudo <input id="name" value="${snapshot.save.playerProfile.name}" maxlength="18" /></label>
+          <label>Pseudo <input id="name" value="${snapshot.save.playerProfile.name}" maxlength="18" ${nameDisabled} /></label>
           <label>Avatar (emoji) <input id="avatar" value="${snapshot.save.playerProfile.avatar}" maxlength="4" /></label>
           <button class="btn primary" id="save-profile">Enregistrer</button>
+          ${authState?.user ? `<p class="muted small">Pseudo verrouillé (compte cloud connecté).</p>` : ""}
         </div>
       </section>
 
@@ -180,8 +182,11 @@ function wire() {
   const name = document.getElementById("name") as HTMLInputElement | null;
   const avatar = document.getElementById("avatar") as HTMLInputElement | null;
   document.getElementById("save-profile")?.addEventListener("click", () => {
+    const authState = getAuthState();
     updateSave((s) => {
-      s.playerProfile.name = (name?.value || "Joueur").slice(0, 18);
+      const currentName = s.playerProfile.name;
+      const nextName = authState?.user ? currentName : (name?.value || "Joueur").slice(0, 18);
+      s.playerProfile.name = nextName;
       s.playerProfile.avatar = (avatar?.value || "🎮").slice(0, 4);
     });
     emitEvent({ type: "PROFILE_UPDATED" });

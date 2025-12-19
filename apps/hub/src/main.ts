@@ -116,8 +116,9 @@ function formatDuration(ms?: number) {
 function handleProfileChange(name: string, avatar: string) {
   const trimmedName = name.trim() || "Joueur";
   const trimmedAvatar = avatar.trim() || "🎮";
+  const enforcedName = cloudState.user ? snapshot.save.playerProfile.name : trimmedName;
   updateSave((state) => {
-    state.playerProfile.name = trimmedName.slice(0, 18);
+    state.playerProfile.name = enforcedName.slice(0, 18);
     state.playerProfile.avatar = trimmedAvatar.slice(0, 4);
   });
   refresh();
@@ -229,7 +230,6 @@ function renderHero() {
     registry.games.find((g) => g.id === save.playerProfile.lastPlayedGameId)?.title;
   lastLevel = save.globalLevel;
   const profileLink = withBasePath("/apps/profil/", basePath);
-  const authLink = withBasePath("/apps/auth/", basePath);
 
   const cloudBadge = cloudState.user
     ? `<span class="chip success">Cloud : ${formatCloudIdentity()}</span>`
@@ -273,8 +273,8 @@ function renderHero() {
         </div>
       </div>
       <div class="actions hero-actions">
-        <a class="btn primary" href="${authLink}">Connexion / Invité</a>
-        <a class="btn ghost" href="${profileLink}">Page Profil complète</a>
+        <a class="btn primary" href="${profileLink}">Ouvrir le profil</a>
+        <button class="btn ghost" id="go-saves">Voir les saves</button>
       </div>
       ${renderAlexBanner(save)}
       <div class="level-row ${levelUp ? "level-up" : ""}">
@@ -286,16 +286,7 @@ function renderHero() {
           snapshot.nextLevelXP - save.globalXP
         } XP restants</div>
       </div>
-      <div class="profile-form">
-        <label>
-          Pseudo
-          <input id="player-name" type="text" value="${save.playerProfile.name}" maxlength="18" />
-        </label>
-        <label>
-          Avatar (emoji)
-          <input id="player-avatar" type="text" value="${save.playerProfile.avatar}" maxlength="4" />
-        </label>
-      </div>
+      <p class="muted small hero-note">Profil éditable depuis la page dédiée.</p>
     </header>
   `;
 }
@@ -604,6 +595,38 @@ function renderSaves() {
 }
 
 function renderHub() {
+  if (!cloudState.user) {
+    const profileLink = withBasePath("/apps/profil/", basePath);
+    const authLink = withBasePath("/apps/auth/", basePath);
+    app.innerHTML = `
+      <div class="layout">
+        <header class="card hero">
+          <div class="hero-glow"></div>
+          <div class="hero-top">
+            <div class="profile">
+              <div class="avatar">🎮</div>
+              <div>
+                <p class="eyebrow">Arcade Galaxy</p>
+                <h1>Connexion requise</h1>
+                <p class="muted">Un compte cloud est obligatoire pour accéder au hub et lancer les jeux. Identifiant + mot de passe (pas d'email nécessaire).</p>
+                <div class="chips">
+                  <span class="chip warning">Cloud : non connecté</span>
+                  <span class="chip ghost">Saves verrouillées</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="actions hero-actions">
+            <a class="btn primary" href="${profileLink}">Se connecter / Créer un compte</a>
+            <a class="btn ghost" href="${authLink}">Page connexion dédiée</a>
+          </div>
+          <p class="muted small hero-note">La connexion se fait depuis la page Profil (formulaire Supabase).</p>
+        </header>
+      </div>
+    `;
+    return;
+  }
+
   app.innerHTML = `
     <div class="layout">
       ${renderNav()}
@@ -633,6 +656,10 @@ function wireEvents() {
   avatarInput?.addEventListener("change", () =>
     handleProfileChange(nameInput?.value || "Joueur", avatarInput.value),
   );
+  document.getElementById("go-saves")?.addEventListener("click", () => {
+    activeTab = "saves";
+    renderHub();
+  });
 
   document.querySelectorAll<HTMLButtonElement>(".help-btn").forEach((btn) => {
     btn.addEventListener("click", () => {

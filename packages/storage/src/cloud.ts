@@ -1,5 +1,5 @@
 import { createClient, Session, User } from "@supabase/supabase-js";
-import { loadSave, subscribeToSaveChanges } from "./index";
+import { loadSave, subscribeToSaveChanges, updateSave } from "./index";
 import type { SaveState } from "./index";
 
 export type CloudState = {
@@ -64,6 +64,24 @@ function toPseudoEmail(identifier: string): string {
   return `${safe || "player"}@${PSEUDO_DOMAIN}`;
 }
 
+function extractIdentifier(user: User | null, provided?: string): string {
+  const fromProvided = provided?.trim();
+  const meta = (user?.user_metadata?.identifier as string | undefined)?.trim();
+  const email = user?.email;
+  if (fromProvided) return fromProvided;
+  if (meta) return meta;
+  if (email?.endsWith(`@${PSEUDO_DOMAIN}`)) return email.replace(`@${PSEUDO_DOMAIN}`, "");
+  if (email) return email.split("@")[0];
+  return "Joueur";
+}
+
+function enforceProfileName(identifier: string) {
+  const name = (identifier || "Joueur").slice(0, 18);
+  updateSave((state) => {
+    state.playerProfile.name = name || "Joueur";
+  });
+}
+
 export async function connectCloud(
   action: AuthAction,
   params?: { email?: string; password?: string; identifier?: string },
@@ -101,6 +119,7 @@ export async function connectCloud(
     if (action === "login") {
       const { data, error } = await auth.signInWithPassword({ email: pseudoEmail, password });
       if (error) throw error;
+      enforceProfileName(identifier);
       cloudState = {
         ready: true,
         user: data.user,
@@ -114,6 +133,7 @@ export async function connectCloud(
         options: { data: { identifier } },
       });
       if (error) throw error;
+      enforceProfileName(identifier);
       cloudState = {
         ready: true,
         user: data.user,
@@ -214,6 +234,7 @@ if (supabase) {
     };
     notify();
     if (session?.user) {
+      enforceProfileName(extractIdentifier(session.user));
       scheduleAutoSync(loadSave());
     }
   });

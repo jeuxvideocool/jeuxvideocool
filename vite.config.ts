@@ -35,7 +35,6 @@ export default defineConfig(({ mode }) => {
   const games = loadGamesRegistry();
   const input: Record<string, string> = {
     index: path.resolve(process.cwd(), "index.html"),
-    home: path.resolve(process.cwd(), "apps/home/index.html"),
     hub: path.resolve(process.cwd(), "apps/hub/index.html"),
     alex: path.resolve(process.cwd(), "apps/alex/index.html"),
     hub_de_jeux: path.resolve(process.cwd(), "apps/hub_de_jeux/index.html"),

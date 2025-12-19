@@ -1,4 +1,4 @@
-import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d as k,e as P,b as B,i as y}from"./index-D5lPzJ7_.js";import{g as L,c as p,a as w,l as x}from"./cloud-Vs8Bl6sx.js";const j=document.getElementById("app");function A(e){return e?new Date(e).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"Jamais"}function f(e){if(!e)return"0m";const n=Math.floor(e/1e3),a=Math.floor(n/3600),o=Math.floor(n%3600/60),t=n%60;return a?`${a}h ${o}m`:o?`${o}m ${t}s`:`${t}s`}function C(e){var o;if(!e)return"connecté";const n=(o=e.user_metadata)==null?void 0:o.identifier,a=e.email;return n||(a!=null&&a.endsWith("@user.local")?a.replace("@user.local",""):a||"connecté")}function d(){const e=$(),n=E().achievements,a=new Set(e.save.achievementsUnlocked),o=S(),t=L(),v=Object.entries(e.save.games);j.innerHTML=`
+import{g as $,b as S,a as I,w as h,u as P,k,h as B,i as L,j as y}from"./index-Bc-Kp7-P.js";import{g as E,c as m,a as w,l as x}from"./cloud-DWN9NUvT.js";const j=document.getElementById("app");function A(e){return e?new Date(e).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"Jamais"}function f(e){if(!e)return"0m";const n=Math.floor(e/1e3),a=Math.floor(n/3600),i=Math.floor(n%3600/60),s=n%60;return a?`${a}h ${i}m`:i?`${i}m ${s}s`:`${s}s`}function C(e){var i;if(!e)return"connecté";const n=(i=e.user_metadata)==null?void 0:i.identifier,a=e.email;return n||(a!=null&&a.endsWith("@user.local")?a.replace("@user.local",""):a||"connecté")}function d(){const e=$(),n=S().achievements,a=new Set(e.save.achievementsUnlocked),i=I(),s=E(),p=Object.entries(e.save.games),v=s!=null&&s.user?"disabled":"";j.innerHTML=`
     <div class="shell">
       <header class="hero">
         <div>
@@ -7,7 +7,7 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
           <p class="muted">Niveau ${e.save.globalLevel} · ${e.save.globalXP} XP · ${a.size}/${n.length} succès</p>
         </div>
         <div class="actions">
-          <a class="btn ghost" href="${h("/apps/home/")}">Accueil</a>
+          <a class="btn ghost" href="${h("/apps/hub/")}">Accueil</a>
           <a class="btn primary" href="${h("/")}">Hub de jeux</a>
         </div>
       </header>
@@ -15,9 +15,10 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
       <section class="panel">
         <h2>Identité</h2>
         <div class="form">
-          <label>Pseudo <input id="name" value="${e.save.playerProfile.name}" maxlength="18" /></label>
+          <label>Pseudo <input id="name" value="${e.save.playerProfile.name}" maxlength="18" ${v} /></label>
           <label>Avatar (emoji) <input id="avatar" value="${e.save.playerProfile.avatar}" maxlength="4" /></label>
           <button class="btn primary" id="save-profile">Enregistrer</button>
+          ${s!=null&&s.user?'<p class="muted small">Pseudo verrouillé (compte cloud connecté).</p>':""}
         </div>
       </section>
 
@@ -25,7 +26,7 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
         <h2>Progression</h2>
         <div class="stats">
           <div><span class="label">XP manquants</span><strong>${e.nextLevelXP-e.save.globalXP}</strong></div>
-          <div><span class="label">Jeux joués</span><strong>${Object.keys(e.save.games).length}/${o.games.length}</strong></div>
+          <div><span class="label">Jeux joués</span><strong>${Object.keys(e.save.games).length}/${i.games.length}</strong></div>
           <div><span class="label">Succès</span><strong>${a.size}/${n.length}</strong></div>
         </div>
       </section>
@@ -51,7 +52,7 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
           </div>
           <div>
             <span class="label">Jeux joués</span>
-            <strong>${Object.keys(e.save.games).length}/${o.games.length}</strong>
+            <strong>${Object.keys(e.save.games).length}/${i.games.length}</strong>
           </div>
           <div>
             <span class="label">Sessions</span>
@@ -59,10 +60,10 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
           </div>
         </div>
         <div class="save-list">
-          ${v.length?v.map(([i,u])=>`
+          ${p.length?p.map(([r,u])=>`
               <div class="save-row">
                 <div>
-                  <strong>${i}</strong>
+                  <strong>${r}</strong>
                   <p class="muted small">v${u.saveSchemaVersion} · Dernier : ${A(u.lastPlayedAt)}</p>
                 </div>
                 <div class="chips">
@@ -78,7 +79,7 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
         <h2>Cloud (Supabase)</h2>
         <div class="form">
           <p class="muted small">Synchronisation cross-device via Supabase (Spark gratuit). Renseigne VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.</p>
-          ${t!=null&&t.user?`<div class="status ok">Connecté : ${C(t.user)}</div>
+          ${s!=null&&s.user?`<div class="status ok">Connecté : ${C(s.user)}</div>
                  <div class="actions">
                     <button class="btn primary" id="cloud-save">Sauvegarder vers cloud</button>
                     <button class="btn ghost" id="cloud-load">Charger depuis cloud</button>
@@ -90,23 +91,23 @@ import{a as E,g as S,w as h}from"./loaders-Bj0CnEmo.js";import{g as $,u as I,d a
                    <button class="btn primary" id="cloud-login">Connexion</button>
                    <button class="btn ghost" id="cloud-register">Créer un compte</button>
                  </div>
-                 <div class="status ${t!=null&&t.error?"error":"info"}">${(t==null?void 0:t.message)??"Non connecté"}</div>`}
+                 <div class="status ${s!=null&&s.error?"error":"info"}">${(s==null?void 0:s.message)??"Non connecté"}</div>`}
         </div>
       </section>
 
       <section class="panel">
         <h2>Succès</h2>
         <div class="ach-list">
-          ${n.map(i=>`
-                <article class="ach ${a.has(i.id)?"ok":""}">
-                  <div class="pill">${i.icon||"⭐️"}</div>
+          ${n.map(r=>`
+                <article class="ach ${a.has(r.id)?"ok":""}">
+                  <div class="pill">${r.icon||"⭐️"}</div>
                   <div>
-                    <h3>${i.title}</h3>
-                    <p class="muted">${i.description}</p>
+                    <h3>${r.title}</h3>
+                    <p class="muted">${r.description}</p>
                   </div>
                 </article>
               `).join("")}
         </div>
       </section>
     </div>
-  `,O()}function O(){var a,o,t,v,i,u,m,g,b;const e=document.getElementById("name"),n=document.getElementById("avatar");(a=document.getElementById("save-profile"))==null||a.addEventListener("click",()=>{I(s=>{s.playerProfile.name=((e==null?void 0:e.value)||"Joueur").slice(0,18),s.playerProfile.avatar=((n==null?void 0:n.value)||"🎮").slice(0,4)}),k({type:"PROFILE_UPDATED"}),d()}),(o=document.getElementById("export"))==null||o.addEventListener("click",()=>{const s=P(),c=new Blob([s],{type:"application/json"}),l=URL.createObjectURL(c),r=document.createElement("a");r.href=l,r.download="arcade-galaxy-save.json",r.click(),URL.revokeObjectURL(l)}),(t=document.getElementById("reset"))==null||t.addEventListener("click",()=>{B(),d()}),(v=document.getElementById("import-btn"))==null||v.addEventListener("click",()=>{var l;const s=((l=document.getElementById("import"))==null?void 0:l.value)||"",c=y(s);c.success?d():alert(c.error||"Import impossible")}),(i=document.getElementById("cloud-login"))==null||i.addEventListener("click",async()=>{var l,r;const s=((l=document.getElementById("cloud-identifier"))==null?void 0:l.value)||"",c=((r=document.getElementById("cloud-password"))==null?void 0:r.value)||"";await p("login",{identifier:s,password:c}),d()}),(u=document.getElementById("cloud-register"))==null||u.addEventListener("click",async()=>{var l,r;const s=((l=document.getElementById("cloud-identifier"))==null?void 0:l.value)||"",c=((r=document.getElementById("cloud-password"))==null?void 0:r.value)||"";await p("register",{identifier:s,password:c}),d()}),(m=document.getElementById("cloud-logout"))==null||m.addEventListener("click",async()=>{await p("logout"),d()}),(g=document.getElementById("cloud-save"))==null||g.addEventListener("click",async()=>{const s=$();await w(s.save)&&alert("Sauvegarde envoyée dans le cloud.")}),(b=document.getElementById("cloud-load"))==null||b.addEventListener("click",async()=>{const s=await x();s!=null&&s.state?(y(JSON.stringify(s.state)),alert("Sauvegarde cloud importée."),d()):s!=null&&s.error&&alert(s.error)})}d();
+  `,O()}function O(){var a,i,s,p,v,r,u,g,b;const e=document.getElementById("name"),n=document.getElementById("avatar");(a=document.getElementById("save-profile"))==null||a.addEventListener("click",()=>{const t=E();P(o=>{const l=o.playerProfile.name,c=t!=null&&t.user?l:((e==null?void 0:e.value)||"Joueur").slice(0,18);o.playerProfile.name=c,o.playerProfile.avatar=((n==null?void 0:n.value)||"🎮").slice(0,4)}),k({type:"PROFILE_UPDATED"}),d()}),(i=document.getElementById("export"))==null||i.addEventListener("click",()=>{const t=B(),o=new Blob([t],{type:"application/json"}),l=URL.createObjectURL(o),c=document.createElement("a");c.href=l,c.download="arcade-galaxy-save.json",c.click(),URL.revokeObjectURL(l)}),(s=document.getElementById("reset"))==null||s.addEventListener("click",()=>{L(),d()}),(p=document.getElementById("import-btn"))==null||p.addEventListener("click",()=>{var l;const t=((l=document.getElementById("import"))==null?void 0:l.value)||"",o=y(t);o.success?d():alert(o.error||"Import impossible")}),(v=document.getElementById("cloud-login"))==null||v.addEventListener("click",async()=>{var l,c;const t=((l=document.getElementById("cloud-identifier"))==null?void 0:l.value)||"",o=((c=document.getElementById("cloud-password"))==null?void 0:c.value)||"";await m("login",{identifier:t,password:o}),d()}),(r=document.getElementById("cloud-register"))==null||r.addEventListener("click",async()=>{var l,c;const t=((l=document.getElementById("cloud-identifier"))==null?void 0:l.value)||"",o=((c=document.getElementById("cloud-password"))==null?void 0:c.value)||"";await m("register",{identifier:t,password:o}),d()}),(u=document.getElementById("cloud-logout"))==null||u.addEventListener("click",async()=>{await m("logout"),d()}),(g=document.getElementById("cloud-save"))==null||g.addEventListener("click",async()=>{const t=$();await w(t.save)&&alert("Sauvegarde envoyée dans le cloud.")}),(b=document.getElementById("cloud-load"))==null||b.addEventListener("click",async()=>{const t=await x();t!=null&&t.state?(y(JSON.stringify(t.state)),alert("Sauvegarde cloud importée."),d()):t!=null&&t.error&&alert(t.error)})}d();

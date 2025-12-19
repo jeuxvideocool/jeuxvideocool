@@ -1,7 +1,6 @@
 import "./style.css";
 import { withBasePath } from "@core/utils";
 import { getProgressionSnapshot } from "@progression";
-import { updateSave } from "@storage";
 import {
   connectCloud,
   getAuthState,
@@ -41,15 +40,12 @@ function formatCloudIdentity(user?: any): string {
 }
 
 function render() {
-  const snapshot = getProgressionSnapshot();
-  const pseudo = snapshot.save.playerProfile.name || "Joueur";
-  const avatar = snapshot.save.playerProfile.avatar || "🎮";
   const profilLink = withBasePath("/apps/profil/", basePath);
   const hubLink = withBasePath("/", basePath);
   const supaStatus = cloudState.user
     ? `Connecté : ${formatCloudIdentity(cloudState.user)}`
     : cloudState.ready
-      ? "Mode invité (local)"
+      ? "Connexion requise"
       : "Supabase non configuré (.env)";
 
   app.innerHTML = `
@@ -57,48 +53,29 @@ function render() {
       <header class="hero">
         <div>
           <p class="eyebrow">Arcade Galaxy</p>
-          <h1>Invité ou compte cloud</h1>
-          <p class="muted">Choisis : jouer en invité (aucune donnée externe) ou créer un compte pour synchroniser tes saves via Supabase.</p>
+          <h1>Compte cloud obligatoire</h1>
+          <p class="muted">Connecte-toi ou crée un compte (identifiant + mot de passe) pour accéder au hub et aux jeux. Les saves sont synchronisées via Supabase.</p>
           <div class="chips">
-            <span class="chip">Pseudo actuel : ${pseudo}</span>
-            <span class="chip ghost">Avatar : ${avatar}</span>
-            <span class="chip ${cloudState.user ? "success" : cloudState.ready ? "ghost" : "warning"}">${supaStatus}</span>
+            <span class="chip ${cloudState.user ? "success" : "warning"}">${supaStatus}</span>
           </div>
         </div>
         <div class="hero-card">
-          <div class="avatar">${avatar}</div>
-          <p class="muted small">Ton profil reste partagé entre hub et jeux.</p>
+          <div class="avatar">🎮</div>
+          <p class="muted small">Connexion requise pour poursuivre.</p>
           <div class="hero-actions">
-            <a class="btn ghost" href="${hubLink}">Hub</a>
             <a class="btn ghost" href="${profilLink}">Profil</a>
+            <a class="btn ghost" href="${hubLink}">Hub</a>
           </div>
         </div>
       </header>
 
-      <main class="grid">
-        <section class="card guest">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">Mode invité</p>
-              <h2>Sans compte</h2>
-              <p class="muted small">Sauvegarde locale uniquement. Aucune connexion Supabase.</p>
-            </div>
-            <span class="pill">Local</span>
-          </div>
-          <div class="form">
-            <label>Pseudo <input id="guest-name" type="text" value="${pseudo}" maxlength="18" /></label>
-            <label>Avatar (emoji) <input id="guest-avatar" type="text" value="${avatar}" maxlength="4" /></label>
-            <button class="btn primary" id="guest-continue">Continuer en invité</button>
-          </div>
-          <p class="muted small">Ton pseudo/avatar sont stockés dans le navigateur. La synchro cloud reste désactivée.</p>
-        </section>
-
+      <main class="grid single">
         <section class="card cloud">
           <div class="section-head">
             <div>
-              <p class="eyebrow">Compte cloud</p>
-              <h2>Supabase</h2>
-              <p class="muted small">Identifiant + mot de passe pour synchroniser ta sauvegarde entre appareils.</p>
+              <p class="eyebrow">Connexion</p>
+              <h2>Compte Supabase</h2>
+              <p class="muted small">Identifiant + mot de passe requis pour continuer.</p>
             </div>
             <span class="pill accent">Cloud</span>
           </div>
@@ -107,7 +84,7 @@ function render() {
             !cloudState.ready
               ? `<div class="status error">Configure VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY pour activer la connexion.</div>`
               : cloudState.user
-                ? `<div class="status ok">Connecté en cloud : ${formatCloudIdentity(cloudState.user)}</div>
+                ? `<div class="status ok">Connecté : ${formatCloudIdentity(cloudState.user)}</div>
                    <p class="muted small">La synchro s'enclenche automatiquement dès qu'une save locale change.</p>
                    <div class="actions wrap">
                      <button class="btn primary" id="cloud-sync" ${cloudState.loading ? "disabled" : ""}>Forcer une sync</button>
@@ -148,12 +125,12 @@ function render() {
         <div class="info-grid">
           <div>
             <p class="eyebrow">Clair et simple</p>
-            <h3>Deux options</h3>
-            <p class="muted">1) Invité : données 100% locales. 2) Cloud : identifiant/mot de passe Supabase pour retrouver ta progression partout.</p>
+            <h3>Compte requis</h3>
+            <p class="muted">Connexion obligatoire : toutes les saves passent par le cloud Supabase pour rester synchronisées.</p>
           </div>
           <div class="bullets">
-            <div class="bullet">🚀 Synchro auto quand la save change (si connecté).</div>
-            <div class="bullet">🔒 Pas d'email obligatoire, identifiant seul suffit.</div>
+            <div class="bullet">🚀 Synchro auto dès qu'une save change.</div>
+            <div class="bullet">🔒 Identifiant + mot de passe (pas d'email requis).</div>
             <div class="bullet">📤 Export/Import possibles depuis la page Profil.</div>
           </div>
         </div>
@@ -165,21 +142,6 @@ function render() {
 }
 
 function wire() {
-  const guestBtn = document.getElementById("guest-continue");
-  const guestName = document.getElementById("guest-name") as HTMLInputElement | null;
-  const guestAvatar = document.getElementById("guest-avatar") as HTMLInputElement | null;
-
-  guestBtn?.addEventListener("click", () => {
-    const name = (guestName?.value || "Joueur").trim().slice(0, 18);
-    const avatar = (guestAvatar?.value || "🎮").trim().slice(0, 4);
-    updateSave((state) => {
-      state.playerProfile.name = name || "Joueur";
-      state.playerProfile.avatar = avatar || "🎮";
-    });
-    showToast("Mode invité prêt");
-    window.location.href = withBasePath("/", basePath);
-  });
-
   const loginBtn = document.getElementById("cloud-login");
   const registerBtn = document.getElementById("cloud-register");
   const logoutBtn = document.getElementById("cloud-logout");
