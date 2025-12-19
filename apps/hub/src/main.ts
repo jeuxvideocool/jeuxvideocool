@@ -121,6 +121,13 @@ function mostPlayedGameTitle(save: SaveState): { title: string; duration: string
   return { title: reg?.title || id, duration: formatDuration(game.timePlayedMs) };
 }
 
+function renderAvatar(url?: string | null, emoji?: string) {
+  const safeEmoji = (emoji || "🎮").slice(0, 4);
+  return `<div class="avatar ${url ? "has-image" : ""}">${
+    url ? `<img src="${url}" alt="Avatar" />` : safeEmoji
+  }</div>`;
+}
+
 function handleProfileChange(name: string, avatar: string) {
   const trimmedName = name.trim() || "Joueur";
   const trimmedAvatar = avatar.trim() || "🎮";
@@ -128,6 +135,7 @@ function handleProfileChange(name: string, avatar: string) {
   updateSave((state) => {
     state.playerProfile.name = enforcedName.slice(0, 18);
     state.playerProfile.avatar = trimmedAvatar.slice(0, 4);
+    state.playerProfile.avatarType = state.playerProfile.avatarUrl ? "image" : "emoji";
   });
   refresh();
 }
@@ -293,7 +301,7 @@ function renderHero() {
       <div class="hero-glow"></div>
       <div class="hero-top">
         <div class="profile">
-          <div class="avatar">${save.playerProfile.avatar || "🎮"}</div>
+          ${renderAvatar(save.playerProfile.avatarUrl, save.playerProfile.avatar)}
           <div>
             <p class="eyebrow">Arcade Galaxy</p>
             <h1>${save.playerProfile.name || "Joueur"}</h1>

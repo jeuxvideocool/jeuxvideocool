@@ -17,6 +17,9 @@ export type SaveState = {
   playerProfile: {
     name: string;
     avatar: string;
+    avatarUrl?: string;
+    avatarType?: "emoji" | "image";
+    avatarStoragePath?: string;
     lastPlayedGameId?: string;
   };
   globalXP: number;
@@ -49,9 +52,12 @@ const SaveSchema = z.object({
     .object({
       name: z.string(),
       avatar: z.string(),
+      avatarUrl: z.string().url().optional(),
+      avatarType: z.enum(["emoji", "image"]).optional(),
+      avatarStoragePath: z.string().optional(),
       lastPlayedGameId: z.string().optional(),
     })
-    .default({ name: "Joueur", avatar: "🎮" }),
+    .default({ name: "Joueur", avatar: "🎮", avatarType: "emoji" }),
   globalXP: z.number().default(0),
   globalLevel: z.number().default(1),
   achievementsUnlocked: z.array(z.string()).default([]),
@@ -72,7 +78,7 @@ const SaveSchema = z.object({
 export function createEmptySave(): SaveState {
   return {
     schemaVersion: CURRENT_SCHEMA_VERSION,
-    playerProfile: { name: "Joueur", avatar: "🎮" },
+    playerProfile: { name: "Joueur", avatar: "🎮", avatarType: "emoji" },
     globalXP: 0,
     globalLevel: 1,
     achievementsUnlocked: [],
@@ -107,6 +113,9 @@ function migrateSave(save: SaveState): SaveState {
       ? Array.from(new Set(current.favorites.filter((id) => typeof id === "string")))
       : [];
     current.schemaVersion = 3;
+  }
+  if (!current.playerProfile.avatarType) {
+    current.playerProfile.avatarType = current.playerProfile.avatarUrl ? "image" : "emoji";
   }
   if (current.schemaVersion < CURRENT_SCHEMA_VERSION) {
     current.schemaVersion = CURRENT_SCHEMA_VERSION;

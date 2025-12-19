@@ -2,6 +2,8 @@ import { createClient, Session, User } from "@supabase/supabase-js";
 import { importSave, loadSave, subscribeToSaveChanges, updateSave } from "./index";
 import type { SaveState } from "./index";
 
+const AVATAR_BUCKET = (import.meta.env.VITE_SUPABASE_AVATAR_BUCKET as string | undefined) || "avatars";
+const MAX_AVATAR_SIZE_BYTES = 1.5 * 1024 * 1024;
 export type CloudState = {
   ready: boolean;
   user: User | null;
@@ -217,6 +219,49 @@ export async function loadCloudSave(): Promise<{ state?: SaveState; error?: stri
   if (error) return { error: error.message };
   if (!data) return { error: "Aucune sauvegarde trouvée." };
   return { state: data.save as SaveState };
+}
+
+export async function uploadAvatarImage(
+  file: File,
+  previousPath?: string,
+): Promise<{ url?: string; path?: string; error?: string }> {
+  if (!requireClient()) return { error: "Supabase non configuré." };
+  if (!cloudState.user) return { error: "Connexion cloud requise." };
+  if (file.size > MAX_AVATAR_SIZE_BYTES) return { error: "Image trop lourde (1.5 Mo max)." };
+
+  const extension = (file.name.split(".").pop() || "png").replace(/[^a-z0-9]/gi, "") || "png";
+  const targetPath = previousPath || `${cloudState.user.id}/avatar-${Date.now()}.${extension}`;
+
+  cloudState = { ...cloudState, loading: true, error: undefined };
+  notify();
+
+  const storage = supabase!.storage.from(AVATAR_BUCKET);
+  const { data, error } = await storage.upload(targetPath, file, {
+    upsert: true,
+    cacheControl: "3600",
+    contentType: file.type || "image/png",
+  });
+
+  if (error) {
+    cloudState = { ...cloudState, loading: false, error: error.message };
+    notify();
+    return { error: error.message };
+  }
+
+  const { data: publicUrl } = storage.getPublicUrl(data.path);
+  cloudState = { ...cloudState, loading: false, message: "Avatar mis à jour." };
+  notify();
+
+  return { url: publicUrl.publicUrl, path: data.path };
+}
+
+export async function removeAvatarImage(path?: string) {
+  if (!requireClient() || !path) return;
+  try {
+    await supabase!.storage.from(AVATAR_BUCKET).remove([path]);
+  } catch (err) {
+    console.warn("Impossible de supprimer l'ancien avatar", err);
+  }
 }
 
 function scheduleAutoSync(state: SaveState) {
