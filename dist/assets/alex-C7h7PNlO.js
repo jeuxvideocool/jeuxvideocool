@@ -1,52 +1,4 @@
-import "./style.css";
-import { withBasePath } from "@core/utils";
-import { ALEX_SECRET, canAccessAlexPage, getProgressionSnapshot } from "@progression";
-
-const basePath = import.meta.env.BASE_URL || "/";
-const app = document.getElementById("app")!;
-
-const snapshot = getProgressionSnapshot();
-const save = snapshot.save;
-
-if (!canAccessAlexPage(save)) {
-  window.location.replace(withBasePath("/", basePath));
-} else {
-  const displayName = save.playerProfile.name || "Alex";
-  const avatar = save.playerProfile.avatar || "✨";
-
-  const perks = [
-    "Accès VIP activé : le hub te déroule un tapis de lumière.",
-    "Boost infini de bonne vibe, calibré sur ton énergie.",
-    "Droit permanent au mode légende dans toutes les conversations.",
-  ];
-
-  const punchlines = [
-    "Ce n'est pas un simple cadeau, c'est une page secrète calibrée pour toi.",
-    "Mode premium débloqué : lumière, musique, et zéro limite.",
-    "Tu viens de déclencher un feu d'artifice rien qu'avec ta présence.",
-  ];
-
-  const keepsakes = [
-    { icon: "⚡️", text: "Un vœu premium à activer quand tu veux." },
-    { icon: "🎆", text: "Une ovation cosmique réservée." },
-    { icon: "💎", text: "Un badge rare qui brille même en mode silencieux." },
-  ];
-
-  const fireworks = [
-    { x: 12, y: 18, hue: 38, delay: "0s", size: 150 },
-    { x: 82, y: 20, hue: 195, delay: "0.6s", size: 170 },
-    { x: 68, y: 54, hue: 300, delay: "1.2s", size: 130 },
-    { x: 22, y: 62, hue: 12, delay: "1.6s", size: 160 },
-    { x: 55, y: 32, hue: 95, delay: "2s", size: 140 },
-    { x: 40, y: 78, hue: 240, delay: "2.6s", size: 180 },
-  ];
-
-  const meter = Math.min(100, Math.max(18, Math.round((save.globalXP / (ALEX_SECRET.minXP * 1.4)) * 100)));
-
-  const backLink = withBasePath("/", basePath);
-  const profileLink = withBasePath("/apps/profil/", basePath);
-
-  app.innerHTML = `
+import{g as u,c as m,w as i,A as n}from"./index-O4QuEqLI.js";const h=document.getElementById("app"),g=u(),e=g.save;if(!m(e))window.location.replace(i("/"));else{const a=e.playerProfile.name||"Alex",l=e.playerProfile.avatar||"✨",r=["Accès VIP activé : le hub te déroule un tapis de lumière.","Boost infini de bonne vibe, calibré sur ton énergie.","Droit permanent au mode légende dans toutes les conversations."],t=["Ce n'est pas un simple cadeau, c'est une page secrète calibrée pour toi.","Mode premium débloqué : lumière, musique, et zéro limite.","Tu viens de déclencher un feu d'artifice rien qu'avec ta présence."],c=[{icon:"⚡️",text:"Un vœu premium à activer quand tu veux."},{icon:"🎆",text:"Une ovation cosmique réservée."},{icon:"💎",text:"Un badge rare qui brille même en mode silencieux."}],d=[{x:12,y:18,hue:38,delay:"0s",size:150},{x:82,y:20,hue:195,delay:"0.6s",size:170},{x:68,y:54,hue:300,delay:"1.2s",size:130},{x:22,y:62,hue:12,delay:"1.6s",size:160},{x:55,y:32,hue:95,delay:"2s",size:140},{x:40,y:78,hue:240,delay:"2.6s",size:180}],o=Math.min(100,Math.max(18,Math.round(e.globalXP/(n.minXP*1.4)*100))),p=i("/"),v=i("/apps/profil/");h.innerHTML=`
     <div class="page">
       <div class="background">
         <div class="orb orb-a"></div>
@@ -57,34 +9,29 @@ if (!canAccessAlexPage(save)) {
       </div>
       <div class="sparkles"></div>
       <div class="fireworks">
-        ${fireworks
-          .map(
-            (fw) =>
-              `<span class="firework" style="--x:${fw.x}%; --y:${fw.y}%; --hue:${fw.hue}; --delay:${fw.delay}; --size:${fw.size}px;"></span>`
-          )
-          .join("")}
+        ${d.map(s=>`<span class="firework" style="--x:${s.x}%; --y:${s.y}%; --hue:${s.hue}; --delay:${s.delay}; --size:${s.size}px;"></span>`).join("")}
       </div>
 
       <main class="wrap">
         <header class="hero">
           <div class="hero-left">
-            <span class="eyebrow">Attention secrète · ${ALEX_SECRET.minXP} XP</span>
+            <span class="eyebrow">Attention secrète · ${n.minXP} XP</span>
             <h1>
-              ${avatar} <span class="hero-name">${displayName}</span>,
+              ${l} <span class="hero-name">${a}</span>,
               <span class="gradient-text">version premium</span> activée
             </h1>
             <p class="lead">
-              ${punchlines[Math.floor(Math.random() * punchlines.length)]}
+              ${t[Math.floor(Math.random()*t.length)]}
               Une page spéciale pour une personne qui met des étincelles partout.
             </p>
             <div class="cta-row">
-              <a class="btn primary" href="${backLink}">Retour au hub</a>
-              <a class="btn ghost" href="${profileLink}">Voir ton profil</a>
+              <a class="btn primary" href="${p}">Retour au hub</a>
+              <a class="btn ghost" href="${v}">Voir ton profil</a>
             </div>
             <div class="stat-row">
               <div class="stat">
                 <span class="stat-label">XP actuel</span>
-                <strong>${save.globalXP.toLocaleString("fr-FR")} XP</strong>
+                <strong>${e.globalXP.toLocaleString("fr-FR")} XP</strong>
               </div>
               <div class="stat">
                 <span class="stat-label">Mode</span>
@@ -99,15 +46,15 @@ if (!canAccessAlexPage(save)) {
           <div class="hero-right">
             <div class="profile-card">
               <div class="profile-top">
-                <div class="profile-avatar">${avatar}</div>
+                <div class="profile-avatar">${l}</div>
                 <div>
                   <p class="label">Pseudo validé</p>
-                  <strong>${displayName}</strong>
+                  <strong>${a}</strong>
                 </div>
               </div>
               <div class="profile-meter">
                 <div class="meter">
-                  <span style="width: ${meter}%"></span>
+                  <span style="width: ${o}%"></span>
                 </div>
                 <p class="meter-label">Niveau secret débloqué</p>
               </div>
@@ -138,7 +85,7 @@ if (!canAccessAlexPage(save)) {
               <h3>Pack d'attentions</h3>
             </div>
             <ul class="perks">
-              ${perks.map((perk) => `<li><span>🎁</span>${perk}</li>`).join("")}
+              ${r.map(s=>`<li><span>🎁</span>${s}</li>`).join("")}
             </ul>
           </article>
 
@@ -148,7 +95,7 @@ if (!canAccessAlexPage(save)) {
               <h3>Version étoilée</h3>
             </div>
             <p class="vibe">
-              Ici, ${displayName}, tu es la tête d'affiche. Ce cadeau n'a pas besoin d'occasion officielle :
+              Ici, ${a}, tu es la tête d'affiche. Ce cadeau n'a pas besoin d'occasion officielle :
               il existe juste pour dire "tu comptes" en version grand format.
             </p>
             <div class="callout">PS : les paillettes sont intégrées, impossible de les désactiver.</div>
@@ -160,9 +107,7 @@ if (!canAccessAlexPage(save)) {
               <h3>Talismans</h3>
             </div>
             <div class="mini-list">
-              ${keepsakes
-                .map((item) => `<div><span class="tag">${item.icon}</span>${item.text}</div>`)
-                .join("")}
+              ${c.map(s=>`<div><span class="tag">${s.icon}</span>${s.text}</div>`).join("")}
             </div>
           </article>
         </section>
@@ -175,5 +120,4 @@ if (!canAccessAlexPage(save)) {
         </section>
       </main>
     </div>
-  `;
-}
+  `}

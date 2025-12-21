@@ -197,11 +197,11 @@ function startGame() {
     { x: mid - 1, y: mid },
     { x: mid, y: mid },
   ];
+  state.score = state.snake.length;
   state.food = null;
   state.tickMs = preset.tickMs;
   state.timer = 0;
   state.boost = 0;
-  state.score = 0;
   state.streak = 0;
   state.comboTimer = 0;
   state.particles = [];
@@ -319,8 +319,7 @@ function handleEat(food: Food) {
   state.flash = 1;
   state.comboTimer = 2.8;
   state.streak += 1;
-  const gain = food.type === "prism" ? 18 : 9;
-  state.score += gain + Math.floor(Math.max(0, state.streak - 1) * 1.5);
+  state.score = state.snake.length;
   emitEvent({
     type: food.type === "prism" ? "PRISM_FRUIT_EATEN" : "FRUIT_EATEN",
     gameId: GAME_ID,
@@ -494,8 +493,7 @@ function renderHUD() {
   const hudTop = document.createElement("div");
   hudTop.className = "hud";
   hudTop.innerHTML = `
-    <div class="chip">Score <strong>${state.score}</strong></div>
-    <div class="chip">Longueur <strong>${state.snake.length}/${state.lengthTarget}</strong></div>
+    <div class="chip">Score <strong>${state.score}/${state.lengthTarget}</strong></div>
     <div class="chip ghost">Vitesse <span>${(1000 / state.tickMs).toFixed(1)} t/s</span></div>
     <div class="chip ghost">Record <span>${state.best}</span></div>
   `;
@@ -520,7 +518,11 @@ function showOverlay(title: string, body: string, showStart = true, lastScore?: 
     <div class="panel">
       <p class="pill">Prism Snake · ${preset.label}</p>
       <h2>${title}</h2>
-      ${lastScore !== undefined ? `<p class="muted">Score ${lastScore} · Longueur ${state.snake.length}</p>` : ""}
+      ${
+        lastScore !== undefined
+          ? `<p class="muted">Score ${lastScore}/${state.lengthTarget}</p>`
+          : ""
+      }
       <p class="muted">${body}</p>
       <div class="panel-actions panel-actions-scroll" style="justify-content:flex-start;">
         ${Object.entries(difficultyPresets)

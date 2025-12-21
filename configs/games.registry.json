@@ -80,6 +80,16 @@
       "previewEmoji": "🐧",
       "order": 7,
       "lastUpdated": "2025-01-01"
+    },
+    {
+      "id": "breakout",
+      "title": "Casse-briques",
+      "description": "Renvoie la balle, casse les briques et nettoie le tableau.",
+      "tags": ["arcade", "réflexes", "score"],
+      "themeId": "grid",
+      "previewEmoji": "🧱",
+      "order": 8,
+      "lastUpdated": "2025-02-01"
     }
   ]
 }

@@ -134,8 +134,18 @@ function mostPlayedGameTitle(save: SaveState): { title: string; duration: string
   return { title: reg?.title || id, duration: formatDuration(game.timePlayedMs) };
 }
 
+function isAbsoluteAvatarUrl(value: string) {
+  return /^https?:\/\//i.test(value) || value.startsWith("blob:") || value.startsWith("data:");
+}
+
 function resolveAvatarUrl(url?: string | null, storagePath?: string | null) {
-  return url || getAvatarPublicUrl(storagePath) || null;
+  if (url) {
+    const trimmed = url.trim();
+    if (isAbsoluteAvatarUrl(trimmed)) return trimmed;
+    const path = storagePath || trimmed;
+    return getAvatarPublicUrl(path) || null;
+  }
+  return getAvatarPublicUrl(storagePath) || null;
 }
 
 function renderAvatar(url?: string | null, emoji?: string, storagePath?: string | null) {

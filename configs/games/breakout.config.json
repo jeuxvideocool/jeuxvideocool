@@ -1,0 +1,36 @@
+{
+  "id": "breakout",
+  "saveSchemaVersion": 1,
+  "themeId": "grid",
+  "xpRules": {
+    "SESSION_START": 3,
+    "BRICK_BROKEN": 2,
+    "ROW_CLEARED": 8,
+    "SESSION_WIN": 50,
+    "SESSION_FAIL": 8
+  },
+  "uiText": {
+    "title": "Casse-briques",
+    "shortDescription": "Renvoie la balle, casse les briques et vide le tableau.",
+    "help": "Deplace la raquette, renvoie la balle, casse toutes les briques pour gagner. Tu perds une vie si la balle tombe.",
+    "controls": ["Fleches ou Q/D pour bouger", "Espace pour lancer"]
+  },
+  "difficultyParams": {
+    "rows": 6,
+    "cols": 10,
+    "ballSpeed": 320,
+    "paddleWidth": 120,
+    "lives": 3,
+    "brickGap": 8,
+    "pointsPerBrick": 10
+  },
+  "input": {
+    "keys": {
+      "left": "ArrowLeft",
+      "right": "ArrowRight",
+      "altLeft": "KeyQ",
+      "altRight": "KeyD",
+      "launch": "Space"
+    }
+  }
+}
