@@ -28,7 +28,14 @@ type Ball = {
 };
 
 type PowerupKind = "bonus" | "malus";
-type PowerupType = "extra-ball" | "speed-up" | "invert-controls" | "screen-shake";
+type PowerupType =
+  | "extra-ball"
+  | "speed-up"
+  | "invert-controls"
+  | "screen-shake"
+  | "paddle-shrink"
+  | "paddle-slow"
+  | "ball-small";
 
 type PowerupDefinition = {
   type: PowerupType;
@@ -38,6 +45,9 @@ type PowerupDefinition = {
   kind: PowerupKind;
   duration?: number;
   speedMultiplier?: number;
+  paddleWidthMultiplier?: number;
+  paddleSpeedMultiplier?: number;
+  ballRadiusMultiplier?: number;
   weight: number;
 };
 
@@ -53,6 +63,9 @@ type Powerup = {
   kind: PowerupKind;
   duration?: number;
   speedMultiplier?: number;
+  paddleWidthMultiplier?: number;
+  paddleSpeedMultiplier?: number;
+  ballRadiusMultiplier?: number;
 };
 
 const GAME_ID = "breakout";
@@ -128,43 +141,43 @@ const basePoints = config?.difficultyParams.pointsPerBrick ?? 10;
 const difficultyPresets = {
   easy: {
     label: "Facile",
-    rows: Math.max(4, baseRows - 1),
-    cols: Math.max(6, baseCols - 2),
+    rows: baseRows + 1,
+    cols: baseCols + 1,
     lives: Math.max(3, baseLives + 1),
-    ballSpeed: Math.round(baseBallSpeed * 0.9),
+    ballSpeed: Math.round(baseBallSpeed * 0.92),
     pointsPerBrick: Math.max(6, basePoints),
-    brickDensity: 0.55,
-    powerupChance: 0.22,
+    brickDensity: 0.78,
+    powerupChance: 0.24,
   },
   medium: {
     label: "Moyen",
-    rows: baseRows,
-    cols: baseCols,
+    rows: baseRows + 2,
+    cols: baseCols + 2,
     lives: baseLives,
     ballSpeed: baseBallSpeed,
     pointsPerBrick: basePoints,
-    brickDensity: 0.7,
-    powerupChance: 0.18,
+    brickDensity: 0.86,
+    powerupChance: 0.2,
   },
   hard: {
     label: "Difficile",
-    rows: baseRows + 1,
-    cols: baseCols + 1,
+    rows: baseRows + 3,
+    cols: baseCols + 3,
     lives: Math.max(2, baseLives - 1),
     ballSpeed: Math.round(baseBallSpeed * 1.1),
     pointsPerBrick: basePoints + 2,
-    brickDensity: 0.82,
-    powerupChance: 0.16,
+    brickDensity: 0.92,
+    powerupChance: 0.18,
   },
   extreme: {
     label: "Extreme",
-    rows: baseRows + 2,
-    cols: baseCols + 2,
+    rows: baseRows + 4,
+    cols: baseCols + 4,
     lives: 1,
     ballSpeed: Math.round(baseBallSpeed * 1.2),
     pointsPerBrick: basePoints + 4,
-    brickDensity: 0.92,
-    powerupChance: 0.14,
+    brickDensity: 0.97,
+    powerupChance: 0.16,
   },
 } as const;
 
@@ -179,7 +192,7 @@ const powerupDefinitions: PowerupDefinition[] = [
     symbol: "+1",
     color: theme.colors.primary,
     kind: "bonus",
-    weight: 3,
+    weight: 2,
   },
   {
     type: "speed-up",
@@ -189,7 +202,7 @@ const powerupDefinitions: PowerupDefinition[] = [
     kind: "malus",
     duration: 6,
     speedMultiplier: 1.35,
-    weight: 2,
+    weight: 3,
   },
   {
     type: "invert-controls",
@@ -198,7 +211,7 @@ const powerupDefinitions: PowerupDefinition[] = [
     color: "#fb7185",
     kind: "malus",
     duration: 6,
-    weight: 2,
+    weight: 3,
   },
   {
     type: "screen-shake",
@@ -207,7 +220,37 @@ const powerupDefinitions: PowerupDefinition[] = [
     color: "#f43f5e",
     kind: "malus",
     duration: 1.4,
-    weight: 1,
+    weight: 2,
+  },
+  {
+    type: "paddle-shrink",
+    label: "Raquette reduite",
+    symbol: "R-",
+    color: "#f472b6",
+    kind: "malus",
+    duration: 8,
+    paddleWidthMultiplier: 0.6,
+    weight: 3,
+  },
+  {
+    type: "paddle-slow",
+    label: "Raquette lente",
+    symbol: "LNT",
+    color: "#fb923c",
+    kind: "malus",
+    duration: 6,
+    paddleSpeedMultiplier: 0.6,
+    weight: 2,
+  },
+  {
+    type: "ball-small",
+    label: "Balle minuscule",
+    symbol: "MIN",
+    color: "#38bdf8",
+    kind: "malus",
+    duration: 6,
+    ballRadiusMultiplier: 0.7,
+    weight: 2,
   },
 ];
 
@@ -218,8 +261,15 @@ const state = {
   dpr: devicePixelRatio || 1,
   play: { x: 0, y: 0, w: 0, h: 0 },
   paddle: { x: 0, y: 0, w: 120, h: 16, speed: 640 },
+  paddleBaseWidth: 120,
+  paddleWidthMultiplier: 1,
+  paddleWidthTimer: 0,
+  paddleSpeedMultiplier: 1,
+  paddleSpeedTimer: 0,
   balls: [] as Ball[],
   ballRadius: 8,
+  ballRadiusMultiplier: 1,
+  ballRadiusTimer: 0,
   rows: initialPreset.rows,
   cols: initialPreset.cols,
   brickGap: clamp(config?.difficultyParams.brickGap ?? 8, 4, 14),
@@ -297,23 +347,30 @@ function layoutPlayfield() {
   state.play.w = playWidth;
   state.play.h = playHeight;
 
-  state.paddle.w = clamp(
+  const basePaddleWidth = clamp(
     config?.difficultyParams.paddleWidth ?? playWidth * 0.24,
     playWidth * 0.16,
     playWidth * 0.34,
+  );
+  state.paddleBaseWidth = basePaddleWidth;
+  state.paddle.w = clamp(
+    basePaddleWidth * state.paddleWidthMultiplier,
+    playWidth * 0.12,
+    playWidth * 0.38,
   );
   state.paddle.h = clamp(Math.floor(playHeight * 0.03), 10, 18);
   state.paddle.y = state.play.y + state.play.h - state.paddle.h - Math.max(16, playHeight * 0.04);
 
   state.ballRadius = clamp(Math.floor(playWidth * 0.012), 6, 10);
-  state.brickGap = clamp(config?.difficultyParams.brickGap ?? 8, 4, 14);
-  state.brickHeight = clamp(Math.floor(playHeight * 0.045), 16, 28);
+  state.brickGap = clamp(config?.difficultyParams.brickGap ?? 6, 3, 10);
+  const rows = Math.max(1, state.rows);
+  const brickBand = Math.max(140, playHeight * 0.55);
+  const maxBrickHeight = Math.floor((brickBand - state.brickGap * (rows - 1)) / rows);
+  state.brickHeight = clamp(maxBrickHeight, 10, 22);
   state.powerupSize = clamp(Math.floor(playWidth * 0.03), 16, 26);
   state.powerupFallSpeed = clamp(playHeight * 0.22, 120, 240);
 
-  state.balls.forEach((ball) => {
-    ball.r = state.ballRadius;
-  });
+  updateBallRadius();
   state.powerups.forEach((powerup) => {
     powerup.size = state.powerupSize;
     powerup.vy = state.powerupFallSpeed;
@@ -350,7 +407,7 @@ function buildBricks() {
   const density = clamp(state.brickDensity, 0.2, 1);
   const totalCells = state.rows * state.cols;
   const target = Math.round(totalCells * density);
-  const minBricks = Math.max(4, Math.floor(target * 0.6));
+  const minBricks = Math.max(8, Math.floor(target * 0.75));
   const emptySlots: Array<{ row: number; col: number }> = [];
 
   const addBrick = (row: number, col: number) => {
@@ -404,12 +461,13 @@ function stickBallToPaddle() {
 }
 
 function createBall(stuck: boolean) {
+  const radius = getBallRadius();
   return {
     x: state.paddle.x + state.paddle.w / 2,
-    y: state.paddle.y - state.ballRadius - 4,
+    y: state.paddle.y - radius - 4,
     vx: 0,
     vy: 0,
-    r: state.ballRadius,
+    r: radius,
     stuck,
   };
 }
@@ -432,6 +490,60 @@ function setBallSpeedMultiplier(mult: number) {
     ball.vx *= ratio;
     ball.vy *= ratio;
   });
+}
+
+function getBallRadius() {
+  return clamp(state.ballRadius * state.ballRadiusMultiplier, 4, 12);
+}
+
+function updateBallRadius() {
+  const radius = getBallRadius();
+  state.balls.forEach((ball) => {
+    ball.r = radius;
+  });
+  if (state.balls.some((ball) => ball.stuck)) {
+    stickBallToPaddle();
+  }
+}
+
+function setBallRadiusMultiplier(mult: number) {
+  const next = clamp(mult, 0.5, 1.4);
+  if (next === state.ballRadiusMultiplier) return;
+  state.ballRadiusMultiplier = next;
+  updateBallRadius();
+}
+
+function applyBallRadiusEffect(multiplier: number, duration: number) {
+  setBallRadiusMultiplier(multiplier);
+  state.ballRadiusTimer = duration;
+}
+
+function setPaddleWidthMultiplier(mult: number) {
+  const next = clamp(mult, 0.45, 1.5);
+  if (next === state.paddleWidthMultiplier) return;
+  state.paddleWidthMultiplier = next;
+  const minW = state.play.w * 0.12;
+  const maxW = state.play.w * 0.38;
+  state.paddle.w = clamp(state.paddleBaseWidth * state.paddleWidthMultiplier, minW, maxW);
+  state.paddle.x = clamp(state.paddle.x, state.play.x, state.play.x + state.play.w - state.paddle.w);
+  if (state.balls.some((ball) => ball.stuck)) {
+    stickBallToPaddle();
+  }
+}
+
+function applyPaddleWidthEffect(multiplier: number, duration: number) {
+  setPaddleWidthMultiplier(multiplier);
+  state.paddleWidthTimer = duration;
+}
+
+function setPaddleSpeedMultiplier(mult: number) {
+  const next = clamp(mult, 0.45, 1.6);
+  state.paddleSpeedMultiplier = next;
+}
+
+function applyPaddleSpeedEffect(multiplier: number, duration: number) {
+  setPaddleSpeedMultiplier(multiplier);
+  state.paddleSpeedTimer = duration;
 }
 
 function applySpeedEffect(multiplier: number, duration: number) {
@@ -463,8 +575,9 @@ function launchBall() {
 }
 
 function spawnExtraBalls(count: number) {
+  const radius = getBallRadius();
   const baseX = state.paddle.x + state.paddle.w / 2;
-  const baseY = state.paddle.y - state.ballRadius - 4;
+  const baseY = state.paddle.y - radius - 4;
   const spread = Math.PI / 2.2;
   const speed = getBallSpeed();
   for (let i = 0; i < count; i += 1) {
@@ -474,7 +587,7 @@ function spawnExtraBalls(count: number) {
       y: baseY,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      r: state.ballRadius,
+      r: radius,
       stuck: false,
     });
   }
@@ -518,6 +631,9 @@ function spawnPowerup(x: number, y: number) {
     kind: def.kind,
     duration: def.duration,
     speedMultiplier: def.speedMultiplier,
+    paddleWidthMultiplier: def.paddleWidthMultiplier,
+    paddleSpeedMultiplier: def.paddleSpeedMultiplier,
+    ballRadiusMultiplier: def.ballRadiusMultiplier,
   });
 }
 
@@ -541,6 +657,15 @@ function applyPowerup(powerup: Powerup) {
       break;
     case "screen-shake":
       triggerShake(powerup.duration ?? 1.2);
+      break;
+    case "paddle-shrink":
+      applyPaddleWidthEffect(powerup.paddleWidthMultiplier ?? 0.6, powerup.duration ?? 8);
+      break;
+    case "paddle-slow":
+      applyPaddleSpeedEffect(powerup.paddleSpeedMultiplier ?? 0.6, powerup.duration ?? 6);
+      break;
+    case "ball-small":
+      applyBallRadiusEffect(powerup.ballRadiusMultiplier ?? 0.7, powerup.duration ?? 6);
       break;
     default:
       break;
@@ -579,7 +704,13 @@ function applyDifficulty(preset: (typeof difficultyPresets)[DifficultyKey]) {
 function resetEffects() {
   state.invertTimer = 0;
   state.speedTimer = 0;
+  state.paddleWidthTimer = 0;
+  state.paddleSpeedTimer = 0;
+  state.ballRadiusTimer = 0;
   setBallSpeedMultiplier(1);
+  setPaddleWidthMultiplier(1);
+  setPaddleSpeedMultiplier(1);
+  setBallRadiusMultiplier(1);
   clearShake();
 }
 
@@ -591,6 +722,7 @@ function startGame() {
   mobileControls.show();
   const preset = difficultyPresets[selectedDifficulty] || difficultyPresets.medium;
   applyDifficulty(preset);
+  layoutPlayfield();
   resetEffects();
   toastLayer.innerHTML = "";
   state.running = true;
@@ -671,6 +803,24 @@ function updateEffects(dt: number) {
       setBallSpeedMultiplier(1);
     }
   }
+  if (state.paddleWidthTimer > 0) {
+    state.paddleWidthTimer = Math.max(0, state.paddleWidthTimer - dt);
+    if (state.paddleWidthTimer === 0) {
+      setPaddleWidthMultiplier(1);
+    }
+  }
+  if (state.paddleSpeedTimer > 0) {
+    state.paddleSpeedTimer = Math.max(0, state.paddleSpeedTimer - dt);
+    if (state.paddleSpeedTimer === 0) {
+      setPaddleSpeedMultiplier(1);
+    }
+  }
+  if (state.ballRadiusTimer > 0) {
+    state.ballRadiusTimer = Math.max(0, state.ballRadiusTimer - dt);
+    if (state.ballRadiusTimer === 0) {
+      setBallRadiusMultiplier(1);
+    }
+  }
   if (state.invertTimer > 0) {
     state.invertTimer = Math.max(0, state.invertTimer - dt);
   }
@@ -714,7 +864,7 @@ function update(dt: number) {
   const moveRaw = (rightDown ? 1 : 0) - (leftDown ? 1 : 0);
   const move = state.invertTimer > 0 ? -moveRaw : moveRaw;
   if (move !== 0) {
-    state.paddle.x += move * state.paddle.speed * dt;
+    state.paddle.x += move * state.paddle.speed * state.paddleSpeedMultiplier * dt;
   }
   state.paddle.x = clamp(state.paddle.x, state.play.x, state.play.x + state.play.w - state.paddle.w);
 
@@ -948,7 +1098,7 @@ function showOverlay(title: string, body: string, showStart = true, lastScore?: 
     .join("");
   const bricksEstimate = Math.round(preset.rows * preset.cols * preset.brickDensity);
   const extraHelp =
-    "Bonus/Malus tombent : balles +, vitesse acceleree, touches inversees, ecran qui tremble.";
+    "Bonus/Malus tombent : balles +, vitesse acceleree, touches inversees, ecran qui tremble, raquette reduite, raquette lente, balle minuscule.";
   overlay.innerHTML = `
     <div class="panel">
       <p class="pill">${config?.uiText.title || "Casse-briques"} · ${preset.label}</p>

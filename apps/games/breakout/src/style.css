@@ -200,7 +200,7 @@ body {
   align-items: center;
   gap: 8px;
   pointer-events: none;
-  z-index: 40;
+  z-index: 70;
 }
 
 .toast {
