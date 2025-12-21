@@ -27,20 +27,14 @@ if (!canAccessAlexPage(save)) {
   const heroLines = [
     "Ton pseudo a allumé le mode VIP, les serveurs ont applaudi, la page s'est habillée en premium.",
     "C'est officiel : le moteur d'achievement t'a réservé une édition luxe, designée aux petits oignons.",
-    "On a mis des paillettes dans l'algorithme, et il a voté pour toi sans hésiter.",
-  ];
-
-  const wowLines = [
-    "Ce n'est pas un bug, c'est l'effet Alex. Et il est irréversible.",
-    "Même les confettis ont demandé ton autographe.",
-    "Le bouton WOW est coincé sur ON, personne n'ose l'éteindre.",
+    "On a mis un supplément de style dans l'algorithme, et il a voté pour toi sans hésiter.",
   ];
 
   const perks = [
     {
-      icon: "🎆",
-      title: "Feu d'artifice on-demand",
-      text: "Effets spéciaux premium à activer dès que tu veux briller.",
+      icon: "✨",
+      title: "Signature exclusive",
+      text: "Un cachet premium réservé à une seule personne.",
     },
     {
       icon: "🛡️",
@@ -61,7 +55,7 @@ if (!canAccessAlexPage(save)) {
 
   const capsuleItems = [
     { icon: "🎧", text: "Playlist de victoire (imaginaire mais certifiée stylée)." },
-    { icon: "🪄", text: "Sort bonus : sourire qui déclenche les paillettes." },
+    { icon: "🪄", text: "Sort bonus : sourire qui déclenche le mode signature." },
     { icon: "🚀", text: "Accélérateur de bonne vibe à usage illimité." },
   ];
 
@@ -108,7 +102,11 @@ if (!canAccessAlexPage(save)) {
 
   const backLink = withBasePath("/", basePath);
   const profileLink = withBasePath("/apps/profil/", basePath);
-  const tickerText = `${displayName} — Édition Surprise — Feu d'artifice — Premium — Achievement unique — ${minXpLabel} XP —`;
+  const auraRays = Array.from({ length: 10 }, (_, index) => ({
+    rotate: index * 36,
+    delay: `${(index * 0.25).toFixed(2)}s`,
+  }));
+  const tickerText = `${displayName} — Édition Surprise — Premium — Achievement unique — ${minXpLabel} XP —`;
 
   app.innerHTML = `
     <div class="page">
@@ -174,7 +172,7 @@ if (!canAccessAlexPage(save)) {
             <div class="hero-meta">
               <span class="chip">XP ${xpLabel}</span>
               <span class="chip">Premium garanti</span>
-              <span class="chip">Mode Wouahou</span>
+              <span class="chip">Mode Signature</span>
             </div>
           </div>
           <aside class="hero-card">
@@ -203,21 +201,24 @@ if (!canAccessAlexPage(save)) {
               </div>
               <div class="stat">
                 <span>Aura</span>
-                <strong>Feu d'artifice</strong>
+                <strong>Aura signature</strong>
               </div>
             </div>
           </aside>
         </header>
 
         <section class="moment reveal" style="--delay: 0.2s">
-          <article class="card wow-card">
-            <div class="wow-burst"></div>
-            <p class="mini-label">Effet WOUAHOU</p>
-            <div class="wow-text">WOUAHOU</div>
-            <p class="wow-line">${pick(wowLines)}</p>
-            <div class="wow-footer">
-              <span class="spark-chip">Spectaculaire</span>
-              <span class="spark-chip">Ultra perso</span>
+          <article class="card aura-card" aria-hidden="true">
+            <div class="aura-core"></div>
+            <div class="aura-ring"></div>
+            <div class="aura-ring alt"></div>
+            <div class="aura-rays">
+              ${auraRays
+                .map(
+                  (ray) =>
+                    `<span style="--rotate:${ray.rotate}deg; --delay:${ray.delay};"></span>`
+                )
+                .join("")}
             </div>
           </article>
           <article class="card capsule-card">
@@ -226,7 +227,7 @@ if (!canAccessAlexPage(save)) {
               <h2>Boost instantané</h2>
             </div>
             <p class="capsule-text">
-              Tout est calibré pour un boost immédiat : lumière, confettis et bonne vibe en édition ${displayName}.
+              Tout est calibré pour un boost immédiat : intensité, énergie et bonne vibe en édition ${displayName}.
             </p>
             <div class="capsule-list">
               ${capsuleItems
