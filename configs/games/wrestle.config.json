@@ -3,11 +3,11 @@
   "saveSchemaVersion": 1,
   "themeId": "ring",
   "xpRules": {
-    "SESSION_START": 4,
-    "SESSION_WIN": 70,
-    "SESSION_FAIL": 14,
-    "HEAD_HIT": 20,
-    "BOOST_USED": 6
+    "SESSION_START": 8,
+    "SESSION_WIN": 110,
+    "SESSION_FAIL": 30,
+    "HEAD_HIT": 30,
+    "BOOST_USED": 10
   },
   "uiText": {
     "title": "Rope Wrestle",

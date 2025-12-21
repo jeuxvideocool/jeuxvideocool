@@ -3,12 +3,12 @@
   "saveSchemaVersion": 1,
   "themeId": "prism",
   "xpRules": {
-    "SESSION_START": 3,
-    "FRUIT_EATEN": 5,
-    "PRISM_FRUIT_EATEN": 10,
-    "STREAK_BONUS": 8,
-    "SESSION_WIN": 50,
-    "SESSION_FAIL": 8
+    "SESSION_START": 10,
+    "FRUIT_EATEN": 18,
+    "PRISM_FRUIT_EATEN": 30,
+    "STREAK_BONUS": 24,
+    "SESSION_WIN": 150,
+    "SESSION_FAIL": 25
   },
   "uiText": {
     "title": "Prism Snake",

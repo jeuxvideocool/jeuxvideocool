@@ -3,11 +3,11 @@
   "saveSchemaVersion": 1,
   "themeId": "grid",
   "xpRules": {
-    "SESSION_START": 3,
-    "BRICK_BROKEN": 2,
-    "ROW_CLEARED": 8,
-    "SESSION_WIN": 50,
-    "SESSION_FAIL": 8
+    "SESSION_START": 15,
+    "BRICK_BROKEN": 12,
+    "ROW_CLEARED": 50,
+    "SESSION_WIN": 250,
+    "SESSION_FAIL": 30
   },
   "uiText": {
     "title": "Casse-briques",

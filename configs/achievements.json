@@ -105,6 +105,118 @@
       "rewardXP": 90
     },
     {
+      "id": "xp-veteran",
+      "title": "Vétéran XP",
+      "description": "Atteins 10 000 XP globaux.",
+      "icon": "📈",
+      "condition": { "type": "xpReached", "xp": 10000 },
+      "rewardXP": 400
+    },
+    {
+      "id": "xp-legend",
+      "title": "Légende XP",
+      "description": "Atteins 20 000 XP globaux.",
+      "icon": "🏆",
+      "condition": { "type": "xpReached", "xp": 20000 },
+      "rewardXP": 800
+    },
+    {
+      "id": "globe-trotter",
+      "title": "Globe-trotteur",
+      "description": "Teste 7 jeux différents.",
+      "icon": "🌍",
+      "condition": { "type": "gamesPlayed", "count": 7 },
+      "rewardXP": 300
+    },
+    {
+      "id": "grand-tour",
+      "title": "Grand tour",
+      "description": "Teste tous les jeux disponibles.",
+      "icon": "🗺️",
+      "condition": { "type": "gamesPlayed", "count": 9 },
+      "rewardXP": 500
+    },
+    {
+      "id": "dodge-veteran",
+      "title": "Esquiveur confirmé",
+      "description": "Esquive 150 obstacles.",
+      "icon": "💨",
+      "condition": { "type": "eventCount", "event": "OBSTACLE_DODGED", "count": 150 },
+      "rewardXP": 300
+    },
+    {
+      "id": "sniper-elite",
+      "title": "Sniper d'élite",
+      "description": "Élimine 300 drones.",
+      "icon": "🎯",
+      "condition": { "type": "eventCount", "event": "ENEMY_KILLED", "count": 300 },
+      "rewardXP": 400
+    },
+    {
+      "id": "gatekeeper",
+      "title": "Gardien des portes",
+      "description": "Ouvre 5 portes dans Mini Quest.",
+      "icon": "🗝️",
+      "condition": { "type": "eventCount", "event": "GATE_UNLOCKED", "count": 5 },
+      "rewardXP": 300
+    },
+    {
+      "id": "line-veteran",
+      "title": "Lignes à la chaîne",
+      "description": "Détruis 100 lignes dans Tetris Mini.",
+      "icon": "🧱",
+      "condition": { "type": "eventCount", "event": "LINES_CLEARED", "count": 100 },
+      "rewardXP": 300
+    },
+    {
+      "id": "tetris-royal",
+      "title": "Tetris royal",
+      "description": "Réalise 10 Tetris (4 lignes d'un coup).",
+      "icon": "👑",
+      "condition": { "type": "eventCount", "event": "TETRIS_CLEAR", "count": 10 },
+      "rewardXP": 450
+    },
+    {
+      "id": "boost-addict",
+      "title": "Accro au boost",
+      "description": "Active 25 boosts dans Neon Drive.",
+      "icon": "🚀",
+      "condition": { "type": "eventCount", "event": "BOOST_USED", "count": 25 },
+      "rewardXP": 250
+    },
+    {
+      "id": "prism-rush",
+      "title": "Chasseur prismatique",
+      "description": "Mange 15 fruits prismatiques.",
+      "icon": "🌈",
+      "condition": { "type": "eventCount", "event": "PRISM_FRUIT_EATEN", "count": 15 },
+      "rewardXP": 300
+    },
+    {
+      "id": "brick-breaker",
+      "title": "Briseur de briques",
+      "description": "Casse 120 briques.",
+      "icon": "🔨",
+      "condition": { "type": "eventCount", "event": "BRICK_BROKEN", "count": 120 },
+      "rewardXP": 350
+    },
+    {
+      "id": "mine-surfer",
+      "title": "Surfeur de mines",
+      "description": "Rebondis sur 12 mines gelées.",
+      "icon": "🧊",
+      "condition": { "type": "eventCount", "event": "MINE_BOOST", "count": 12 },
+      "rewardXP": 300
+    },
+    {
+      "id": "headliner",
+      "title": "Tête d'affiche",
+      "description": "Fais tomber 10 têtes dans Rope Wrestle.",
+      "icon": "🤼",
+      "condition": { "type": "eventCount", "event": "HEAD_HIT", "count": 10 },
+      "rewardXP": 300
+    },
+    {
       "id": "alex-birthday-31",
       "title": "Surprise pour Alex",
       "description": "Pseudo Alex et 31 000 XP globaux : une page secrète t'attend.",

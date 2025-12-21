@@ -3,12 +3,12 @@
   "saveSchemaVersion": 1,
   "themeId": "asphalt",
   "xpRules": {
-    "SESSION_START": 3,
-    "SESSION_WIN": 50,
-    "SESSION_FAIL": 12,
-    "OBSTACLE_DODGED": 4,
-    "ITEM_COLLECTED": 6,
-    "BOOST_USED": 3
+    "SESSION_START": 10,
+    "SESSION_WIN": 120,
+    "SESSION_FAIL": 30,
+    "OBSTACLE_DODGED": 12,
+    "ITEM_COLLECTED": 16,
+    "BOOST_USED": 6
   },
   "uiText": {
     "title": "Neon Drive",

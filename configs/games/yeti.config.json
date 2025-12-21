@@ -3,10 +3,10 @@
   "saveSchemaVersion": 1,
   "themeId": "frost",
   "xpRules": {
-    "SESSION_START": 3,
-    "SESSION_WIN": 50,
-    "SESSION_FAIL": 10,
-    "MINE_BOOST": 4
+    "SESSION_START": 15,
+    "SESSION_WIN": 250,
+    "SESSION_FAIL": 40,
+    "MINE_BOOST": 25
   },
   "uiText": {
     "title": "Yeti Launch",

@@ -3,12 +3,12 @@
   "saveSchemaVersion": 1,
   "themeId": "sunset",
   "xpRules": {
-    "SESSION_START": 3,
-    "OBSTACLE_DODGED": 2,
-    "POWERUP_COLLECTED": 6,
-    "DASH_USED": 1,
-    "SESSION_WIN": 40,
-    "SESSION_FAIL": 8
+    "SESSION_START": 10,
+    "OBSTACLE_DODGED": 5,
+    "POWERUP_COLLECTED": 15,
+    "DASH_USED": 2,
+    "SESSION_WIN": 100,
+    "SESSION_FAIL": 20
   },
   "uiText": {
     "title": "Dodge Rush",

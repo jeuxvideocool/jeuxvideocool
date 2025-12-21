@@ -1,7 +1,7 @@
 import "./style.css";
 import { createHybridInput, createMobileControls } from "@core/input";
 import { createGameLoop } from "@core/loop";
-import { clamp, lerp, rand, withBasePath } from "@core/utils";
+import { chance, clamp, lerp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
 import { getGameConfig, getThemes } from "@config";
 import { attachProgressionListener } from "@progression";
@@ -78,6 +78,7 @@ const state = {
   wind: 0,
   penguin: { x: 0, y: 0, vx: 0, vy: 0, rotation: 0 },
   objects: [] as GroundObject[],
+  nextSpawnX: 0,
   particles: [] as Particle[],
   actionHeld: false,
   lastBoost: 0,
@@ -99,19 +100,43 @@ const loop = createGameLoop({
   fps: 60,
 });
 
-function buildCourse() {
-  const length = params.courseLength ?? 4200;
-  const mines = Math.max(3, Math.floor(params.mineCount ?? 6));
-  const traps = Math.max(2, Math.floor(params.trapCount ?? 4));
-  const slots = [...Array(mines).fill("mine"), ...Array(traps).fill("trap")];
-  let cursor = 260;
-  return slots
-    .map((type) => {
-      const stride = length / slots.length;
-      cursor += rand(stride * 0.4, stride * 1.25);
-      return { x: cursor + state.startX, type: type as GroundObject["type"], triggered: false };
-    })
-    .filter((obj) => obj.x < length + state.startX + 200);
+function getObstacleSpacing() {
+  const fallbackLength = params.courseLength ?? 4200;
+  const fallbackCount = Math.max(6, Math.floor((params.mineCount ?? 6) + (params.trapCount ?? 4)));
+  const baseSpacing = fallbackLength / fallbackCount;
+  const spacingMin = Math.max(140, params.obstacleSpacingMin ?? baseSpacing * 0.55);
+  const spacingMax = Math.max(spacingMin + 80, params.obstacleSpacingMax ?? baseSpacing * 1.4);
+  return { spacingMin, spacingMax };
+}
+
+function getMineChance() {
+  const mineWeight = Math.max(1, Math.floor(params.mineCount ?? 6));
+  const trapWeight = Math.max(1, Math.floor(params.trapCount ?? 4));
+  return mineWeight / (mineWeight + trapWeight);
+}
+
+function spawnObjectsUpTo(targetX: number) {
+  const { spacingMin, spacingMax } = getObstacleSpacing();
+  const mineChance = getMineChance();
+  while (state.nextSpawnX < targetX) {
+    state.nextSpawnX += rand(spacingMin, spacingMax);
+    state.objects.push({
+      x: state.nextSpawnX,
+      type: chance(mineChance) ? "mine" : "trap",
+      triggered: false,
+    });
+  }
+}
+
+function cleanupObjects() {
+  const cleanupX = state.cameraX - state.width * 0.8;
+  state.objects = state.objects.filter((obj) => obj.x >= cleanupX);
+}
+
+function maintainObjectsAhead() {
+  const spawnAhead = params.spawnAheadDistance ?? Math.max(1000, state.width * 2);
+  spawnObjectsUpTo(state.penguin.x + spawnAhead);
+  cleanupObjects();
 }
 
 function resetRun() {
@@ -128,7 +153,9 @@ function resetRun() {
   state.penguin.vy = 0;
   state.penguin.rotation = 0;
   state.wind = rand(-(params.windMax ?? 42), params.windMax ?? 42);
-  state.objects = buildCourse();
+  state.objects = [];
+  state.nextSpawnX = state.startX;
+  maintainObjectsAhead();
   state.particles = [];
   state.lastBoost = 0;
   state.actionHeld = false;
@@ -226,11 +253,12 @@ function applyTrap(obj: GroundObject) {
   endGame(false, "Le pingouin est stoppé net par un piège !");
 }
 
-function checkGroundObjects() {
+function checkGroundObjects(prevX: number, currentX: number) {
+  const minX = Math.min(prevX, currentX) - 26;
+  const maxX = Math.max(prevX, currentX) + 26;
   for (const obj of state.objects) {
     if (obj.triggered) continue;
-    const dx = obj.x - state.penguin.x;
-    if (Math.abs(dx) < 26) {
+    if (obj.x >= minX && obj.x <= maxX) {
       obj.triggered = true;
       if (obj.type === "mine") {
         applyMine(obj);
@@ -296,6 +324,7 @@ function updateFlight(dt: number) {
   const gravity = params.gravity ?? 1700;
   const airDrag = params.airDrag ?? 60;
   const groundDrag = params.groundDrag ?? 220;
+  const prevX = state.penguin.x;
   state.penguin.vy += gravity * dt;
   const drag = Math.sign(state.penguin.vx) * airDrag * dt;
   state.penguin.vx = Math.sign(state.penguin.vx) * Math.max(0, Math.abs(state.penguin.vx) - Math.abs(drag));
@@ -304,6 +333,8 @@ function updateFlight(dt: number) {
 
   state.penguin.x += state.penguin.vx * dt;
   state.penguin.y += state.penguin.vy * dt;
+
+  maintainObjectsAhead();
 
   let onGround = false;
   if (state.penguin.y >= state.groundY) {
@@ -318,7 +349,7 @@ function updateFlight(dt: number) {
       state.penguin.vy = 0;
       state.penguin.vx = Math.max(0, state.penguin.vx - groundDrag * dt);
     }
-    checkGroundObjects();
+    checkGroundObjects(prevX, state.penguin.x);
     if (!state.running) return;
   }
 
@@ -328,11 +359,6 @@ function updateFlight(dt: number) {
 
   const windFriction = state.phase === "flight" ? 0.01 : 0;
   state.wind = clamp(state.wind + rand(-1, 1) * windFriction, -(params.windMax ?? 42), params.windMax ?? 42);
-
-  if (state.penguin.x - state.startX > (params.courseLength ?? 4200) + 400) {
-    endGame(true, "Tu as dépassé toute la zone de jeu !");
-    return;
-  }
 
   const stopped =
     onGround && state.lastBoost <= 0.05 && Math.abs(state.penguin.vx) < 12 && Math.abs(state.penguin.vy) < 10;
@@ -376,12 +402,16 @@ function drawGround() {
   ctx.save();
   ctx.translate(-state.cameraX, 0);
   ctx.fillStyle = "rgba(15, 32, 50, 0.9)";
-  ctx.fillRect(-400, state.groundY, state.width + 800, state.height - state.groundY);
+  const viewLeft = state.cameraX - 400;
+  const viewRight = state.cameraX + state.width + 400;
+  ctx.fillRect(viewLeft, state.groundY, viewRight - viewLeft, state.height - state.groundY);
 
   ctx.fillStyle = "rgba(255,255,255,0.6)";
-  for (let i = -2; i < 40; i++) {
-    const x = i * 140;
-    ctx.fillRect(x, state.groundY - 6, 80, 2);
+  const stripeSpacing = 140;
+  const stripeWidth = 80;
+  const startX = Math.floor(viewLeft / stripeSpacing) * stripeSpacing;
+  for (let x = startX; x < viewRight; x += stripeSpacing) {
+    ctx.fillRect(x, state.groundY - 6, stripeWidth, 2);
   }
   ctx.restore();
 }

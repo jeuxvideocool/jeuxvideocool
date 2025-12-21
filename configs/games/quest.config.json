@@ -3,12 +3,12 @@
   "saveSchemaVersion": 1,
   "themeId": "forest",
   "xpRules": {
-    "SESSION_START": 3,
-    "ITEM_COLLECTED": 5,
-    "GATE_UNLOCKED": 15,
-    "QUEST_COMPLETE": 50,
-    "TRAP_TRIGGERED": 2,
-    "SESSION_FAIL": 8
+    "SESSION_START": 12,
+    "ITEM_COLLECTED": 25,
+    "GATE_UNLOCKED": 80,
+    "QUEST_COMPLETE": 250,
+    "TRAP_TRIGGERED": 6,
+    "SESSION_FAIL": 25
   },
   "uiText": {
     "title": "Mini Quest",

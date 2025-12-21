@@ -3,11 +3,11 @@
   "saveSchemaVersion": 1,
   "themeId": "grid",
   "xpRules": {
-    "SESSION_START": 3,
-    "LINES_CLEARED": 6,
-    "TETRIS_CLEAR": 24,
-    "SESSION_WIN": 70,
-    "SESSION_FAIL": 10
+    "SESSION_START": 12,
+    "LINES_CLEARED": 30,
+    "TETRIS_CLEAR": 120,
+    "SESSION_WIN": 200,
+    "SESSION_FAIL": 30
   },
   "uiText": {
     "title": "Tetris Mini",

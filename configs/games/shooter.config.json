@@ -3,13 +3,13 @@
   "saveSchemaVersion": 1,
   "themeId": "neon",
   "xpRules": {
-    "SESSION_START": 3,
-    "ENEMY_KILLED": 4,
-    "WAVE_CLEARED": 20,
+    "SESSION_START": 5,
+    "ENEMY_KILLED": 5,
+    "WAVE_CLEARED": 30,
     "PLAYER_HIT": 1,
     "COMBO_REACHED": 10,
-    "SESSION_WIN": 45,
-    "SESSION_FAIL": 8
+    "SESSION_WIN": 60,
+    "SESSION_FAIL": 12
   },
   "uiText": {
     "title": "Pixel Shooter",
