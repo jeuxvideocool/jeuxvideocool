@@ -53,6 +53,13 @@ export function getAuthState(): CloudState {
   return cloudState;
 }
 
+export function getAvatarPublicUrl(path?: string | null): string | null {
+  if (!path || !supabaseUrl) return null;
+  const baseUrl = supabaseUrl.replace(/\/+$/, "");
+  const safePath = path.replace(/^\/+/, "");
+  return `${baseUrl}/storage/v1/object/public/${AVATAR_BUCKET}/${safePath}`;
+}
+
 type AuthAction = "login" | "register" | "logout";
 
 function toPseudoEmail(identifier: string): string {

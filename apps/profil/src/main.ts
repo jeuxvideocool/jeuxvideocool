@@ -6,6 +6,7 @@ import { getProgressionSnapshot } from "@progression";
 import { exportSave, importSave, resetSave, updateSave } from "@storage";
 import {
   connectCloud,
+  getAvatarPublicUrl,
   getAuthState,
   loadCloudSave,
   saveCloud,
@@ -76,10 +77,20 @@ function showToast(message: string, variant: "success" | "error" | "info" = "inf
   }, 2400);
 }
 
-function renderAvatarVisual(id: string, url: string | null | undefined, emoji: string) {
-  const hasImage = Boolean(url);
+function resolveAvatarUrl(url?: string | null, storagePath?: string | null) {
+  return url || getAvatarPublicUrl(storagePath) || null;
+}
+
+function renderAvatarVisual(
+  id: string,
+  url: string | null | undefined,
+  emoji: string,
+  storagePath?: string | null,
+) {
+  const resolvedUrl = resolveAvatarUrl(url, storagePath);
+  const hasImage = Boolean(resolvedUrl);
   return `<div class="avatar ${hasImage ? "has-image" : ""}" id="${id}">
-    ${hasImage ? `<img src="${url}" alt="Avatar" />` : `<span>${emoji}</span>`}
+    ${hasImage ? `<img src="${resolvedUrl}" alt="Avatar" />` : `<span>${emoji}</span>`}
   </div>`;
 }
 
@@ -95,9 +106,11 @@ function updateAvatarPreview() {
   const previewEl = document.getElementById("avatar-preview");
   const helper = document.getElementById("avatar-helper");
   const clearBtn = document.getElementById("avatar-clear") as HTMLButtonElement | null;
-  const url = pendingAvatarReset
-    ? null
-    : pendingAvatarPreview || currentSnapshot.save.playerProfile.avatarUrl;
+  const storedUrl = resolveAvatarUrl(
+    currentSnapshot.save.playerProfile.avatarUrl,
+    currentSnapshot.save.playerProfile.avatarStoragePath,
+  );
+  const url = pendingAvatarReset ? null : pendingAvatarPreview || storedUrl;
   const hasImage = Boolean(url);
 
   if (previewEl) {
@@ -119,9 +132,13 @@ function render() {
   const mostPlayed = mostPlayedGameTitle(snapshot);
   const lastSync = cloudState.lastSyncedAt ? formatDate(cloudState.lastSyncedAt) : "Jamais";
   const avatarEmoji = snapshot.save.playerProfile.avatar || "🎮";
+  const storedAvatarUrl = resolveAvatarUrl(
+    snapshot.save.playerProfile.avatarUrl,
+    snapshot.save.playerProfile.avatarStoragePath,
+  );
   const avatarPreviewUrl = pendingAvatarReset
     ? null
-    : pendingAvatarPreview || snapshot.save.playerProfile.avatarUrl;
+    : pendingAvatarPreview || storedAvatarUrl;
   const avatarHelper = getAvatarHelperText(Boolean(avatarPreviewUrl));
   const lastPlayedTitle = snapshot.save.playerProfile.lastPlayedGameId
     ? registry.games.find((g) => g.id === snapshot.save.playerProfile.lastPlayedGameId)?.title ?? "Inconnu"
@@ -138,7 +155,12 @@ function render() {
       <header class="hero">
         <div class="identity">
           <div class="identity-top">
-            ${renderAvatarVisual("avatar-hero", snapshot.save.playerProfile.avatarUrl, avatarEmoji)}
+            ${renderAvatarVisual(
+              "avatar-hero",
+              storedAvatarUrl,
+              avatarEmoji,
+              snapshot.save.playerProfile.avatarStoragePath,
+            )}
             <div>
               <p class="eyebrow">Arcade Galaxy</p>
               <h1>${snapshot.save.playerProfile.name || "Joueur"}</h1>
@@ -190,8 +212,13 @@ function render() {
               <span class="chip ghost">Avatar image</span>
             </div>
             <div class="identity-grid">
-              <div class="avatar-panel">
-                ${renderAvatarVisual("avatar-preview", avatarPreviewUrl, avatarEmoji)}
+            <div class="avatar-panel">
+                ${renderAvatarVisual(
+                  "avatar-preview",
+                  avatarPreviewUrl,
+                  avatarEmoji,
+                  snapshot.save.playerProfile.avatarStoragePath,
+                )}
                 <p class="muted small" id="avatar-helper">${avatarHelper}</p>
                 <div class="avatar-actions">
                   <label class="file-drop">

@@ -12,6 +12,7 @@ import { ALEX_SECRET, attachProgressionListener, canAccessAlexPage, getProgressi
 import { exportSave, importSave, resetGameSave, resetSave, updateSave } from "@storage";
 import {
   connectCloud,
+  getAvatarPublicUrl,
   getAuthState,
   loadCloudSave,
   saveCloud,
@@ -63,7 +64,7 @@ applyTheme(findTheme(registry.hubTheme));
 
 subscribeCloud((state) => {
   cloudState = state;
-  renderHub();
+  refresh();
 });
 
 onEvent("ACHIEVEMENT_UNLOCKED", (event) => {
@@ -133,16 +134,25 @@ function mostPlayedGameTitle(save: SaveState): { title: string; duration: string
   return { title: reg?.title || id, duration: formatDuration(game.timePlayedMs) };
 }
 
-function renderAvatar(url?: string | null, emoji?: string) {
+function resolveAvatarUrl(url?: string | null, storagePath?: string | null) {
+  return url || getAvatarPublicUrl(storagePath) || null;
+}
+
+function renderAvatar(url?: string | null, emoji?: string, storagePath?: string | null) {
   const safeEmoji = (emoji || "🎮").slice(0, 4);
-  return `<div class="avatar ${url ? "has-image" : ""}">${
-    url ? `<img src="${url}" alt="Avatar" />` : safeEmoji
+  const resolvedUrl = resolveAvatarUrl(url, storagePath);
+  return `<div class="avatar ${resolvedUrl ? "has-image" : ""}">${
+    resolvedUrl ? `<img src="${resolvedUrl}" alt="Avatar" />` : safeEmoji
   }</div>`;
 }
 
 function profileAvatarUrl() {
   if (profileAvatarReset) return null;
-  return profileAvatarPreview || snapshot.save.playerProfile.avatarUrl || null;
+  const savedUrl = resolveAvatarUrl(
+    snapshot.save.playerProfile.avatarUrl,
+    snapshot.save.playerProfile.avatarStoragePath,
+  );
+  return profileAvatarPreview || savedUrl;
 }
 
 function clearProfileAvatarPreview() {
@@ -350,7 +360,11 @@ function renderHero() {
       <div class="hero-glow"></div>
       <div class="hero-top">
         <div class="profile">
-          ${renderAvatar(save.playerProfile.avatarUrl, save.playerProfile.avatar)}
+          ${renderAvatar(
+            save.playerProfile.avatarUrl,
+            save.playerProfile.avatar,
+            save.playerProfile.avatarStoragePath,
+          )}
           <div>
             <p class="eyebrow">Arcade Galaxy</p>
             <h1>${save.playerProfile.name || "Joueur"}</h1>
