@@ -1,7 +1,7 @@
 import "./style.css";
 import { createHybridInput, createMobileControls } from "@core/input";
 import { createGameLoop } from "@core/loop";
-import { clamp, withBasePath } from "@core/utils";
+import { chance, clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
 import { getGameConfig, getThemes } from "@config";
 import { attachProgressionListener } from "@progression";
@@ -16,6 +16,43 @@ type Brick = {
   col: number;
   alive: boolean;
   color: string;
+};
+
+type Ball = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+  stuck: boolean;
+};
+
+type PowerupKind = "bonus" | "malus";
+type PowerupType = "extra-ball" | "speed-up" | "invert-controls" | "screen-shake";
+
+type PowerupDefinition = {
+  type: PowerupType;
+  label: string;
+  symbol: string;
+  color: string;
+  kind: PowerupKind;
+  duration?: number;
+  speedMultiplier?: number;
+  weight: number;
+};
+
+type Powerup = {
+  x: number;
+  y: number;
+  vy: number;
+  size: number;
+  type: PowerupType;
+  label: string;
+  symbol: string;
+  color: string;
+  kind: PowerupKind;
+  duration?: number;
+  speedMultiplier?: number;
 };
 
 const GAME_ID = "breakout";
@@ -35,6 +72,7 @@ if (theme) {
   document.body.style.background = theme.gradient || theme.colors.background;
 }
 
+const gameRoot = document.getElementById("game-root") as HTMLDivElement;
 const canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
 const ui = document.getElementById("ui") as HTMLDivElement;
 const ctx = canvas.getContext("2d")!;
@@ -43,6 +81,10 @@ const overlay = document.createElement("div");
 overlay.className = "overlay";
 overlay.style.display = "none";
 ui.appendChild(overlay);
+
+const toastLayer = document.createElement("div");
+toastLayer.className = "toast-layer";
+gameRoot.appendChild(toastLayer);
 
 const controls = {
   left: config?.input.keys.left || "ArrowLeft",
@@ -77,6 +119,98 @@ const mobileControls = isMobile
       dispose: () => {},
     };
 
+const baseRows = config?.difficultyParams.rows ?? 6;
+const baseCols = config?.difficultyParams.cols ?? 10;
+const baseLives = config?.difficultyParams.lives ?? 3;
+const baseBallSpeed = config?.difficultyParams.ballSpeed ?? 320;
+const basePoints = config?.difficultyParams.pointsPerBrick ?? 10;
+
+const difficultyPresets = {
+  easy: {
+    label: "Facile",
+    rows: Math.max(4, baseRows - 1),
+    cols: Math.max(6, baseCols - 2),
+    lives: Math.max(3, baseLives + 1),
+    ballSpeed: Math.round(baseBallSpeed * 0.9),
+    pointsPerBrick: Math.max(6, basePoints),
+    brickDensity: 0.55,
+    powerupChance: 0.22,
+  },
+  medium: {
+    label: "Moyen",
+    rows: baseRows,
+    cols: baseCols,
+    lives: baseLives,
+    ballSpeed: baseBallSpeed,
+    pointsPerBrick: basePoints,
+    brickDensity: 0.7,
+    powerupChance: 0.18,
+  },
+  hard: {
+    label: "Difficile",
+    rows: baseRows + 1,
+    cols: baseCols + 1,
+    lives: Math.max(2, baseLives - 1),
+    ballSpeed: Math.round(baseBallSpeed * 1.1),
+    pointsPerBrick: basePoints + 2,
+    brickDensity: 0.82,
+    powerupChance: 0.16,
+  },
+  extreme: {
+    label: "Extreme",
+    rows: baseRows + 2,
+    cols: baseCols + 2,
+    lives: 1,
+    ballSpeed: Math.round(baseBallSpeed * 1.2),
+    pointsPerBrick: basePoints + 4,
+    brickDensity: 0.92,
+    powerupChance: 0.14,
+  },
+} as const;
+
+type DifficultyKey = keyof typeof difficultyPresets;
+let selectedDifficulty: DifficultyKey = "medium";
+const initialPreset = difficultyPresets[selectedDifficulty];
+
+const powerupDefinitions: PowerupDefinition[] = [
+  {
+    type: "extra-ball",
+    label: "Balles supplementaires",
+    symbol: "+1",
+    color: theme.colors.primary,
+    kind: "bonus",
+    weight: 3,
+  },
+  {
+    type: "speed-up",
+    label: "Vitesse acceleree",
+    symbol: "V+",
+    color: "#f97316",
+    kind: "malus",
+    duration: 6,
+    speedMultiplier: 1.35,
+    weight: 2,
+  },
+  {
+    type: "invert-controls",
+    label: "Touches inversees",
+    symbol: "INV",
+    color: "#fb7185",
+    kind: "malus",
+    duration: 6,
+    weight: 2,
+  },
+  {
+    type: "screen-shake",
+    label: "Ecran qui tremble",
+    symbol: "SHA",
+    color: "#f43f5e",
+    kind: "malus",
+    duration: 1.4,
+    weight: 1,
+  },
+];
+
 const state = {
   running: false,
   width: 0,
@@ -84,9 +218,10 @@ const state = {
   dpr: devicePixelRatio || 1,
   play: { x: 0, y: 0, w: 0, h: 0 },
   paddle: { x: 0, y: 0, w: 120, h: 16, speed: 640 },
-  ball: { x: 0, y: 0, vx: 0, vy: 0, r: 8, stuck: true },
-  rows: config?.difficultyParams.rows ?? 6,
-  cols: config?.difficultyParams.cols ?? 10,
+  balls: [] as Ball[],
+  ballRadius: 8,
+  rows: initialPreset.rows,
+  cols: initialPreset.cols,
   brickGap: clamp(config?.difficultyParams.brickGap ?? 8, 4, 14),
   brickHeight: 22,
   bricks: [] as Brick[],
@@ -95,9 +230,19 @@ const state = {
   clearedRows: new Set<number>(),
   score: 0,
   best: loadSave().games[GAME_ID]?.bestScore ?? 0,
-  lives: config?.difficultyParams.lives ?? 3,
-  ballSpeed: config?.difficultyParams.ballSpeed ?? 320,
-  pointsPerBrick: config?.difficultyParams.pointsPerBrick ?? 10,
+  lives: initialPreset.lives,
+  ballSpeed: initialPreset.ballSpeed,
+  ballSpeedMultiplier: 1,
+  pointsPerBrick: initialPreset.pointsPerBrick,
+  brickDensity: initialPreset.brickDensity,
+  powerupChance: initialPreset.powerupChance,
+  powerupSize: 20,
+  powerupFallSpeed: 160,
+  powerups: [] as Powerup[],
+  invertTimer: 0,
+  speedTimer: 0,
+  shakeTimer: 0,
+  shakeDuration: 0,
   launchHeld: false,
   flash: 0,
 };
@@ -121,16 +266,23 @@ function resize() {
   if (prevPlay.w > 0 && prevPlay.h > 0) {
     const paddleRatio = (state.paddle.x - prevPlay.x) / prevPlay.w;
     state.paddle.x = state.play.x + clamp(paddleRatio, 0, 1) * state.play.w;
-    if (!state.ball.stuck) {
-      const ballRatioX = (state.ball.x - prevPlay.x) / prevPlay.w;
-      const ballRatioY = (state.ball.y - prevPlay.y) / prevPlay.h;
-      state.ball.x = state.play.x + ballRatioX * state.play.w;
-      state.ball.y = state.play.y + ballRatioY * state.play.h;
-    }
+    state.balls.forEach((ball) => {
+      if (ball.stuck) return;
+      const ballRatioX = (ball.x - prevPlay.x) / prevPlay.w;
+      const ballRatioY = (ball.y - prevPlay.y) / prevPlay.h;
+      ball.x = state.play.x + ballRatioX * state.play.w;
+      ball.y = state.play.y + ballRatioY * state.play.h;
+    });
+    state.powerups.forEach((powerup) => {
+      const powerupRatioX = (powerup.x - prevPlay.x) / prevPlay.w;
+      const powerupRatioY = (powerup.y - prevPlay.y) / prevPlay.h;
+      powerup.x = state.play.x + powerupRatioX * state.play.w;
+      powerup.y = state.play.y + powerupRatioY * state.play.h;
+    });
   } else {
     state.paddle.x = state.play.x + (state.play.w - state.paddle.w) / 2;
   }
-  if (state.ball.stuck) {
+  if (state.balls.some((ball) => ball.stuck)) {
     stickBallToPaddle();
   }
   positionBricks();
@@ -153,9 +305,19 @@ function layoutPlayfield() {
   state.paddle.h = clamp(Math.floor(playHeight * 0.03), 10, 18);
   state.paddle.y = state.play.y + state.play.h - state.paddle.h - Math.max(16, playHeight * 0.04);
 
-  state.ball.r = clamp(Math.floor(playWidth * 0.012), 6, 10);
+  state.ballRadius = clamp(Math.floor(playWidth * 0.012), 6, 10);
   state.brickGap = clamp(config?.difficultyParams.brickGap ?? 8, 4, 14);
   state.brickHeight = clamp(Math.floor(playHeight * 0.045), 16, 28);
+  state.powerupSize = clamp(Math.floor(playWidth * 0.03), 16, 26);
+  state.powerupFallSpeed = clamp(playHeight * 0.22, 120, 240);
+
+  state.balls.forEach((ball) => {
+    ball.r = state.ballRadius;
+  });
+  state.powerups.forEach((powerup) => {
+    powerup.size = state.powerupSize;
+    powerup.vy = state.powerupFallSpeed;
+  });
 }
 
 function positionBricks() {
@@ -185,43 +347,240 @@ function buildBricks() {
   state.bricks = [];
   state.clearedRows = new Set();
 
+  const density = clamp(state.brickDensity, 0.2, 1);
+  const totalCells = state.rows * state.cols;
+  const target = Math.round(totalCells * density);
+  const minBricks = Math.max(4, Math.floor(target * 0.6));
+  const emptySlots: Array<{ row: number; col: number }> = [];
+
+  const addBrick = (row: number, col: number) => {
+    state.bricks.push({
+      x: startX + col * (brickW + state.brickGap),
+      y: startY + row * (state.brickHeight + state.brickGap),
+      w: brickW,
+      h: state.brickHeight,
+      row,
+      col,
+      alive: true,
+      color: palette[row % palette.length],
+    });
+  };
+
   for (let row = 0; row < state.rows; row += 1) {
     for (let col = 0; col < state.cols; col += 1) {
-      state.bricks.push({
-        x: startX + col * (brickW + state.brickGap),
-        y: startY + row * (state.brickHeight + state.brickGap),
-        w: brickW,
-        h: state.brickHeight,
-        row,
-        col,
-        alive: true,
-        color: palette[row % palette.length],
-      });
+      if (chance(density)) {
+        addBrick(row, col);
+      } else {
+        emptySlots.push({ row, col });
+      }
     }
   }
 
-  state.totalBricks = state.rows * state.cols;
+  if (state.bricks.length < minBricks && emptySlots.length > 0) {
+    for (let i = emptySlots.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(rand(0, i + 1));
+      [emptySlots[i], emptySlots[j]] = [emptySlots[j], emptySlots[i]];
+    }
+    for (const slot of emptySlots) {
+      if (state.bricks.length >= minBricks) break;
+      addBrick(slot.row, slot.col);
+    }
+  }
+
+  if (state.bricks.length === 0) {
+    addBrick(Math.floor(state.rows / 2), Math.floor(state.cols / 2));
+  }
+
+  state.totalBricks = state.bricks.length;
   state.bricksRemaining = state.totalBricks;
 }
 
 function stickBallToPaddle() {
-  state.ball.x = state.paddle.x + state.paddle.w / 2;
-  state.ball.y = state.paddle.y - state.ball.r - 4;
+  state.balls.forEach((ball) => {
+    if (!ball.stuck) return;
+    ball.x = state.paddle.x + state.paddle.w / 2;
+    ball.y = state.paddle.y - ball.r - 4;
+  });
+}
+
+function createBall(stuck: boolean) {
+  return {
+    x: state.paddle.x + state.paddle.w / 2,
+    y: state.paddle.y - state.ballRadius - 4,
+    vx: 0,
+    vy: 0,
+    r: state.ballRadius,
+    stuck,
+  };
 }
 
 function resetBall() {
-  state.ball.stuck = true;
-  state.ball.vx = 0;
-  state.ball.vy = 0;
-  stickBallToPaddle();
+  state.balls = [createBall(true)];
+}
+
+function getBallSpeed() {
+  return state.ballSpeed * state.ballSpeedMultiplier;
+}
+
+function setBallSpeedMultiplier(mult: number) {
+  const next = clamp(mult, 0.6, 1.6);
+  if (next === state.ballSpeedMultiplier) return;
+  const ratio = next / state.ballSpeedMultiplier;
+  state.ballSpeedMultiplier = next;
+  state.balls.forEach((ball) => {
+    if (ball.stuck) return;
+    ball.vx *= ratio;
+    ball.vy *= ratio;
+  });
+}
+
+function applySpeedEffect(multiplier: number, duration: number) {
+  setBallSpeedMultiplier(multiplier);
+  state.speedTimer = duration;
+}
+
+function triggerShake(duration: number) {
+  state.shakeTimer = duration;
+  state.shakeDuration = duration;
+}
+
+function clearShake() {
+  state.shakeTimer = 0;
+  state.shakeDuration = 0;
+  gameRoot.style.transform = "";
 }
 
 function launchBall() {
-  state.ball.stuck = false;
   const spread = Math.PI / 3;
-  const angle = -Math.PI / 2 + (Math.random() * spread - spread / 2);
-  state.ball.vx = Math.cos(angle) * state.ballSpeed;
-  state.ball.vy = Math.sin(angle) * state.ballSpeed;
+  const speed = getBallSpeed();
+  state.balls.forEach((ball) => {
+    if (!ball.stuck) return;
+    const angle = -Math.PI / 2 + rand(-spread / 2, spread / 2);
+    ball.vx = Math.cos(angle) * speed;
+    ball.vy = Math.sin(angle) * speed;
+    ball.stuck = false;
+  });
+}
+
+function spawnExtraBalls(count: number) {
+  const baseX = state.paddle.x + state.paddle.w / 2;
+  const baseY = state.paddle.y - state.ballRadius - 4;
+  const spread = Math.PI / 2.2;
+  const speed = getBallSpeed();
+  for (let i = 0; i < count; i += 1) {
+    const angle = -Math.PI / 2 + rand(-spread / 2, spread / 2);
+    state.balls.push({
+      x: baseX + rand(-12, 12),
+      y: baseY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      r: state.ballRadius,
+      stuck: false,
+    });
+  }
+}
+
+function showToast(text: string, kind: PowerupKind) {
+  const toast = document.createElement("div");
+  toast.className = `toast ${kind}`;
+  toast.textContent = text;
+  toastLayer.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+  window.setTimeout(() => {
+    toast.classList.remove("show");
+    window.setTimeout(() => toast.remove(), 220);
+  }, 1400);
+}
+
+function pickPowerupDefinition() {
+  const totalWeight = powerupDefinitions.reduce((sum, def) => sum + def.weight, 0);
+  let roll = rand(0, totalWeight);
+  for (const def of powerupDefinitions) {
+    roll -= def.weight;
+    if (roll <= 0) return def;
+  }
+  return powerupDefinitions[0];
+}
+
+function spawnPowerup(x: number, y: number) {
+  const def = pickPowerupDefinition();
+  state.powerups.push({
+    x,
+    y,
+    vy: state.powerupFallSpeed + rand(-20, 40),
+    size: state.powerupSize,
+    type: def.type,
+    label: def.label,
+    symbol: def.symbol,
+    color: def.color,
+    kind: def.kind,
+    duration: def.duration,
+    speedMultiplier: def.speedMultiplier,
+  });
+}
+
+function maybeSpawnPowerup(brick: Brick) {
+  if (!chance(state.powerupChance)) return;
+  spawnPowerup(brick.x + brick.w / 2, brick.y + brick.h / 2);
+}
+
+function applyPowerup(powerup: Powerup) {
+  const prefix = powerup.kind === "bonus" ? "Bonus" : "Malus";
+  showToast(`${prefix}: ${powerup.label}`, powerup.kind);
+  switch (powerup.type) {
+    case "extra-ball":
+      spawnExtraBalls(2);
+      break;
+    case "speed-up":
+      applySpeedEffect(powerup.speedMultiplier ?? 1.3, powerup.duration ?? 6);
+      break;
+    case "invert-controls":
+      state.invertTimer = powerup.duration ?? 6;
+      break;
+    case "screen-shake":
+      triggerShake(powerup.duration ?? 1.2);
+      break;
+    default:
+      break;
+  }
+}
+
+function updatePowerups(dt: number) {
+  const paddle = state.paddle;
+  const playBottom = state.play.y + state.play.h;
+  state.powerups = state.powerups.filter((powerup) => {
+    powerup.y += powerup.vy * dt;
+    if (powerup.y - powerup.size > playBottom) return false;
+    const hit =
+      powerup.y + powerup.size / 2 >= paddle.y &&
+      powerup.y - powerup.size / 2 <= paddle.y + paddle.h &&
+      powerup.x >= paddle.x &&
+      powerup.x <= paddle.x + paddle.w;
+    if (hit) {
+      applyPowerup(powerup);
+      return false;
+    }
+    return true;
+  });
+}
+
+function applyDifficulty(preset: (typeof difficultyPresets)[DifficultyKey]) {
+  state.rows = preset.rows;
+  state.cols = preset.cols;
+  state.lives = preset.lives;
+  state.ballSpeed = preset.ballSpeed;
+  state.pointsPerBrick = preset.pointsPerBrick;
+  state.brickDensity = clamp(preset.brickDensity, 0.2, 1);
+  state.powerupChance = clamp(preset.powerupChance, 0.05, 0.4);
+}
+
+function resetEffects() {
+  state.invertTimer = 0;
+  state.speedTimer = 0;
+  setBallSpeedMultiplier(1);
+  clearShake();
 }
 
 function startGame() {
@@ -230,14 +589,14 @@ function startGame() {
     return;
   }
   mobileControls.show();
+  const preset = difficultyPresets[selectedDifficulty] || difficultyPresets.medium;
+  applyDifficulty(preset);
+  resetEffects();
+  toastLayer.innerHTML = "";
   state.running = true;
   state.score = 0;
   state.flash = 0;
-  state.lives = config?.difficultyParams.lives ?? 3;
-  state.rows = config?.difficultyParams.rows ?? 6;
-  state.cols = config?.difficultyParams.cols ?? 10;
-  state.ballSpeed = config?.difficultyParams.ballSpeed ?? 320;
-  state.pointsPerBrick = config?.difficultyParams.pointsPerBrick ?? 10;
+  state.powerups = [];
   state.paddle.x = state.play.x + (state.play.w - state.paddle.w) / 2;
   resetBall();
   buildBricks();
@@ -252,6 +611,9 @@ function endGame(win: boolean) {
   state.running = false;
   loop.stop();
   mobileControls.hide();
+  resetEffects();
+  state.powerups = [];
+  toastLayer.innerHTML = "";
   const score = state.score;
   const eventType = win ? "SESSION_WIN" : "SESSION_FAIL";
   emitEvent({ type: eventType, gameId: GAME_ID, payload: { score } });
@@ -287,6 +649,7 @@ function breakBrick(brick: Brick) {
   state.bricksRemaining -= 1;
   state.score += state.pointsPerBrick;
   emitEvent({ type: "BRICK_BROKEN", gameId: GAME_ID, payload: { score: state.score } });
+  maybeSpawnPowerup(brick);
 
   if (!state.clearedRows.has(brick.row)) {
     const rowCleared = !state.bricks.some((b) => b.alive && b.row === brick.row);
@@ -301,36 +664,73 @@ function breakBrick(brick: Brick) {
   }
 }
 
+function updateEffects(dt: number) {
+  if (state.speedTimer > 0) {
+    state.speedTimer = Math.max(0, state.speedTimer - dt);
+    if (state.speedTimer === 0) {
+      setBallSpeedMultiplier(1);
+    }
+  }
+  if (state.invertTimer > 0) {
+    state.invertTimer = Math.max(0, state.invertTimer - dt);
+  }
+  if (state.shakeTimer > 0) {
+    state.shakeTimer = Math.max(0, state.shakeTimer - dt);
+  }
+  if (state.shakeTimer > 0) {
+    const intensity = state.shakeDuration > 0 ? state.shakeTimer / state.shakeDuration : 0;
+    const offset = Math.max(1, 8 * intensity);
+    gameRoot.style.transform = `translate(${rand(-offset, offset)}px, ${rand(-offset, offset)}px)`;
+  } else if (gameRoot.style.transform) {
+    gameRoot.style.transform = "";
+  }
+}
+
+function updateBalls(dt: number) {
+  if (state.balls.some((ball) => ball.stuck)) {
+    stickBallToPaddle();
+  }
+  for (let i = state.balls.length - 1; i >= 0; i -= 1) {
+    const ball = state.balls[i];
+    if (ball.stuck) continue;
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+    const lost = handleCollisions(ball);
+    if (lost) {
+      state.balls.splice(i, 1);
+    }
+  }
+  if (state.balls.length === 0) {
+    loseLife();
+  }
+}
+
 function update(dt: number) {
   if (!state.running) return;
+  updateEffects(dt);
+
   const leftDown = input.isDown(controls.left) || input.isDown(controls.altLeft);
   const rightDown = input.isDown(controls.right) || input.isDown(controls.altRight);
-  const move = (rightDown ? 1 : 0) - (leftDown ? 1 : 0);
+  const moveRaw = (rightDown ? 1 : 0) - (leftDown ? 1 : 0);
+  const move = state.invertTimer > 0 ? -moveRaw : moveRaw;
   if (move !== 0) {
     state.paddle.x += move * state.paddle.speed * dt;
   }
   state.paddle.x = clamp(state.paddle.x, state.play.x, state.play.x + state.play.w - state.paddle.w);
 
   const launchDown = input.isDown(controls.launch);
-  if (state.ball.stuck && launchDown && !state.launchHeld) {
+  if (state.balls.some((ball) => ball.stuck) && launchDown && !state.launchHeld) {
     launchBall();
   }
   state.launchHeld = launchDown;
 
-  if (state.ball.stuck) {
-    stickBallToPaddle();
-    return;
-  }
-
-  state.ball.x += state.ball.vx * dt;
-  state.ball.y += state.ball.vy * dt;
-
-  handleCollisions();
+  updateBalls(dt);
+  if (!state.running) return;
+  updatePowerups(dt);
   state.flash = Math.max(0, state.flash - dt * 2);
 }
 
-function handleCollisions() {
-  const ball = state.ball;
+function handleCollisions(ball: Ball) {
   const play = state.play;
   if (ball.x - ball.r <= play.x) {
     ball.x = play.x + ball.r;
@@ -345,8 +745,7 @@ function handleCollisions() {
     ball.vy = Math.abs(ball.vy);
   }
   if (ball.y - ball.r > play.y + play.h) {
-    loseLife();
-    return;
+    return true;
   }
 
   if (
@@ -359,8 +758,9 @@ function handleCollisions() {
     const hit = (ball.x - (state.paddle.x + state.paddle.w / 2)) / (state.paddle.w / 2);
     const clampedHit = clamp(hit, -1, 1);
     const angle = clampedHit * (Math.PI / 3);
-    ball.vx = Math.sin(angle) * state.ballSpeed;
-    ball.vy = -Math.cos(angle) * state.ballSpeed;
+    const speed = getBallSpeed();
+    ball.vx = Math.sin(angle) * speed;
+    ball.vy = -Math.cos(angle) * speed;
     ball.y = state.paddle.y - ball.r - 0.5;
   }
 
@@ -393,6 +793,8 @@ function handleCollisions() {
     breakBrick(brick);
     break;
   }
+
+  return false;
 }
 
 function drawRoundedRect(x: number, y: number, w: number, h: number, r: number) {
@@ -408,6 +810,36 @@ function drawRoundedRect(x: number, y: number, w: number, h: number, r: number) 
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
+}
+
+function renderPowerups() {
+  if (!state.powerups.length) return;
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  state.powerups.forEach((powerup) => {
+    const size = powerup.size;
+    const half = size / 2;
+    const grad = ctx.createLinearGradient(
+      powerup.x - half,
+      powerup.y - half,
+      powerup.x + half,
+      powerup.y + half,
+    );
+    grad.addColorStop(0, powerup.color);
+    grad.addColorStop(1, `${powerup.color}cc`);
+    ctx.fillStyle = grad;
+    drawRoundedRect(powerup.x - half, powerup.y - half, size, size, 8);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.28)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = "#0b1020";
+    ctx.font = `700 ${Math.max(10, size * 0.45)}px "Space Grotesk", "Sora", system-ui, sans-serif`;
+    ctx.fillText(powerup.symbol, powerup.x, powerup.y + 0.5);
+  });
+  ctx.restore();
 }
 
 function render() {
@@ -442,6 +874,8 @@ function render() {
     ctx.stroke();
   });
 
+  renderPowerups();
+
   const paddleGrad = ctx.createLinearGradient(
     state.paddle.x,
     state.paddle.y,
@@ -454,20 +888,22 @@ function render() {
   drawRoundedRect(state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h, 10);
   ctx.fill();
 
-  const ballGlow = ctx.createRadialGradient(
-    state.ball.x - state.ball.r * 0.4,
-    state.ball.y - state.ball.r * 0.4,
-    state.ball.r * 0.2,
-    state.ball.x,
-    state.ball.y,
-    state.ball.r,
-  );
-  ballGlow.addColorStop(0, "#ffffff");
-  ballGlow.addColorStop(1, theme.colors.accent);
-  ctx.fillStyle = ballGlow;
-  ctx.beginPath();
-  ctx.arc(state.ball.x, state.ball.y, state.ball.r, 0, Math.PI * 2);
-  ctx.fill();
+  state.balls.forEach((ball) => {
+    const ballGlow = ctx.createRadialGradient(
+      ball.x - ball.r * 0.4,
+      ball.y - ball.r * 0.4,
+      ball.r * 0.2,
+      ball.x,
+      ball.y,
+      ball.r,
+    );
+    ballGlow.addColorStop(0, "#ffffff");
+    ballGlow.addColorStop(1, theme.colors.accent);
+    ctx.fillStyle = ballGlow;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
   ctx.restore();
   renderHUD();
@@ -477,6 +913,8 @@ function renderHUD() {
   ui.innerHTML = "";
   ui.appendChild(overlay);
   const destroyed = state.totalBricks - state.bricksRemaining;
+  const preset = difficultyPresets[selectedDifficulty] || difficultyPresets.medium;
+  const hasStuck = state.balls.some((ball) => ball.stuck);
   const hudTop = document.createElement("div");
   hudTop.className = "hud";
   hudTop.innerHTML = `
@@ -484,52 +922,81 @@ function renderHUD() {
     <div class="chip">Briques <strong>${destroyed}/${state.totalBricks}</strong></div>
     <div class="chip ghost">Vies <span>${state.lives}</span></div>
     <div class="chip ghost">Record <span>${state.best}</span></div>
+    <div class="chip ghost">Niveau <span>${preset.label}</span></div>
   `;
   ui.appendChild(hudTop);
 
   const hudBottom = document.createElement("div");
   hudBottom.className = "hud bottom";
   hudBottom.innerHTML = `
-    <div class="pill ${state.ball.stuck ? "glow" : ""}">${
-      state.ball.stuck ? "Pret a lancer" : "Balle en jeu"
+    <div class="pill ${hasStuck ? "glow" : ""}">${
+      hasStuck ? "Pret a lancer" : `Balles ${state.balls.length}`
     }</div>
-    <div class="pill ghost">${state.ball.stuck ? "Espace pour lancer" : "Garde le rythme"}</div>
+    <div class="pill ghost">${hasStuck ? "Espace pour lancer" : "Attrape les bonus/malus"}</div>
   `;
   ui.appendChild(hudBottom);
 }
 
 function showOverlay(title: string, body: string, showStart = true, lastScore?: number) {
   mobileControls.hide();
+  const preset = difficultyPresets[selectedDifficulty] || difficultyPresets.medium;
   overlay.style.display = "grid";
   ui.style.pointerEvents = "auto";
   canvas.style.pointerEvents = "none";
   const controlsList = (config?.uiText.controls || [])
     .map((item) => `<span class="chip ghost">${item}</span>`)
     .join("");
+  const bricksEstimate = Math.round(preset.rows * preset.cols * preset.brickDensity);
+  const extraHelp =
+    "Bonus/Malus tombent : balles +, vitesse acceleree, touches inversees, ecran qui tremble.";
   overlay.innerHTML = `
     <div class="panel">
-      <p class="pill">${config?.uiText.title || "Casse-briques"}</p>
+      <p class="pill">${config?.uiText.title || "Casse-briques"} · ${preset.label}</p>
       <h2>${title}</h2>
       ${lastScore !== undefined ? `<p class="muted">Score ${lastScore}</p>` : ""}
       <p class="muted">${body}</p>
+      <p class="muted">${extraHelp}</p>
+      <div class="panel-actions" style="justify-content:flex-start;">
+        ${Object.entries(difficultyPresets)
+          .map(
+            ([key, preset]) => `
+              <button class="btn ghost diff-btn ${key === selectedDifficulty ? "active" : ""}" data-diff="${key}">
+                ${preset.label} · ${preset.rows}x${preset.cols} · ${preset.lives} vie${
+                  preset.lives > 1 ? "s" : ""
+                }
+              </button>
+            `,
+          )
+          .join("")}
+      </div>
       <div class="panel-actions">
         ${showStart ? `<button class="btn" id="start-btn">Lancer</button>` : ""}
         <a class="btn ghost" href="${withBasePath("/", import.meta.env.BASE_URL)}">Hub</a>
       </div>
       <div class="inline-metrics">
         <div><span>Record</span><strong>${state.best}</strong></div>
-        <div><span>Vies</span><strong>${state.lives}</strong></div>
-        <div><span>Briques</span><strong>${state.bricksRemaining}/${state.totalBricks}</strong></div>
+        <div><span>Briques</span><strong>~${bricksEstimate}</strong></div>
+        <div><span>Vies</span><strong>${preset.lives}</strong></div>
       </div>
       <div class="controls">${controlsList}</div>
     </div>
   `;
   document.getElementById("start-btn")?.addEventListener("click", startGame);
+  document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const diff = btn.dataset.diff as DifficultyKey | undefined;
+      if (diff && difficultyPresets[diff]) {
+        selectedDifficulty = diff;
+        showOverlay(title, body, showStart, lastScore);
+      }
+    });
+  });
 }
 
 resize();
 window.addEventListener("resize", resize);
 
+applyDifficulty(initialPreset);
 buildBricks();
 state.paddle.x = state.play.x + (state.play.w - state.paddle.w) / 2;
 resetBall();
