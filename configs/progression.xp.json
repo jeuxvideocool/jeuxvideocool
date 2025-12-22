@@ -30,6 +30,26 @@
     { "level": 28, "requiredXP": 25916 },
     { "level": 29, "requiredXP": 27569 },
     { "level": 30, "requiredXP": 29264 },
-    { "level": 31, "requiredXP": 31000 }
+    { "level": 31, "requiredXP": 31000 },
+
+    { "level": 32, "requiredXP": 32775 },
+    { "level": 33, "requiredXP": 34588 },
+    { "level": 34, "requiredXP": 36438 },
+    { "level": 35, "requiredXP": 38324 },
+    { "level": 36, "requiredXP": 40244 },
+    { "level": 37, "requiredXP": 42198 },
+    { "level": 38, "requiredXP": 44186 },
+    { "level": 39, "requiredXP": 46206 },
+    { "level": 40, "requiredXP": 48257 },
+    { "level": 41, "requiredXP": 50340 },
+    { "level": 42, "requiredXP": 52453 },
+    { "level": 43, "requiredXP": 54597 },
+    { "level": 44, "requiredXP": 56771 },
+    { "level": 45, "requiredXP": 58974 },
+    { "level": 46, "requiredXP": 61207 },
+    { "level": 47, "requiredXP": 63468 },
+    { "level": 48, "requiredXP": 65758 },
+    { "level": 49, "requiredXP": 68076 },
+    { "level": 50, "requiredXP": 70423 }
   ]
 }

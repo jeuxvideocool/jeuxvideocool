@@ -271,9 +271,9 @@ function injectMobileStyles() {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 8px;
-      width: min(176px, 44vw);
-      max-width: 40vw;
+      gap: 6px;
+      width: min(148px, 38vw);
+      max-width: 34vw;
       justify-self: start;
       background: var(--mc-surface);
       border-radius: 18px;
@@ -290,15 +290,15 @@ function injectMobileStyles() {
       justify-self: end;
     }
     .mobile-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
       border: 1px solid var(--mc-border);
       background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.06)),
         linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.12));
       color: var(--mc-ink);
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
       cursor: pointer;
       touch-action: none;
@@ -306,9 +306,9 @@ function injectMobileStyles() {
       transition: transform 0.12s ease, box-shadow 0.2s ease;
     }
     .mobile-btn.action {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
       border: none;
       background: linear-gradient(135deg, var(--mc-primary), var(--mc-accent));
       color: #0b0f17;
@@ -327,28 +327,28 @@ function injectMobileStyles() {
     }
     @media (max-height: 720px) {
       .mobile-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 14px;
+        width: 40px;
+        height: 40px;
+        font-size: 13px;
       }
       .mobile-btn.action {
-        width: 58px;
-        height: 58px;
+        width: 48px;
+        height: 48px;
       }
       .mobile-pad {
-        width: min(156px, 42vw);
-        padding: 10px;
+        width: min(132px, 36vw);
+        padding: 8px;
       }
     }
     .mobile-fs-btn {
-      width: 56px;
-      height: 56px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       border: 1px solid var(--mc-border);
       background: rgba(255, 255, 255, 0.08);
       color: var(--mc-ink);
       font-weight: 800;
-      font-size: 18px;
+      font-size: 16px;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.26);
       cursor: pointer;
       touch-action: manipulation;
