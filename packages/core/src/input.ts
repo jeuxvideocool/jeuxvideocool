@@ -230,6 +230,11 @@ function injectMobileStyles() {
       z-index: 30;
       display: grid;
       grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr auto;
+      grid-template-areas:
+        "fs fs"
+        "pad actions";
+      align-content: end;
       align-items: end;
       justify-items: stretch;
       gap: 12px;
@@ -262,6 +267,7 @@ function injectMobileStyles() {
       margin-bottom: env(safe-area-inset-bottom, 0px);
     }
     .mobile-pad {
+      grid-area: pad;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
@@ -278,6 +284,7 @@ function injectMobileStyles() {
         inset 0 0 0 1px rgba(255, 255, 255, 0.04);
     }
     .mobile-actions {
+      grid-area: actions;
       display: flex;
       gap: 12px;
       justify-self: end;
@@ -349,6 +356,12 @@ function injectMobileStyles() {
     }
     .mobile-fs-btn:active {
       transform: scale(0.95);
+    }
+    .mobile-fs-wrap {
+      grid-area: fs;
+      pointer-events: all;
+      align-self: start;
+      justify-self: end;
     }
     .mobile-gesture {
       position: fixed;
@@ -525,9 +538,7 @@ export function createMobileControls(options: MobileControlsOptions) {
       }
     });
     const fsWrap = document.createElement("div");
-    fsWrap.style.pointerEvents = "all";
-    fsWrap.style.alignSelf = "start";
-    fsWrap.style.justifySelf = "end";
+    fsWrap.className = "mobile-fs-wrap";
     fsWrap.appendChild(fsBtn);
     root.appendChild(fsWrap);
   }
