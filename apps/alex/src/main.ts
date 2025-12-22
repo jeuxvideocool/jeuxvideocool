@@ -1,18 +1,43 @@
 import "./style.css";
 import { withBasePath } from "@core/utils";
 import { ALEX_SECRET, canAccessAlexPage, getProgressionSnapshot } from "@progression";
+import { getAuthState, subscribe as subscribeCloud } from "@storage/cloud";
 
 const basePath = import.meta.env.BASE_URL || "/";
 const app = document.getElementById("app")!;
-
-const snapshot = getProgressionSnapshot();
-const save = snapshot.save;
+const authLink = withBasePath("/apps/auth/", basePath);
+let cloudState = getAuthState();
 
 const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 
-if (!canAccessAlexPage(save)) {
-  window.location.replace(withBasePath("/", basePath));
-} else {
+function renderGate() {
+  app.innerHTML = `
+    <div class="page">
+      <main class="shell">
+        <header class="hero">
+          <div class="hero-content">
+            <p class="overline">Arcade Galaxy</p>
+            <h1>Synchronisation cloud en cours</h1>
+            <p class="lead">Chargement de ta sauvegarde avant l'accès au secret.</p>
+            <div class="hero-actions">
+              <a class="btn primary" href="${authLink}">Connexion cloud</a>
+              <a class="btn ghost" href="${withBasePath("/", basePath)}">Retour au hub</a>
+            </div>
+          </div>
+        </header>
+      </main>
+    </div>
+  `;
+}
+
+function renderSecretPage() {
+  const snapshot = getProgressionSnapshot();
+  const save = snapshot.save;
+
+  if (!canAccessAlexPage(save)) {
+    window.location.replace(withBasePath("/", basePath));
+    return;
+  }
   const displayName = "Alexiane";
   const avatar = save.playerProfile.avatar || "💫";
   const xpLabel = save.globalXP.toLocaleString("fr-FR");
@@ -285,4 +310,18 @@ function startFireworks() {
       launch();
     }, shot.delay);
   });
+}
+
+if (!cloudState.ready || !cloudState.user) {
+  window.location.replace(authLink);
+} else if (!cloudState.hydrated) {
+  renderGate();
+  subscribeCloud((state) => {
+    cloudState = state;
+    if (cloudState.user && cloudState.hydrated) {
+      window.location.reload();
+    }
+  });
+} else {
+  renderSecretPage();
 }

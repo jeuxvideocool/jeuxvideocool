@@ -85,7 +85,7 @@ function render() {
               ? `<div class="status error">Configure VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY pour activer la connexion.</div>`
               : cloudState.user
                 ? `<div class="status ok">Connecté : ${formatCloudIdentity(cloudState.user)}</div>
-                   <p class="muted small">La synchro s'enclenche automatiquement dès qu'une save locale change.</p>
+                   <p class="muted small">La synchro s'enclenche automatiquement dès qu'une sauvegarde change.</p>
                    <div class="actions wrap">
                      <button class="btn primary" id="cloud-sync" ${cloudState.loading ? "disabled" : ""}>Forcer une sync</button>
                      <a class="btn ghost" href="${hubLink}">Aller au hub</a>

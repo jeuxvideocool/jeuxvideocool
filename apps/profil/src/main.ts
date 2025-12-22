@@ -8,9 +8,9 @@ import {
   connectCloud,
   getAvatarPublicUrl,
   getAuthState,
-  loadCloudSave,
   requestCloudResetSync,
   saveCloud,
+  syncCloudToLocal,
   subscribe as subscribeCloud,
   uploadAvatarImage,
   removeAvatarImage,
@@ -19,7 +19,7 @@ import {
 const basePath = import.meta.env.BASE_URL || "/";
 const app = document.getElementById("app")!;
 let cloudState = getAuthState();
-let currentSnapshot = getProgressionSnapshot();
+let currentSnapshot: ReturnType<typeof getProgressionSnapshot>;
 let pendingAvatarFile: File | null = null;
 let pendingAvatarPreview: string | null = null;
 let pendingAvatarReset = false;
@@ -106,9 +106,9 @@ function renderAvatarVisual(
 }
 
 function getAvatarHelperText(hasImage: boolean) {
-  if (hasImage) return "Image utilisée pour l'avatar (stockée sur Supabase). L'emoji reste disponible en secours.";
+  if (hasImage) return "Image utilisée pour l'avatar (stockée sur Supabase).";
   if (!cloudState.ready) return "Supabase non configuré (.env).";
-  if (!cloudState.user) return "Connecte-toi au cloud pour utiliser une image. Emoji disponible hors-ligne.";
+  if (!cloudState.user) return "Connecte-toi au cloud pour utiliser une image.";
   return "Choisis une image, elle sera envoyée sur Supabase.";
 }
 
@@ -132,7 +132,55 @@ function updateAvatarPreview() {
   if (clearBtn) clearBtn.disabled = !hasImage;
 }
 
+function renderGate(title: string, description: string, showAuth = true) {
+  const authLink = withBasePath("/apps/auth/", basePath);
+  const hubLink = withBasePath("/", basePath);
+  app.innerHTML = `
+    <div class="page">
+      <header class="hero">
+        <div class="identity">
+          <div class="identity-top">
+            <div class="avatar">☁️</div>
+            <div>
+              <p class="eyebrow">Arcade Galaxy</p>
+              <h1>${title}</h1>
+              <p class="muted">${description}</p>
+            </div>
+          </div>
+          <div class="identity-actions">
+            ${showAuth ? `<a class="btn primary strong" href="${authLink}">Connexion cloud</a>` : ""}
+            <a class="btn ghost" href="${hubLink}">Retour hub</a>
+          </div>
+        </div>
+      </header>
+    </div>
+  `;
+}
+
 function render() {
+  if (!cloudState.ready) {
+    renderGate(
+      "Cloud indisponible",
+      "Supabase n'est pas configuré. Ajoute VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.",
+      false,
+    );
+    return;
+  }
+  if (!cloudState.user) {
+    renderGate(
+      "Connexion requise",
+      "Connecte-toi au cloud pour consulter et gérer ta progression.",
+    );
+    return;
+  }
+  if (!cloudState.hydrated) {
+    renderGate(
+      "Synchronisation cloud en cours",
+      "Chargement de ta sauvegarde avant d'afficher le profil.",
+      false,
+    );
+    return;
+  }
   currentSnapshot = getProgressionSnapshot();
   const snapshot = currentSnapshot;
   const achievements = getAchievementsConfig().achievements;
@@ -280,7 +328,7 @@ function render() {
           <div class="section-head">
             <div>
               <h2>Gestion des sauvegardes</h2>
-              <p class="muted small">Export/Import JSON et stats locales. Les actions cloud ci-dessus restent disponibles.</p>
+              <p class="muted small">Export/Import JSON et stats. Les actions cloud ci-dessus restent disponibles.</p>
             </div>
             <span class="chip ghost">Local</span>
           </div>
@@ -503,7 +551,7 @@ function wire() {
   document.getElementById("reset-save")?.addEventListener("click", () => {
     requestCloudResetSync();
     resetSave();
-    showToast("Sauvegarde locale réinitialisée", "info");
+    showToast("Sauvegarde réinitialisée", "info");
     render();
   });
 
@@ -539,9 +587,8 @@ function wire() {
     showToast(ok ? "Sauvegarde envoyée dans le cloud." : cloudState.error || "Erreur cloud", ok ? "success" : "error");
   });
   document.getElementById("cloud-load")?.addEventListener("click", async () => {
-    const res = await loadCloudSave();
-    if (res?.state) {
-      importSave(JSON.stringify(res.state));
+    const ok = await syncCloudToLocal();
+    if (ok) {
       pendingAvatarFile = null;
       if (pendingAvatarPreview) {
         URL.revokeObjectURL(pendingAvatarPreview);
@@ -550,8 +597,10 @@ function wire() {
       pendingAvatarReset = false;
       showToast("Sauvegarde cloud importée.", "success");
       render();
-    } else if (res?.error) {
-      showToast(res.error, "error");
+    } else if (cloudState.error) {
+      showToast(cloudState.error, "error");
+    } else {
+      showToast("Import cloud impossible", "error");
     }
   });
 

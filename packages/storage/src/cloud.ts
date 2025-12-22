@@ -1,5 +1,5 @@
 import { createClient, Session, User } from "@supabase/supabase-js";
-import { importSave, loadSave, subscribeToSaveChanges, updateSave } from "./index";
+import { importSave, loadSave, resetSave, subscribeToSaveChanges, updateSave } from "./index";
 import type { SaveState } from "./index";
 
 const AVATAR_BUCKET = (import.meta.env.VITE_SUPABASE_AVATAR_BUCKET as string | undefined) || "avatars";
@@ -7,6 +7,7 @@ const MAX_AVATAR_SIZE_BYTES = 1.5 * 1024 * 1024;
 export type CloudState = {
   ready: boolean;
   user: User | null;
+  hydrated: boolean;
   message?: string;
   error?: string;
   session?: Session | null;
@@ -23,7 +24,7 @@ let supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 let supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 let supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-let cloudState: CloudState = { ready: Boolean(supabase), user: null };
+let cloudState: CloudState = { ready: Boolean(supabase), user: null, hydrated: false };
 const AUTO_SYNC_DELAY_MS = 600;
 let pendingAutoSync: SaveState | null = null;
 let pendingAutoSyncForce = false;
@@ -31,6 +32,7 @@ let autoSyncTimer: ReturnType<typeof setTimeout> | null = null;
 const PSEUDO_DOMAIN = "user.local";
 let allowAutoSync = true;
 let forceNextCloudSync = false;
+let hydrationPromise: Promise<boolean> | null = null;
 
 type Listener = (state: CloudState) => void;
 const listeners: Listener[] = [];
@@ -49,7 +51,7 @@ export function subscribe(fn: Listener) {
 
 function requireClient(): boolean {
   if (!supabase) {
-    cloudState = { ready: false, user: null, error: "Supabase non configuré." };
+    cloudState = { ready: false, user: null, hydrated: false, error: "Supabase non configuré." };
     notify();
     return false;
   }
@@ -62,6 +64,16 @@ export function getAuthState(): CloudState {
 
 export function requestCloudResetSync() {
   forceNextCloudSync = true;
+}
+
+export async function syncCloudToLocal(): Promise<boolean> {
+  if (!requireClient() || !cloudState.user) return false;
+  allowAutoSync = false;
+  try {
+    return await hydrateFromCloud();
+  } finally {
+    allowAutoSync = true;
+  }
 }
 
 export function getAvatarPublicUrl(path?: string | null): string | null {
@@ -105,12 +117,33 @@ function enforceProfileName(identifier: string) {
 
 async function hydrateFromCloud(): Promise<boolean> {
   if (!supabase || !cloudState.user) return false;
-  const res = await loadCloudSave();
-  if (res?.state) {
-    importSave(JSON.stringify(res.state));
-    return true;
+  if (hydrationPromise) return hydrationPromise;
+  hydrationPromise = (async () => {
+    const res = await loadCloudSave();
+    if (res?.state) {
+      importSave(JSON.stringify(res.state));
+      cloudState = { ...cloudState, hydrated: true };
+      notify();
+      return true;
+    }
+    if (res?.error === "Aucune sauvegarde trouvée.") {
+      resetSave();
+      if (cloudState.user) {
+        enforceProfileName(extractIdentifier(cloudState.user));
+      }
+      cloudState = { ...cloudState, hydrated: true };
+      notify();
+      return true;
+    }
+    cloudState = { ...cloudState, hydrated: false };
+    notify();
+    return false;
+  })();
+  try {
+    return await hydrationPromise;
+  } finally {
+    hydrationPromise = null;
   }
-  return false;
 }
 
 function isEmptySave(save: SaveState): boolean {
@@ -145,7 +178,7 @@ export async function connectCloud(
       clearTimeout(autoSyncTimer);
       autoSyncTimer = null;
     }
-    cloudState = { ready: true, user: null, session: null, message: "Déconnecté" };
+    cloudState = { ready: true, user: null, hydrated: false, session: null, message: "Déconnecté" };
     notify();
     return cloudState;
   }
@@ -159,7 +192,7 @@ export async function connectCloud(
   }
   const pseudoEmail = toPseudoEmail(identifier);
 
-  cloudState = { ...cloudState, loading: true, error: undefined, message: undefined };
+  cloudState = { ...cloudState, loading: true, error: undefined, message: undefined, hydrated: false };
   notify();
 
   const auth = supabase!.auth;
@@ -167,14 +200,15 @@ export async function connectCloud(
     if (action === "login") {
       const { data, error } = await auth.signInWithPassword({ email: pseudoEmail, password });
       if (error) throw error;
+      allowAutoSync = false;
       enforceProfileName(identifier);
       cloudState = {
         ready: true,
         user: data.user,
+        hydrated: false,
         session: data.session,
         message: "Connecté",
       };
-      allowAutoSync = false;
       await hydrateFromCloud();
       allowAutoSync = true;
     } else if (action === "register") {
@@ -184,14 +218,15 @@ export async function connectCloud(
         options: { data: { identifier } },
       });
       if (error) throw error;
+      allowAutoSync = false;
       enforceProfileName(identifier);
       cloudState = {
         ready: true,
         user: data.user,
+        hydrated: false,
         session: data.session,
         message: "Compte créé (identifiant).",
       };
-      allowAutoSync = false;
       await hydrateFromCloud();
       allowAutoSync = true;
     }
@@ -341,6 +376,7 @@ if (supabase) {
     cloudState = {
       ready: true,
       user: session?.user ?? null,
+      hydrated: false,
       session,
       message: session?.user ? "Connecté" : "Non connecté",
       error: undefined,
@@ -349,8 +385,8 @@ if (supabase) {
     };
     notify();
     if (session?.user) {
-      enforceProfileName(extractIdentifier(session.user));
       allowAutoSync = false;
+      enforceProfileName(extractIdentifier(session.user));
       hydrateFromCloud().finally(() => {
         allowAutoSync = true;
       });

@@ -43,6 +43,17 @@ const ctx: ProgressionContext = {
   gameConfigs: getGameConfigs(),
 };
 
+// Prevent double counting when an event is handled directly then emitted on the bus.
+const PROGRESSION_HANDLED_FLAG = "__progressionHandled";
+
+function hasProgressionHandled(event: GameEvent): boolean {
+  return Boolean((event as any)[PROGRESSION_HANDLED_FLAG]);
+}
+
+function markProgressionHandled(event: GameEvent) {
+  (event as any)[PROGRESSION_HANDLED_FLAG] = true;
+}
+
 export const ALEX_SECRET = {
   achievementId: "alex-birthday-31",
   minXP: 31000,
@@ -204,11 +215,21 @@ function applyLevelFromXP(state: SaveState) {
 }
 
 export function handleProgressionEvent(event: GameEvent): SaveState {
+  if (hasProgressionHandled(event)) {
+    return loadSave();
+  }
+  markProgressionHandled(event);
   const state = updateSave((draft) => {
     applyEventToState(draft, event);
     unlockEligibleAchievements(draft, ctx.achievements);
     applyLevelFromXP(draft);
   });
+  return state;
+}
+
+export function emitProgressionEvent(event: GameEvent): SaveState {
+  const state = handleProgressionEvent(event);
+  emitEvent(event);
   return state;
 }
 

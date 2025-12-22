@@ -15,9 +15,9 @@ import {
   connectCloud,
   getAvatarPublicUrl,
   getAuthState,
-  loadCloudSave,
   requestCloudResetSync,
   saveCloud,
+  syncCloudToLocal,
   subscribe as subscribeCloud,
   uploadAvatarImage,
   removeAvatarImage,
@@ -34,8 +34,9 @@ const themes = getThemes();
 const basePath = import.meta.env.BASE_URL || "/";
 
 let activeTab: Tab = "hub";
-let snapshot = getProgressionSnapshot();
-let lastLevel = snapshot.save.globalLevel;
+let snapshot: ReturnType<typeof getProgressionSnapshot>;
+let lastLevel = 1;
+let hasSnapshot = false;
 let cloudState = getAuthState();
 let searchTerm = "";
 let categoryFilter = "all";
@@ -55,9 +56,9 @@ function formatCloudIdentity(): string {
 }
 
 function getAvatarHelperText(hasImage: boolean) {
-  if (hasImage) return "Image stockée sur Supabase. L'emoji reste disponible en secours.";
+  if (hasImage) return "Image stockée sur Supabase.";
   if (!cloudState.ready) return "Supabase non configuré (.env).";
-  if (!cloudState.user) return "Connecte-toi au cloud pour utiliser une image. Emoji disponible hors-ligne.";
+  if (!cloudState.user) return "Connecte-toi au cloud pour utiliser une image.";
   return "Choisis une image, elle sera envoyée sur Supabase.";
 }
 
@@ -360,16 +361,17 @@ async function handleCloudSaveAction() {
 }
 
 async function handleCloudLoadAction() {
-  const res = await loadCloudSave();
-  if (res?.state) {
-    importSave(JSON.stringify(res.state));
+  const ok = await syncCloudToLocal();
+  if (ok) {
     showToast("Sauvegarde cloud importée", "success");
     clearProfileAvatarPreview();
     profileAvatarFile = null;
     profileAvatarReset = false;
     refresh();
-  } else if (res?.error) {
-    showToast(res.error, "error");
+  } else if (cloudState.error) {
+    showToast(cloudState.error, "error");
+  } else {
+    showToast("Import cloud impossible", "error");
   }
 }
 
@@ -442,6 +444,31 @@ function renderAuthGate() {
   `;
 }
 
+function renderSyncGate() {
+  return `
+    <div class="layout">
+      <header class="card hero auth-gate">
+        <div class="hero-glow"></div>
+        <div class="hero-top">
+          <div class="profile">
+            <div class="avatar">☁️</div>
+            <div>
+              <p class="eyebrow">Arcade Galaxy</p>
+              <h1>Synchronisation cloud en cours</h1>
+              <p class="muted">Chargement de ta sauvegarde avant d'accéder au hub.</p>
+              <div class="chips">
+                <span class="chip accent">Sauvegarde cloud</span>
+                <span class="chip ghost">${cloudState.loading ? "Chargement..." : "En attente"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${cloudState.error ? `<p class="status error">${cloudState.error}</p>` : ""}
+      </header>
+    </div>
+  `;
+}
+
 function renderHero() {
   const save = snapshot.save;
   const unlocked = save.achievementsUnlocked.length;
@@ -455,11 +482,7 @@ function renderHero() {
     registry.games.find((g) => g.id === save.playerProfile.lastPlayedGameId)?.title;
   lastLevel = save.globalLevel;
   const mostPlayed = mostPlayedGameTitle(save);
-  const cloudBadge = cloudState.user
-    ? `<span class="chip success">Cloud : ${formatCloudIdentity()}</span>`
-    : cloudState.ready
-      ? `<span class="chip ghost">Mode invité · données locales</span>`
-      : `<span class="chip warning">Supabase non configuré (.env)</span>`;
+  const cloudBadge = `<span class="chip success">Cloud : ${formatCloudIdentity()}</span>`;
 
   return `
     <header class="card hero">
@@ -734,7 +757,7 @@ function renderCloudPanel() {
         <div>
           <p class="eyebrow">Cloud</p>
           <h2>Supabase</h2>
-          <p class="muted small">Créé pour rester optionnel : invité/local ou compte cloud.</p>
+          <p class="muted small">Sauvegarde cloud obligatoire : Supabase est la source de vérité.</p>
         </div>
       </div>
       <div class="profile-form two-cols">
@@ -748,7 +771,7 @@ function renderCloudPanel() {
       ${
         cloudState.error
           ? `<p class="status error">${cloudState.error}</p>`
-          : `<p class="status info">Aucune donnée n'est envoyée sans action manuelle.</p>`
+          : `<p class="status info">Connecte-toi pour charger ta sauvegarde cloud.</p>`
       }
     </section>
   `;
@@ -1138,7 +1161,7 @@ function renderProfileTab() {
         <div>
           <p class="eyebrow">Cloud</p>
           <h2>Supabase</h2>
-          <p class="muted small">Sauvegarde manuelle sur ton compte connecté.</p>
+          <p class="muted small">Sauvegarde cloud (source de vérité) liée à ton compte.</p>
         </div>
         <span class="chip success">Connecté : ${formatCloudIdentity()}</span>
       </div>
@@ -1151,7 +1174,7 @@ function renderProfileTab() {
       ${
         cloudState.message
           ? `<p class="status ok">${cloudState.message}</p>`
-          : `<p class="status info">Tes données locales sont synchronisées sur demande.</p>`
+          : `<p class="status info">Synchronisation cloud active.</p>`
       }
       ${cloudState.error ? `<p class="status error">${cloudState.error}</p>` : ""}
     </section>
@@ -1159,9 +1182,9 @@ function renderProfileTab() {
     <section class="card">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Sauvegardes locales</p>
+          <p class="eyebrow">Sauvegardes</p>
           <h2>Export / Import</h2>
-          <p class="muted small">Exporter, importer ou remettre à zéro la progression locale.</p>
+          <p class="muted small">Exporter, importer ou remettre à zéro ta progression.</p>
         </div>
         <button class="btn ghost danger" id="reset-save" type="button">Reset global</button>
       </div>
@@ -1211,9 +1234,13 @@ function renderProfileTab() {
 }
 
 function renderHub() {
-  if (!cloudState.user) {
+  if (!cloudState.ready || !cloudState.user) {
     app.innerHTML = renderAuthGate();
     wireAuthGate();
+    return;
+  }
+  if (!cloudState.hydrated) {
+    app.innerHTML = renderSyncGate();
     return;
   }
 
@@ -1445,9 +1472,18 @@ function wireEvents() {
 }
 
 function refresh() {
-  snapshot = getProgressionSnapshot();
+  if (!cloudState.ready || !cloudState.user || !cloudState.hydrated) {
+    renderHub();
+    return;
+  }
+  const nextSnapshot = getProgressionSnapshot();
+  if (!hasSnapshot) {
+    lastLevel = nextSnapshot.save.globalLevel;
+    hasSnapshot = true;
+  }
+  snapshot = nextSnapshot;
   applyTheme(findTheme(registry.hubTheme));
   renderHub();
 }
 
-renderHub();
+refresh();

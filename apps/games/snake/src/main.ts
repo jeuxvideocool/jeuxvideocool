@@ -3,9 +3,8 @@ import "@core/launch-menu.css";
 import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { chance, clamp, rand, withBasePath } from "@core/utils";
-import { emitEvent } from "@core/events";
 import { getGameConfig, getThemes } from "@config";
-import { attachProgressionListener } from "@progression";
+import { attachProgressionListener, emitProgressionEvent } from "@progression";
 import { loadSave, updateGameState } from "@storage";
 
 type Cell = { x: number; y: number };
@@ -219,7 +218,7 @@ function startGame() {
   overlay.style.display = "none";
   canvas.style.pointerEvents = "auto";
   ui.style.pointerEvents = "none";
-  emitEvent({ type: "SESSION_START", gameId: GAME_ID });
+  emitProgressionEvent({ type: "SESSION_START", gameId: GAME_ID });
   loop.start();
 }
 
@@ -229,7 +228,7 @@ function endGame(win: boolean) {
   mobileControls.hide();
   const score = state.score;
   const eventType = win ? "SESSION_WIN" : "SESSION_FAIL";
-  emitEvent({ type: eventType, gameId: GAME_ID, payload: { score } });
+  emitProgressionEvent({ type: eventType, gameId: GAME_ID, payload: { score } });
   updateGameState(GAME_ID, config?.saveSchemaVersion ?? 1, (game) => {
     const bestLength = (game.state.bestLength as number | undefined) || 0;
     game.state.bestLength = Math.max(bestLength, state.snake.length);
@@ -324,14 +323,14 @@ function handleEat(food: Food) {
   state.comboTimer = 2.8;
   state.streak += 1;
   state.score = state.snake.length;
-  emitEvent({
+  emitProgressionEvent({
     type: food.type === "prism" ? "PRISM_FRUIT_EATEN" : "FRUIT_EATEN",
     gameId: GAME_ID,
     payload: { score: state.score },
   });
   if (food.type === "prism") {
     state.boost = Math.max(state.boost, state.boostSeconds);
-    emitEvent({ type: "STREAK_BONUS", gameId: GAME_ID });
+    emitProgressionEvent({ type: "STREAK_BONUS", gameId: GAME_ID });
   }
 
   state.tickMs = Math.max(75, state.tickMs * state.speedRamp);
