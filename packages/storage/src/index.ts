@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CURRENT_SCHEMA_VERSION = 3;
 export const LOCAL_STORAGE_KEY = "nintendo-hub-save";
+const MAX_SAVE_BYTES = 200_000;
 
 export type GameSaveState = {
   saveSchemaVersion: number;
@@ -127,11 +128,19 @@ export function loadSave(): SaveState {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) return createEmptySave();
+    if (raw.length > MAX_SAVE_BYTES) {
+      throw new Error("Save payload too large");
+    }
     const parsed = JSON.parse(raw);
     const validated = SaveSchema.parse(parsed);
     return migrateSave(validated);
   } catch (err) {
     console.warn("Corrupt save detected, resetting.", err);
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch (removeErr) {
+      console.warn("Failed to clear corrupt save.", removeErr);
+    }
     return createEmptySave();
   }
 }
@@ -159,6 +168,9 @@ export function exportSave(): string {
 
 export function importSave(json: string): { success: boolean; error?: string; state?: SaveState } {
   try {
+    if (json.length > MAX_SAVE_BYTES) {
+      return { success: false, error: "Import trop volumineux" };
+    }
     const parsed = JSON.parse(json);
     const validated = SaveSchema.parse(parsed);
     const migrated = migrateSave(validated);
