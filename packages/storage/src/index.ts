@@ -11,6 +11,7 @@ export type GameSaveState = {
   bestScore?: number;
   timePlayedMs?: number;
   sessionStartedAt?: number;
+  xpEarned?: number;
 };
 
 export type SaveState = {
@@ -45,6 +46,7 @@ const GameSaveSchema = z.object({
   bestScore: z.number().optional(),
   timePlayedMs: z.number().default(0),
   sessionStartedAt: z.number().optional(),
+  xpEarned: z.number().default(0),
 });
 
 const SaveSchema = z.object({
@@ -195,7 +197,9 @@ export function resetGameSave(gameId: string) {
 
 export function getGameState(state: SaveState, gameId: string, saveSchemaVersion = 1): GameSaveState {
   if (!state.games[gameId]) {
-    state.games[gameId] = { saveSchemaVersion, state: {}, timePlayedMs: 0 };
+    state.games[gameId] = { saveSchemaVersion, state: {}, timePlayedMs: 0, xpEarned: 0 };
+  } else if (state.games[gameId].xpEarned === undefined) {
+    state.games[gameId].xpEarned = 0;
   }
   return state.games[gameId];
 }

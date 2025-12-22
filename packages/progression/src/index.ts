@@ -195,6 +195,9 @@ function applyEventToState(state: SaveState, event: GameEvent) {
   if (event.gameId) {
     const existed = Boolean(state.games[event.gameId]);
     const gameState: GameSaveState = getGameState(state, event.gameId);
+    if (xpGain !== 0) {
+      gameState.xpEarned = (gameState.xpEarned ?? 0) + xpGain;
+    }
     trackSessionTime(state, event, gameState);
     if (event.type === "SESSION_START") {
       state.globalStats.gamesPlayed += existed ? 0 : 1;

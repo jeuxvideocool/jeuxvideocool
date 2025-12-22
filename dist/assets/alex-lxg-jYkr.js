@@ -1,4 +1,4 @@
-import{w as u,g as S,c as k,A as f}from"./index-Dv4N1amJ.js";import{getAuthState as R,subscribe as C}from"./cloud-DBr7FsFn.js";const $=document.getElementById("app"),A=u("/apps/auth/");let l=R();const w=t=>t[Math.floor(Math.random()*t.length)];function T(){$.innerHTML=`
+import{w as u,g as S,c as k,A as f}from"./index-B_MPXOKW.js";import{getAuthState as R,subscribe as C}from"./cloud-BKbz8Q0r.js";const $=document.getElementById("app"),A=u("/apps/auth/");let l=R();const w=t=>t[Math.floor(Math.random()*t.length)];function T(){$.innerHTML=`
     <div class="page">
       <main class="shell">
         <header class="hero">

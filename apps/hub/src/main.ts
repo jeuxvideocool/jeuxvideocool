@@ -786,6 +786,7 @@ function renderStats() {
       title,
       timePlayedMs: game.timePlayedMs ?? 0,
       bestScore: game.bestScore,
+      xpEarned: game.xpEarned ?? 0,
       lastPlayedAt: game.lastPlayedAt ?? 0,
     };
   });
@@ -899,16 +900,16 @@ function renderStats() {
     donutStyle = `style="--donut: conic-gradient(rgba(255, 255, 255, 0.08) 0 100%)"`;
   }
 
-  const scoreEntries = [...games]
-    .filter((game) => game.bestScore !== undefined)
-    .sort((a, b) => (b.bestScore ?? 0) - (a.bestScore ?? 0))
+  const xpEntries = [...games]
+    .filter((game) => game.xpEarned > 0)
+    .sort((a, b) => b.xpEarned - a.xpEarned)
     .slice(0, 6);
-  const maxScore = Math.max(1, ...scoreEntries.map((game) => game.bestScore ?? 0));
-  const scoreRows = scoreEntries.length
-    ? scoreEntries
+  const maxXP = Math.max(1, ...xpEntries.map((game) => game.xpEarned));
+  const scoreRows = xpEntries.length
+    ? xpEntries
         .map((game) => {
-          const score = game.bestScore ?? 0;
-          const percent = Math.max(6, Math.round((score / maxScore) * 100));
+          const xp = game.xpEarned;
+          const percent = Math.max(6, Math.round((xp / maxXP) * 100));
           return `
             <div class="score-row">
               <div class="score-info">
@@ -916,12 +917,12 @@ function renderStats() {
                 <span class="muted small">${formatDuration(game.timePlayedMs)} joués</span>
               </div>
               <div class="score-bar"><span style="width:${percent}%"></span></div>
-              <div class="score-value">${formatNumber(score)}</div>
+              <div class="score-value">${formatNumber(xp)} XP</div>
             </div>
           `;
         })
         .join("")
-    : `<p class="muted">Aucun score enregistré pour le moment.</p>`;
+    : `<p class="muted">Aucune XP enregistrée pour le moment.</p>`;
 
   return `
     <section class="card stats-kpi">
@@ -1053,8 +1054,8 @@ function renderStats() {
       <div class="section-head">
         <div>
           <p class="eyebrow">Jeux</p>
-          <h2>Diagrammes & scores</h2>
-          <p class="muted">Répartition des jeux les plus joués et meilleurs scores.</p>
+          <h2>Diagrammes & XP</h2>
+          <p class="muted">Répartition des jeux les plus joués et XP générée.</p>
         </div>
       </div>
       <div class="diagram-grid">
@@ -1080,8 +1081,8 @@ function renderStats() {
         <article class="diagram-card">
           <div class="diagram-head">
             <div>
-              <h3>Meilleurs scores</h3>
-              <p class="muted small">Top jeux par score enregistré.</p>
+              <h3>XP générée</h3>
+              <p class="muted small">Top jeux par XP gagnée.</p>
             </div>
           </div>
           <div class="score-list">
