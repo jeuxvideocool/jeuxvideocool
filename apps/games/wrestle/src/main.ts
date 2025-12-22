@@ -2,7 +2,7 @@ import "./style.css";
 import "@core/launch-menu.css";
 import Matter from "matter-js";
 import { clamp, rand, withBasePath } from "@core/utils";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { emitEvent } from "@core/events";
 import { getGameConfig, getThemes } from "@config";
 import { attachProgressionListener } from "@progression";
@@ -80,17 +80,31 @@ const keys = {
   p2: config?.input.keys.p2Jump || "ArrowUp",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    actionA: keys.p1,
-    actionALabel: "P1",
-    actionB: keys.p2,
-    actionBLabel: "P2",
+  touch: {
+    mapping: {
+      actionA: keys.p1,
+      actionALabel: "P1",
+      actionB: keys.p2,
+      actionBLabel: "P2",
+    },
+    showPad: false,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    actions: [
+      { code: keys.p1, trigger: "tiltLeft" },
+      { code: keys.p2, trigger: "tiltRight" },
+    ],
+  },
+  hints: {
+    touch: "Boutons P1 / P2.",
+    motion: "Incliner à gauche/droite pour P1/P2.",
+  },
 });
 
 function resize() {
@@ -428,6 +442,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", () => {
     startGame();

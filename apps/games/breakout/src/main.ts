@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { chance, clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -108,30 +108,32 @@ const controls = {
   launch: config?.input.keys.launch || "Space",
 };
 
-const isMobile =
-  typeof window !== "undefined" &&
-  (window.matchMedia?.("(pointer: coarse)")?.matches || navigator.maxTouchPoints > 0);
-
-const mobileControls = isMobile
-  ? createMobileControls({
-      container: document.body,
-      input,
-      mapping: {
-        left: controls.left,
-        right: controls.right,
-        actionA: controls.launch,
-        actionALabel: "Lancer",
-      },
-      autoShow: false,
-      showPad: true,
-      gestureEnabled: false,
-      showOnDesktop: false,
-    })
-  : {
-      show: () => {},
-      hide: () => {},
-      dispose: () => {},
-    };
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
+  container: document.body,
+  input,
+  touch: {
+    mapping: {
+      left: controls.left,
+      right: controls.right,
+      actionA: controls.launch,
+      actionALabel: "Lancer",
+    },
+    showPad: true,
+    gestureEnabled: false,
+  },
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+    },
+    actions: [{ code: controls.launch, trigger: "shake" }],
+  },
+  hints: {
+    touch: "Flèches pour déplacer, bouton Lancer.",
+    motion: "Incliner pour déplacer, secouer pour lancer.",
+  },
+});
 
 const baseRows = config?.difficultyParams.rows ?? 6;
 const baseCols = config?.difficultyParams.cols ?? 10;
@@ -1175,6 +1177,7 @@ function showOverlay(title: string, body: string, showStart = true, lastScore?: 
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   document.getElementById("launch-start")?.addEventListener("click", startGame);
   document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) => {
     btn.addEventListener("click", () => {

@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { chance, clamp, lerp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -43,15 +43,26 @@ const controls = {
   restart: config?.input.keys.restart || "KeyR",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    actionA: controls.action,
-    actionALabel: "Frapper",
+  touch: {
+    mapping: {
+      actionA: controls.action,
+      actionALabel: "Frapper",
+    },
+    showPad: false,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    actions: [{ code: controls.action, trigger: "shake" }],
+  },
+  hints: {
+    touch: "Bouton Frapper.",
+    motion: "Secouer pour frapper.",
+  },
 });
 
 type Phase = "angle" | "power" | "flight" | "end";
@@ -264,6 +275,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
 }

@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -46,11 +46,6 @@ ui.appendChild(overlay);
 
 const CHASE_OFF = 10;
 const CHASE_ON = 3;
-let mobileControls:
-  | {
-      dispose: () => void;
-    }
-  | null = null;
 
 const controls = {
   up: config?.input.keys.up || "ArrowUp",
@@ -59,11 +54,11 @@ const controls = {
   right: config?.input.keys.right || "ArrowRight",
   attack: (config as any)?.input?.keys?.attack || (config as any)?.input?.keys?.interact || "Space",
 };
-function ensureMobileControls() {
-  if (mobileControls) return;
-  mobileControls = createMobileControls({
-    container: document.body,
-    input,
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
+  container: document.body,
+  input,
+  touch: {
     mapping: {
       up: controls.up,
       down: controls.down,
@@ -72,10 +67,22 @@ function ensureMobileControls() {
       actionA: controls.attack,
       actionALabel: "Frappe",
     },
-    autoShow: false,
-    showPad: false,
-  });
-}
+    showPad: true,
+    gestureEnabled: false,
+  },
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+      y: { negative: controls.up, positive: controls.down },
+    },
+    actions: [{ code: controls.attack, trigger: "shake" }],
+  },
+  hints: {
+    touch: "Flèches pour bouger, bouton Frappe.",
+    motion: "Incliner pour bouger, secouer pour frapper.",
+  },
+});
 
 type Point = { x: number; y: number };
 type Item = Point & { collected: boolean };
@@ -127,8 +134,7 @@ function startGame() {
     showOverlay("Config manquante", "Ajoute configs/games/quest.config.json", false);
     return;
   }
-  ensureMobileControls();
-  mobileControls?.show();
+  mobileControls.show();
   state.running = true;
   state.baseTime = config?.difficultyParams.timeLimitSeconds ?? 60;
   state.timeDecay = 5;
@@ -206,9 +212,7 @@ function spawnEnemies(count: number) {
 function endGame(win: boolean) {
   state.running = false;
   loop.stop();
-  mobileControls?.hide();
-  mobileControls?.dispose();
-  mobileControls = null;
+  mobileControls.hide();
   const eventType = win ? "QUEST_COMPLETE" : "SESSION_FAIL";
   emitEvent({ type: eventType, gameId: GAME_ID, payload: { remaining: state.timer } });
   updateGameState(GAME_ID, config?.saveSchemaVersion ?? 1, (game) => {
@@ -222,7 +226,7 @@ function endGame(win: boolean) {
 }
 
 function showOverlay(title: string, body: string, showStart = true) {
-  mobileControls?.hide();
+  mobileControls.hide();
   const description =
     body && body.trim().length
       ? body
@@ -292,6 +296,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
 }

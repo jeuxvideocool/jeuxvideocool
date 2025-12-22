@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { chance, clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -41,19 +41,34 @@ const controls = {
   dash: config?.input.keys.dash || "Space",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    up: controls.up,
-    down: controls.down,
-    left: controls.left,
-    right: controls.right,
-    actionA: controls.dash,
-    actionALabel: "Dash",
+  touch: {
+    mapping: {
+      up: controls.up,
+      down: controls.down,
+      left: controls.left,
+      right: controls.right,
+      actionA: controls.dash,
+      actionALabel: "Dash",
+    },
+    showPad: true,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+      y: { negative: controls.up, positive: controls.down },
+    },
+    actions: [{ code: controls.dash, trigger: "shake" }],
+  },
+  hints: {
+    touch: "Flèches pour bouger, bouton Dash.",
+    motion: "Incliner pour bouger, secouer pour dash.",
+  },
 });
 
 type Obstacle = { x: number; y: number; size: number; speed: number };
@@ -218,6 +233,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
   wireModePicker();

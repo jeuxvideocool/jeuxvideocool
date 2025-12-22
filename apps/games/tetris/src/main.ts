@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -109,21 +109,39 @@ const keys = {
   drop: config?.input.keys.drop || "Space",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    left: keys.left,
-    right: keys.right,
-    down: keys.down,
-    up: keys.rotate,
-    actionA: keys.rotate,
-    actionALabel: "Rotate",
-    actionB: keys.drop,
-    actionBLabel: "Drop",
+  touch: {
+    mapping: {
+      left: keys.left,
+      right: keys.right,
+      down: keys.down,
+      up: keys.rotate,
+      actionA: keys.rotate,
+      actionALabel: "Rotate",
+      actionB: keys.drop,
+      actionBLabel: "Drop",
+    },
+    showPad: true,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    axis: {
+      x: { negative: keys.left, positive: keys.right },
+      y: { positive: keys.down },
+    },
+    actions: [
+      { code: keys.rotate, trigger: "tiltBack" },
+      { code: keys.drop, trigger: "shake" },
+    ],
+  },
+  hints: {
+    touch: "Flèches pour déplacer, boutons Rotate/Drop.",
+    motion: "Incliner pour déplacer, pencher vers l'avant pour descendre, basculer vers l'arrière pour tourner, secouer pour drop.",
+  },
 });
 
 const keyLatch: Record<string, boolean> = {};
@@ -506,6 +524,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
 }

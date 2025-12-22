@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -39,18 +39,32 @@ const controls = {
   boost: config?.input.keys.boost || "ArrowUp",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    left: controls.left,
-    right: controls.right,
-    up: controls.boost,
-    actionA: controls.boost,
-    actionALabel: "Boost",
+  touch: {
+    mapping: {
+      left: controls.left,
+      right: controls.right,
+      up: controls.boost,
+      actionA: controls.boost,
+      actionALabel: "Boost",
+    },
+    showPad: true,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+    },
+    actions: [{ code: controls.boost, trigger: "tiltForward", mode: "hold", threshold: 16 }],
+  },
+  hints: {
+    touch: "Flèches pour changer de voie, bouton Boost.",
+    motion: "Incliner pour changer de voie, pencher vers l'avant pour booster.",
+  },
 });
 
 const carSprite = new Image();
@@ -364,6 +378,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
 }

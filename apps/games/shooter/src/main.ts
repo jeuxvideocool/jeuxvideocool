@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -57,19 +57,31 @@ const controls = {
   altShoot: "Space",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    up: controls.up,
-    down: controls.down,
-    left: controls.left,
-    right: controls.right,
-    actionA: controls.shoot,
-    actionALabel: "Tir",
+  touch: {
+    mapping: {
+      left: controls.left,
+      right: controls.right,
+      actionA: controls.shoot,
+      actionALabel: "Tir",
+    },
+    showPad: true,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+    },
+    actions: [{ code: controls.shoot, trigger: "tiltForward", mode: "hold", threshold: 14 }],
+  },
+  hints: {
+    touch: "Flèches pour bouger, bouton Tir.",
+    motion: "Incliner pour bouger, pencher vers l'avant pour tirer.",
+  },
 });
 
 const difficultyPresets = {
@@ -251,6 +263,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
   document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) => {

@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -45,17 +45,31 @@ const controls = {
   right: config?.input.keys.right || "ArrowRight",
 };
 
-const mobileControls = createMobileControls({
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
   container: document.body,
   input,
-  mapping: {
-    up: controls.up,
-    down: controls.down,
-    left: controls.left,
-    right: controls.right,
+  touch: {
+    mapping: {
+      up: controls.up,
+      down: controls.down,
+      left: controls.left,
+      right: controls.right,
+    },
+    showPad: true,
+    gestureEnabled: false,
   },
-  autoShow: false,
-  showPad: false,
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+      y: { negative: controls.up, positive: controls.down },
+    },
+  },
+  hints: {
+    touch: "Flèches pour bouger.",
+    motion: "Incliner pour bouger.",
+  },
 });
 
 type Pickup = { x: number; y: number; collected: boolean };
@@ -178,6 +192,7 @@ function showOverlay(title: string, body: string, showStart = true) {
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   const play = document.getElementById("launch-start");
   play?.addEventListener("click", startGame);
 }

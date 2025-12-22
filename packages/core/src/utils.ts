@@ -15,3 +15,16 @@ export function withBasePath(path: string, basePath: string) {
   const suffix = path.startsWith("/") ? path : `/${path}`;
   return `${normalizedBase}${suffix}`;
 }
+
+export function isMobileDevice() {
+  if (typeof window === "undefined") return false;
+  const ua = navigator?.userAgent || "";
+  const isUA =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Silk/i.test(ua);
+  const isSmallScreen = Math.max(window.innerWidth, window.innerHeight) <= 1024;
+  const isTouch =
+    "ontouchstart" in window ||
+    navigator?.maxTouchPoints > 0 ||
+    Boolean(window.matchMedia?.("(pointer: coarse)")?.matches);
+  return isUA || (isSmallScreen && isTouch);
+}

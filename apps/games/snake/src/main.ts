@@ -1,6 +1,6 @@
 import "./style.css";
 import "@core/launch-menu.css";
-import { createHybridInput, createMobileControls } from "@core/input";
+import { createHybridInput, createMobileControlManager } from "@core/input";
 import { createGameLoop } from "@core/loop";
 import { chance, clamp, rand, withBasePath } from "@core/utils";
 import { emitEvent } from "@core/events";
@@ -53,32 +53,35 @@ const controls = {
   dash: config?.input.keys.dash || "Space",
 };
 
-const isMobile =
-  typeof window !== "undefined" &&
-  (window.matchMedia?.("(pointer: coarse)")?.matches || navigator.maxTouchPoints > 0);
-
-const mobileControls = isMobile
-  ? createMobileControls({
-      container: document.body,
-      input,
-      mapping: {
-        up: controls.up,
-        down: controls.down,
-        left: controls.left,
-        right: controls.right,
-        actionA: controls.dash,
-        actionALabel: "Boost",
-      },
-      autoShow: false,
-      showPad: true,
-      gestureEnabled: false,
-      showOnDesktop: false,
-    })
-  : {
-      show: () => {},
-      hide: () => {},
-      dispose: () => {},
-    };
+const mobileControls = createMobileControlManager({
+  gameId: GAME_ID,
+  container: document.body,
+  input,
+  touch: {
+    mapping: {
+      up: controls.up,
+      down: controls.down,
+      left: controls.left,
+      right: controls.right,
+      actionA: controls.dash,
+      actionALabel: "Boost",
+    },
+    showPad: true,
+    gestureEnabled: false,
+  },
+  motion: {
+    input,
+    axis: {
+      x: { negative: controls.left, positive: controls.right },
+      y: { negative: controls.up, positive: controls.down },
+    },
+    actions: [{ code: controls.dash, trigger: "shake" }],
+  },
+  hints: {
+    touch: "Flèches pour diriger, bouton Boost.",
+    motion: "Incliner pour diriger, secouer pour booster.",
+  },
+});
 
 const difficultyPresets = {
   easy: {
@@ -594,6 +597,7 @@ function showOverlay(title: string, body: string, showStart = true, lastScore?: 
       </div>
     </div>
   `;
+  mobileControls.attachOverlay(overlay);
   document.getElementById("launch-start")?.addEventListener("click", startGame);
   document.querySelectorAll<HTMLButtonElement>(".diff-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
