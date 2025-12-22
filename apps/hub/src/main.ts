@@ -482,31 +482,30 @@ function renderHero() {
     registry.games.find((g) => g.id === save.playerProfile.lastPlayedGameId)?.title;
   lastLevel = save.globalLevel;
   const mostPlayed = mostPlayedGameTitle(save);
-  const cloudBadge = `<span class="chip success">Cloud : ${formatCloudIdentity()}</span>`;
+  const displayName = cloudState.user ? formatCloudIdentity() : save.playerProfile.name || "Joueur";
+  const heroSubtitle = lastGame ? `Dernier jeu : ${lastGame}` : "Aucun jeu lancé";
 
   return `
-    <header class="card hero">
+    <header class="card hero hero-premium">
       <div class="hero-glow"></div>
-      <div class="hero-top">
-        <div class="profile">
+      <div class="hero-top hero-premium-top">
+        <div class="profile hero-profile">
           ${renderAvatar(
             save.playerProfile.avatarUrl,
             save.playerProfile.avatar,
             save.playerProfile.avatarStoragePath,
           )}
-          <div>
+          <div class="hero-identity">
             <p class="eyebrow">Arcade Galaxy</p>
-            <h1>${save.playerProfile.name || "Joueur"}</h1>
-            <p class="muted">${lastGame ? `Dernier jeu : ${lastGame}` : "Aucun jeu lancé"}</p>
-            <div class="chips">
-              ${cloudBadge}
-              <span class="chip">⏱ ${totalTime}</span>
-              <span class="chip">🎮 ${sessionCount} sessions</span>
-              <button class="btn primary strong profile-inline" id="open-profile">Voir le profil</button>
+            <h1>${displayName}</h1>
+            <p class="hero-subtitle">${heroSubtitle}</p>
+            <div class="hero-badges">
+              <span class="hero-badge">⏱ ${totalTime}</span>
+              <span class="hero-badge">🎮 ${sessionCount} sessions</span>
             </div>
           </div>
         </div>
-        <div class="stat-grid compact">
+        <div class="stat-grid compact hero-stats">
           <div class="stat-card">
             <p class="label">Niveau</p>
             <strong>${save.globalLevel}</strong>
@@ -530,7 +529,7 @@ function renderHero() {
         </div>
       </div>
       ${renderAlexBanner(save)}
-      <div class="level-row ${levelUp ? "level-up" : ""}">
+      <div class="level-row hero-progress ${levelUp ? "level-up" : ""}">
         <div class="level-label">Progression niveau</div>
         <div class="xp-bar" style="${xpBarStyle}">
           <div class="xp-fill"></div>
@@ -539,7 +538,7 @@ function renderHero() {
           snapshot.nextLevelXP - save.globalXP
         } XP restants</div>
       </div>
-      <p class="muted small hero-note">Profil éditable depuis la page dédiée.</p>
+      <p class="muted small hero-note">Profil accessible via l'onglet Profil.</p>
     </header>
   `;
 }

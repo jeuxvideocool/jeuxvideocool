@@ -1,4 +1,4 @@
-import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c as Oe,h as De,i as qe,r as He,j as Ve,k as _e,A as ze}from"./index-D7FXfqsP.js";import{subscribe as We,getAuthState as Ke,connectCloud as V,uploadAvatarImage as Ye,removeAvatarImage as Qe,requestCloudResetSync as Ze,saveCloud as be,syncCloudToLocal as es,getAvatarPublicUrl as de}from"./cloud-RhfiTCPq.js";const re=document.getElementById("app"),w=Re(),D=Ne(),$e=Xe(),pe=Ge();let C="hub",v,ie=1,ue=!1,o=Ke(),Q="",G="all",O=!1,B=null,_=null,U=!1;function Pe(){var a;const e=o.user;if(!e)return"connecté";const s=(a=e.user_metadata)==null?void 0:a.identifier,t=e.email;return s||(t!=null&&t.endsWith("@user.local")?t.replace("@user.local",""):t||"connecté")}function Se(e){return e?"Image stockée sur Supabase.":o.ready?o.user?"Choisis une image, elle sera envoyée sur Supabase.":"Connecte-toi au cloud pour utiliser une image.":"Supabase non configuré (.env)."}Je();Ee(xe(w.hubTheme));We(e=>{o=e,M()});Fe("ACHIEVEMENT_UNLOCKED",e=>{var a;const s=(a=e.payload)==null?void 0:a.achievementId,t=D.achievements.find(l=>l.id===s);t&&f(`Succès débloqué : ${t.title}`,"success"),s===ze.achievementId&&M()});function xe(e){return e?pe.find(s=>s.id===e):pe[0]}function Ee(e){if(!e)return;const s=document.documentElement.style;s.setProperty("--color-primary",e.colors.primary),s.setProperty("--color-secondary",e.colors.secondary),s.setProperty("--color-accent",e.colors.accent),s.setProperty("--color-bg",e.colors.background),s.setProperty("--color-surface",e.colors.surface),s.setProperty("--color-text",e.colors.text),s.setProperty("--color-muted",e.colors.muted),e.gradient&&s.setProperty("--hero-gradient",e.gradient)}function f(e,s="info"){const t=document.createElement("div");t.className=`toast ${s}`,t.textContent=e,document.body.appendChild(t),requestAnimationFrame(()=>t.classList.add("visible")),setTimeout(()=>{t.classList.remove("visible"),setTimeout(()=>t.remove(),300)},2600)}function Z(e){return e?new Date(e).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"Jamais"}function A(e){if(!e)return"0m";const s=Math.floor(e/1e3),t=Math.floor(s/3600),a=Math.floor(s%3600/60),l=s%60;return t?`${t}h ${a}m`:a?`${a}m ${l}s`:`${l}s`}function X(e){return new Intl.NumberFormat("fr-FR").format(e)}function ss(e){return e.trim().slice(0,3).toUpperCase()}function ve(e,s){if(e.length<2)return null;const t=e.map(c=>Number.isFinite(c)?c:0),a=100,l=42,n=4,S=Math.max(...t,1),h=Math.min(...t,0),y=S-h||1,P=(a-n*2)/Math.max(1,t.length-1),r=t.map((c,p)=>{const $=n+P*p,N=(c-h)/y,x=n+(l-n*2)*(1-N);return{x:$,y:x}}),b=r.map(c=>`${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(" "),m=`${n},${l-n} ${b} ${a-n},${l-n}`,T=s===void 0?r.length-1:s,L=Math.max(0,Math.min(T,r.length-1)),g=Math.floor(L),I=L-g,E=r.slice(0,g+1);if(I>0&&g<r.length-1){const c=r[g],p=r[g+1];E.push({x:c.x+(p.x-c.x)*I,y:c.y+(p.y-c.y)*I})}const k=E.map(c=>`${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(" "),d=E[E.length-1];return{points:b,area:m,progress:k,marker:d}}function me(e,s){return e?`
+import{a as Ne,b as Re,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c as Oe,h as De,i as qe,r as He,j as _e,k as Ve,A as ze}from"./index-D7FXfqsP.js";import{subscribe as We,getAuthState as Ke,connectCloud as _,uploadAvatarImage as Ye,removeAvatarImage as Qe,requestCloudResetSync as Ze,saveCloud as be,syncCloudToLocal as es,getAvatarPublicUrl as de}from"./cloud-RhfiTCPq.js";const re=document.getElementById("app"),w=Ne(),D=Re(),$e=Xe(),pe=Ge();let C="hub",m,ie=1,ue=!1,o=Ke(),Q="",G="all",O=!1,U=null,V=null,B=!1;function Pe(){var a;const e=o.user;if(!e)return"connecté";const s=(a=e.user_metadata)==null?void 0:a.identifier,t=e.email;return s||(t!=null&&t.endsWith("@user.local")?t.replace("@user.local",""):t||"connecté")}function Se(e){return e?"Image stockée sur Supabase.":o.ready?o.user?"Choisis une image, elle sera envoyée sur Supabase.":"Connecte-toi au cloud pour utiliser une image.":"Supabase non configuré (.env)."}Je();Ee(xe(w.hubTheme));We(e=>{o=e,M()});Fe("ACHIEVEMENT_UNLOCKED",e=>{var a;const s=(a=e.payload)==null?void 0:a.achievementId,t=D.achievements.find(l=>l.id===s);t&&y(`Succès débloqué : ${t.title}`,"success"),s===ze.achievementId&&M()});function xe(e){return e?pe.find(s=>s.id===e):pe[0]}function Ee(e){if(!e)return;const s=document.documentElement.style;s.setProperty("--color-primary",e.colors.primary),s.setProperty("--color-secondary",e.colors.secondary),s.setProperty("--color-accent",e.colors.accent),s.setProperty("--color-bg",e.colors.background),s.setProperty("--color-surface",e.colors.surface),s.setProperty("--color-text",e.colors.text),s.setProperty("--color-muted",e.colors.muted),e.gradient&&s.setProperty("--hero-gradient",e.gradient)}function y(e,s="info"){const t=document.createElement("div");t.className=`toast ${s}`,t.textContent=e,document.body.appendChild(t),requestAnimationFrame(()=>t.classList.add("visible")),setTimeout(()=>{t.classList.remove("visible"),setTimeout(()=>t.remove(),300)},2600)}function Z(e){return e?new Date(e).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}):"Jamais"}function A(e){if(!e)return"0m";const s=Math.floor(e/1e3),t=Math.floor(s/3600),a=Math.floor(s%3600/60),l=s%60;return t?`${t}h ${a}m`:a?`${a}m ${l}s`:`${l}s`}function X(e){return new Intl.NumberFormat("fr-FR").format(e)}function ss(e){return e.trim().slice(0,3).toUpperCase()}function ve(e,s){if(e.length<2)return null;const t=e.map(c=>Number.isFinite(c)?c:0),a=100,l=42,r=4,S=Math.max(...t,1),h=Math.min(...t,0),b=S-h||1,P=(a-r*2)/Math.max(1,t.length-1),n=t.map((c,p)=>{const $=r+P*p,R=(c-h)/b,x=r+(l-r*2)*(1-R);return{x:$,y:x}}),f=n.map(c=>`${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(" "),u=`${r},${l-r} ${f} ${a-r},${l-r}`,T=s===void 0?n.length-1:s,L=Math.max(0,Math.min(T,n.length-1)),g=Math.floor(L),I=L-g,E=n.slice(0,g+1);if(I>0&&g<n.length-1){const c=n[g],p=n[g+1];E.push({x:c.x+(p.x-c.x)*I,y:c.y+(p.y-c.y)*I})}const k=E.map(c=>`${c.x.toFixed(2)},${c.y.toFixed(2)}`).join(" "),d=E[E.length-1];return{points:f,area:u,progress:k,marker:d}}function me(e,s){return e?`
     <div class="curve-chart">
       <svg viewBox="0 0 100 42" preserveAspectRatio="none" aria-hidden="true">
         <defs>
@@ -17,7 +17,7 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
         <circle class="chart-marker" cx="${e.marker.x}" cy="${e.marker.y}" r="2.6" />
       </svg>
     </div>
-  `:'<div class="chart-empty">Pas encore assez de données.</div>'}function oe(e){const s=Object.entries(e.games||{});if(!s.length)return{title:"Aucun jeu",duration:"0m"};const[t,a]=s.sort((n,S)=>(S[1].timePlayedMs||0)-(n[1].timePlayedMs||0))[0],l=w.games.find(n=>n.id===t);return{title:(l==null?void 0:l.title)||t,duration:A(a.timePlayedMs)}}function ts(e){return/^https?:\/\//i.test(e)||e.startsWith("blob:")||e.startsWith("data:")}function ke(e,s){if(e){const t=e.trim();return ts(t)?t:de(s||t)||null}return de(s)||null}function as(e,s,t){const a=(s||"🎮").slice(0,4),l=ke(e,t);return`<div class="avatar ${l?"has-image":""}">${l?`<img src="${l}" alt="Avatar" />`:a}</div>`}function Ae(){if(U)return null;const e=ke(v.save.playerProfile.avatarUrl,v.save.playerProfile.avatarStoragePath);return _||e}function J(){_&&(URL.revokeObjectURL(_),_=null)}function ne(){const e=document.getElementById("profile-avatar-preview"),s=document.getElementById("profile-avatar-helper"),t=document.getElementById("profile-avatar-clear"),a=Ae(),l=v.save.playerProfile.avatar||"🎮",n=!!a;e&&(e.classList.toggle("has-image",n),e.innerHTML=n?`<img src="${a}" alt="Avatar" />`:l),s&&(s.textContent=Se(n)),t&&(t.disabled=!n)}function ge(e,s){const t=e.trim()||"Joueur",a=s.trim()||"🎮",l=o.user?v.save.playerProfile.name:t;le(n=>{n.playerProfile.name=l.slice(0,18),n.playerProfile.avatar=a.slice(0,4),n.playerProfile.avatarType=n.playerProfile.avatarUrl?"image":"emoji"}),M()}function rs(){const e=qe(),s=new Blob([e],{type:"application/json"}),t=URL.createObjectURL(s),a=document.createElement("a");a.href=t,a.download="nintendo-hub-save.json",a.click(),URL.revokeObjectURL(t),f("Sauvegarde exportée","success")}async function ns(e){const s=_e(e);if(s.success)if(f("Import réussi","success"),J(),B=null,U=!1,M(),o.user)try{const t=await be(v.save,{allowEmpty:!0});f(t?"Sauvegarde cloud remplacée":o.error||"Erreur cloud",t?"success":"error")}catch(t){console.error("Cloud save failed after import",t),f("Erreur cloud","error")}else o.ready&&f("Connecte-toi pour envoyer l'import sur le cloud","info");else f(s.error||"Import impossible","error")}function he(e){Ze(),e?(He(e),f(`Progression de ${e} réinitialisée`,"info")):(Ve(),f("Progression globale réinitialisée","info")),J(),B=null,U=!1,M()}function is(e){le(s=>{const t=new Set(s.favorites||[]);t.has(e)?t.delete(e):t.add(e),s.favorites=Array.from(t)}),M()}async function ls(){const e=fe();await be(e.save)?(v=e,f("Sauvegarde envoyée sur le cloud","success")):o.error&&f(o.error,"error")}async function os(){await es()?(f("Sauvegarde cloud importée","success"),J(),B=null,U=!1,M()):o.error?f(o.error,"error"):f("Import cloud impossible","error")}function cs(){return`
+  `:'<div class="chart-empty">Pas encore assez de données.</div>'}function oe(e){const s=Object.entries(e.games||{});if(!s.length)return{title:"Aucun jeu",duration:"0m"};const[t,a]=s.sort((r,S)=>(S[1].timePlayedMs||0)-(r[1].timePlayedMs||0))[0],l=w.games.find(r=>r.id===t);return{title:(l==null?void 0:l.title)||t,duration:A(a.timePlayedMs)}}function ts(e){return/^https?:\/\//i.test(e)||e.startsWith("blob:")||e.startsWith("data:")}function ke(e,s){if(e){const t=e.trim();return ts(t)?t:de(s||t)||null}return de(s)||null}function as(e,s,t){const a=(s||"🎮").slice(0,4),l=ke(e,t);return`<div class="avatar ${l?"has-image":""}">${l?`<img src="${l}" alt="Avatar" />`:a}</div>`}function Ae(){if(B)return null;const e=ke(m.save.playerProfile.avatarUrl,m.save.playerProfile.avatarStoragePath);return V||e}function J(){V&&(URL.revokeObjectURL(V),V=null)}function ne(){const e=document.getElementById("profile-avatar-preview"),s=document.getElementById("profile-avatar-helper"),t=document.getElementById("profile-avatar-clear"),a=Ae(),l=m.save.playerProfile.avatar||"🎮",r=!!a;e&&(e.classList.toggle("has-image",r),e.innerHTML=r?`<img src="${a}" alt="Avatar" />`:l),s&&(s.textContent=Se(r)),t&&(t.disabled=!r)}function ge(e,s){const t=e.trim()||"Joueur",a=s.trim()||"🎮",l=o.user?m.save.playerProfile.name:t;le(r=>{r.playerProfile.name=l.slice(0,18),r.playerProfile.avatar=a.slice(0,4),r.playerProfile.avatarType=r.playerProfile.avatarUrl?"image":"emoji"}),M()}function rs(){const e=qe(),s=new Blob([e],{type:"application/json"}),t=URL.createObjectURL(s),a=document.createElement("a");a.href=t,a.download="nintendo-hub-save.json",a.click(),URL.revokeObjectURL(t),y("Sauvegarde exportée","success")}async function ns(e){const s=Ve(e);if(s.success)if(y("Import réussi","success"),J(),U=null,B=!1,M(),o.user)try{const t=await be(m.save,{allowEmpty:!0});y(t?"Sauvegarde cloud remplacée":o.error||"Erreur cloud",t?"success":"error")}catch(t){console.error("Cloud save failed after import",t),y("Erreur cloud","error")}else o.ready&&y("Connecte-toi pour envoyer l'import sur le cloud","info");else y(s.error||"Import impossible","error")}function he(e){Ze(),e?(He(e),y(`Progression de ${e} réinitialisée`,"info")):(_e(),y("Progression globale réinitialisée","info")),J(),U=null,B=!1,M()}function is(e){le(s=>{const t=new Set(s.favorites||[]);t.has(e)?t.delete(e):t.add(e),s.favorites=Array.from(t)}),M()}async function ls(){const e=fe();await be(e.save)?(m=e,y("Sauvegarde envoyée sur le cloud","success")):o.error&&y(o.error,"error")}async function os(){await es()?(y("Sauvegarde cloud importée","success"),J(),U=null,B=!1,M()):o.error?y(o.error,"error"):y("Import cloud impossible","error")}function cs(){return`
     <nav class="nav">
       <button class="nav-btn ${C==="hub"?"active":""}" data-tab="hub">Hub</button>
       <button class="nav-btn ${C==="achievements"?"active":""}" data-tab="achievements">Succès</button>
@@ -83,25 +83,23 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
         ${o.error?`<p class="status error">${o.error}</p>`:""}
       </header>
     </div>
-  `}function vs(){var r;const e=v.save,s=e.achievementsUnlocked.length,t=D.achievements.length,a=e.globalLevel>ie,l=`--progress:${v.levelProgress*100}%`,n=A(e.globalStats.timePlayedMs),S=e.globalStats.totalSessions,h=e.playerProfile.lastPlayedGameId&&((r=w.games.find(b=>b.id===e.playerProfile.lastPlayedGameId))==null?void 0:r.title);ie=e.globalLevel;const y=oe(e),P=`<span class="chip success">Cloud : ${Pe()}</span>`;return`
-    <header class="card hero">
+  `}function vs(){var f;const e=m.save,s=e.achievementsUnlocked.length,t=D.achievements.length,a=e.globalLevel>ie,l=`--progress:${m.levelProgress*100}%`,r=A(e.globalStats.timePlayedMs),S=e.globalStats.totalSessions,h=e.playerProfile.lastPlayedGameId&&((f=w.games.find(u=>u.id===e.playerProfile.lastPlayedGameId))==null?void 0:f.title);ie=e.globalLevel;const b=oe(e),P=o.user?Pe():e.playerProfile.name||"Joueur",n=h?`Dernier jeu : ${h}`:"Aucun jeu lancé";return`
+    <header class="card hero hero-premium">
       <div class="hero-glow"></div>
-      <div class="hero-top">
-        <div class="profile">
+      <div class="hero-top hero-premium-top">
+        <div class="profile hero-profile">
           ${as(e.playerProfile.avatarUrl,e.playerProfile.avatar,e.playerProfile.avatarStoragePath)}
-          <div>
+          <div class="hero-identity">
             <p class="eyebrow">Arcade Galaxy</p>
-            <h1>${e.playerProfile.name||"Joueur"}</h1>
-            <p class="muted">${h?`Dernier jeu : ${h}`:"Aucun jeu lancé"}</p>
-            <div class="chips">
-              ${P}
-              <span class="chip">⏱ ${n}</span>
-              <span class="chip">🎮 ${S} sessions</span>
-              <button class="btn primary strong profile-inline" id="open-profile">Voir le profil</button>
+            <h1>${P}</h1>
+            <p class="hero-subtitle">${n}</p>
+            <div class="hero-badges">
+              <span class="hero-badge">⏱ ${r}</span>
+              <span class="hero-badge">🎮 ${S} sessions</span>
             </div>
           </div>
         </div>
-        <div class="stat-grid compact">
+        <div class="stat-grid compact hero-stats">
           <div class="stat-card">
             <p class="label">Niveau</p>
             <strong>${e.globalLevel}</strong>
@@ -114,50 +112,50 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
           </div>
           <div class="stat-card">
             <p class="label">Temps global</p>
-            <strong>${n}</strong>
+            <strong>${r}</strong>
             <p class="muted small">Sessions ${S}</p>
           </div>
           <div class="stat-card">
             <p class="label">Jeu le plus joué</p>
-            <strong>${y.title}</strong>
-            <p class="muted small">Temps ${y.duration}</p>
+            <strong>${b.title}</strong>
+            <p class="muted small">Temps ${b.duration}</p>
           </div>
         </div>
       </div>
       ${ds(e)}
-      <div class="level-row ${a?"level-up":""}">
+      <div class="level-row hero-progress ${a?"level-up":""}">
         <div class="level-label">Progression niveau</div>
         <div class="xp-bar" style="${l}">
           <div class="xp-fill"></div>
         </div>
-        <div class="xp-values">${Math.floor(v.levelProgress*100)}% · ${v.nextLevelXP-e.globalXP} XP restants</div>
+        <div class="xp-values">${Math.floor(m.levelProgress*100)}% · ${m.nextLevelXP-e.globalXP} XP restants</div>
       </div>
-      <p class="muted small hero-note">Profil éditable depuis la page dédiée.</p>
+      <p class="muted small hero-note">Profil accessible via l'onglet Profil.</p>
     </header>
-  `}function ms(){const e=w.games.length?[]:["games.registry.json vide ou invalide"],s=new Set(v.save.favorites||[]),t=Array.from(new Set(w.games.flatMap(r=>r.tags||[]).filter(Boolean))).sort((r,b)=>r.localeCompare(b,"fr")),a=Q.trim().toLowerCase(),l=Q.replace(/"/g,"&quot;"),n=w.games.filter(r=>O?s.has(r.id):!0).filter(r=>G==="all"?!0:(r.tags||[]).includes(G)).filter(r=>a?r.title.toLowerCase().includes(a)||r.description.toLowerCase().includes(a)||r.id.toLowerCase().includes(a):!0).sort((r,b)=>{const m=Number(s.has(b.id))-Number(s.has(r.id));return m!==0?m:(r.order??0)-(b.order??0)}),S=n.map(r=>{$e.find(k=>k.id===r.id)||e.push(`Config manquante pour ${r.id}`);const m=v.save.games[r.id],T=m!=null&&m.lastPlayedAt?Z(m.lastPlayedAt):"Jamais",L=(m==null?void 0:m.bestScore)??null,g=A(m==null?void 0:m.timePlayedMs),I=ye(`/apps/games/${r.id}/`),E=s.has(r.id);return`
+  `}function ms(){const e=w.games.length?[]:["games.registry.json vide ou invalide"],s=new Set(m.save.favorites||[]),t=Array.from(new Set(w.games.flatMap(n=>n.tags||[]).filter(Boolean))).sort((n,f)=>n.localeCompare(f,"fr")),a=Q.trim().toLowerCase(),l=Q.replace(/"/g,"&quot;"),r=w.games.filter(n=>O?s.has(n.id):!0).filter(n=>G==="all"?!0:(n.tags||[]).includes(G)).filter(n=>a?n.title.toLowerCase().includes(a)||n.description.toLowerCase().includes(a)||n.id.toLowerCase().includes(a):!0).sort((n,f)=>{const u=Number(s.has(f.id))-Number(s.has(n.id));return u!==0?u:(n.order??0)-(f.order??0)}),S=r.map(n=>{$e.find(k=>k.id===n.id)||e.push(`Config manquante pour ${n.id}`);const u=m.save.games[n.id],T=u!=null&&u.lastPlayedAt?Z(u.lastPlayedAt):"Jamais",L=(u==null?void 0:u.bestScore)??null,g=A(u==null?void 0:u.timePlayedMs),I=ye(`/apps/games/${n.id}/`),E=s.has(n.id);return`
         <article class="card game-card">
           <div class="card-top">
-            <div class="pill accent">${r.previewEmoji||"🎮"} ${r.title}</div>
+            <div class="pill accent">${n.previewEmoji||"🎮"} ${n.title}</div>
             <div class="card-actions">
-              <button class="icon-btn favorite-btn ${E?"active":""}" data-game="${r.id}" title="${E?"Retirer des favoris":"Ajouter aux favoris"}">
+              <button class="icon-btn favorite-btn ${E?"active":""}" data-game="${n.id}" title="${E?"Retirer des favoris":"Ajouter aux favoris"}">
                 ${E?"★":"☆"}
               </button>
-              <span class="muted">MAJ ${r.lastUpdated||"N/A"}</span>
+              <span class="muted">MAJ ${n.lastUpdated||"N/A"}</span>
             </div>
           </div>
-          <p class="game-desc">${r.description}</p>
-          <div class="tags">${r.tags.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
+          <p class="game-desc">${n.description}</p>
+          <div class="tags">${n.tags.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
           <div class="meta-row">
             <span class="chip ghost">⏱ ${g}</span>
             <span class="chip ghost">🏆 ${L??"—"}</span>
             <span class="chip ghost">🕘 ${T}</span>
           </div>
           <div class="game-actions">
-            <a class="btn primary" href="${I}" data-game="${r.id}">Jouer</a>
-            <button class="btn ghost help-btn" data-help="${r.id}">Aide</button>
+            <a class="btn primary" href="${I}" data-game="${n.id}">Jouer</a>
+            <button class="btn ghost help-btn" data-help="${n.id}">Aide</button>
           </div>
         </article>
-      `}).join(""),h=O||G!=="all"||!!a,y=n.length,P=e.length?`<div class="alert">Configs manquantes : ${e.join(", ")}</div>`:"";return`
+      `}).join(""),h=O||G!=="all"||!!a,b=r.length,P=e.length?`<div class="alert">Configs manquantes : ${e.join(", ")}</div>`:"";return`
     <section>
       <div class="section-head">
         <div>
@@ -177,20 +175,20 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
         </div>
         <div class="filter group">
           <button class="chip-btn ${G==="all"?"active":""}" data-category="all">Toutes</button>
-          ${t.map(r=>`<button class="chip-btn ${r===G?"active":""}" data-category="${r}">${r}</button>`).join("")}
+          ${t.map(n=>`<button class="chip-btn ${n===G?"active":""}" data-category="${n}">${n}</button>`).join("")}
         </div>
         <div class="filter actions">
           <button class="chip-btn fav ${O?"active":""}" id="filter-fav">
             ★ Favoris ${s.size?`<span class="badge">${s.size}</span>`:""}
           </button>
-          <span class="muted small">${y}/${w.games.length} jeux</span>
+          <span class="muted small">${b}/${w.games.length} jeux</span>
           ${h?'<button class="chip-btn ghost" id="clear-filters">Réinitialiser</button>':""}
         </div>
       </div>
       ${P}
       <div class="grid">${S||"<p class='muted'>Aucun jeu ne correspond aux filtres.</p>"}</div>
     </section>
-  `}function gs(){const e=new Set(v.save.achievementsUnlocked),s=D.achievements.map(t=>`
+  `}function gs(){const e=new Set(m.save.achievementsUnlocked),s=D.achievements.map(t=>`
         <article class="card achievement ${e.has(t.id)?"unlocked":""}">
           <div class="pill accent">${t.icon||"⭐️"}</div>
           <div>
@@ -211,9 +209,9 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
       </div>
       <div class="stack">${s}</div>
     </section>
-  `}function hs(e){const s=e.condition;return s.type==="eventCount"?`${s.count}x ${s.event}`:s.type==="xpReached"?`${s.xp} XP globaux`:s.type==="gamesPlayed"?`${s.count} jeux différents`:s.type==="streak"?`${s.count} ${s.event} d'affilée`:s.type==="playerXpName"?`${s.xp} XP et pseudo "${s.name}"`:""}function fs(){const e=v.save,t=Object.entries(e.games||{}).map(([i,u])=>{var F;const j=((F=w.games.find(H=>H.id===i))==null?void 0:F.title)||i;return{id:i,title:j,timePlayedMs:u.timePlayedMs??0,bestScore:u.bestScore,lastPlayedAt:u.lastPlayedAt??0}}),a=t.length,l=e.globalStats.timePlayedMs??0,n=e.globalStats.totalSessions??0,S=n?l/n:0,h=e.globalStats.events.SESSION_WIN??0,y=e.globalStats.events.SESSION_FAIL??0,P=h+y>0?Math.round(h/(h+y)*100):0,r=e.achievementsUnlocked.length,b=D.achievements.length,m=b?Math.round(r/b*100):0,T=Math.max(0,...Object.values(e.globalStats.streaks||{})),L=[...t].sort((i,u)=>u.timePlayedMs-i.timePlayedMs),g=[...t].filter(i=>i.lastPlayedAt).sort((i,u)=>u.lastPlayedAt-i.lastPlayedAt)[0],I=(g==null?void 0:g.title)||"Aucun jeu",E=g!=null&&g.lastPlayedAt?Z(g.lastPlayedAt):"Jamais",k=oe(e),c=[...De().levels].sort((i,u)=>i.level-u.level),p=c.map(i=>i.requiredXP),N=Math.max(0,c.findIndex(i=>i.level===e.globalLevel))+v.levelProgress,x=ve(p,N),ce=Math.round(v.levelProgress*100),we=Math.max(0,v.nextLevelXP-e.globalXP),ee=[...t].filter(i=>i.lastPlayedAt).sort((i,u)=>i.lastPlayedAt-u.lastPlayedAt).slice(-8),se=ee.length>=2?ee:L.filter(i=>i.timePlayedMs>0).slice(0,8),Le=se.map(i=>i.timePlayedMs),Ie=ve(Le),je=ee.length>=2?"Derniers jeux lancés":"Top temps de jeu",Ce=se.length?`<div class="curve-labels">
+  `}function hs(e){const s=e.condition;return s.type==="eventCount"?`${s.count}x ${s.event}`:s.type==="xpReached"?`${s.xp} XP globaux`:s.type==="gamesPlayed"?`${s.count} jeux différents`:s.type==="streak"?`${s.count} ${s.event} d'affilée`:s.type==="playerXpName"?`${s.xp} XP et pseudo "${s.name}"`:""}function fs(){const e=m.save,t=Object.entries(e.games||{}).map(([i,v])=>{var F;const j=((F=w.games.find(H=>H.id===i))==null?void 0:F.title)||i;return{id:i,title:j,timePlayedMs:v.timePlayedMs??0,bestScore:v.bestScore,lastPlayedAt:v.lastPlayedAt??0}}),a=t.length,l=e.globalStats.timePlayedMs??0,r=e.globalStats.totalSessions??0,S=r?l/r:0,h=e.globalStats.events.SESSION_WIN??0,b=e.globalStats.events.SESSION_FAIL??0,P=h+b>0?Math.round(h/(h+b)*100):0,n=e.achievementsUnlocked.length,f=D.achievements.length,u=f?Math.round(n/f*100):0,T=Math.max(0,...Object.values(e.globalStats.streaks||{})),L=[...t].sort((i,v)=>v.timePlayedMs-i.timePlayedMs),g=[...t].filter(i=>i.lastPlayedAt).sort((i,v)=>v.lastPlayedAt-i.lastPlayedAt)[0],I=(g==null?void 0:g.title)||"Aucun jeu",E=g!=null&&g.lastPlayedAt?Z(g.lastPlayedAt):"Jamais",k=oe(e),c=[...De().levels].sort((i,v)=>i.level-v.level),p=c.map(i=>i.requiredXP),R=Math.max(0,c.findIndex(i=>i.level===e.globalLevel))+m.levelProgress,x=ve(p,R),ce=Math.round(m.levelProgress*100),we=Math.max(0,m.nextLevelXP-e.globalXP),ee=[...t].filter(i=>i.lastPlayedAt).sort((i,v)=>i.lastPlayedAt-v.lastPlayedAt).slice(-8),se=ee.length>=2?ee:L.filter(i=>i.timePlayedMs>0).slice(0,8),Le=se.map(i=>i.timePlayedMs),Ie=ve(Le),je=ee.length>=2?"Derniers jeux lancés":"Top temps de jeu",Ce=se.length?`<div class="curve-labels">
         ${se.map(i=>`<span title="${i.title}">${ss(i.title)}</span>`).join("")}
-      </div>`:"",q=t.reduce((i,u)=>i+u.timePlayedMs,0),z=L.filter(i=>i.timePlayedMs>0).slice(0,5),Me=z.reduce((i,u)=>i+u.timePlayedMs,0),W=Math.max(0,q-Me),K=["var(--chart-1)","var(--chart-2)","var(--chart-3)","var(--chart-4)","var(--chart-5)","var(--chart-6)"];let te="",Y="";if(q>0&&z.length){let i=0;const u=z.map((j,F)=>{const H=j.timePlayedMs/q*100,Ue=i;return i+=H,`${K[F%K.length]} ${Ue.toFixed(2)}% ${i.toFixed(2)}%`});if(W>0&&u.push(`var(--chart-6) ${i.toFixed(2)}% 100%`),te=`style="--donut: conic-gradient(${u.join(", ")})"`,Y=z.map((j,F)=>{const H=Math.round(j.timePlayedMs/q*100);return`
+      </div>`:"",q=t.reduce((i,v)=>i+v.timePlayedMs,0),z=L.filter(i=>i.timePlayedMs>0).slice(0,5),Me=z.reduce((i,v)=>i+v.timePlayedMs,0),W=Math.max(0,q-Me),K=["var(--chart-1)","var(--chart-2)","var(--chart-3)","var(--chart-4)","var(--chart-5)","var(--chart-6)"];let te="",Y="";if(q>0&&z.length){let i=0;const v=z.map((j,F)=>{const H=j.timePlayedMs/q*100,Be=i;return i+=H,`${K[F%K.length]} ${Be.toFixed(2)}% ${i.toFixed(2)}%`});if(W>0&&v.push(`var(--chart-6) ${i.toFixed(2)}% 100%`),te=`style="--donut: conic-gradient(${v.join(", ")})"`,Y=z.map((j,F)=>{const H=Math.round(j.timePlayedMs/q*100);return`
           <div class="legend-item">
             <span class="legend-dot" style="--dot:${K[F%K.length]}"></span>
             <div>
@@ -229,14 +227,14 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
             <p class="muted small">${A(W)} · ${j}%</p>
           </div>
         </div>
-      `}}else Y='<p class="muted">Pas encore de temps de jeu enregistré.</p>',te='style="--donut: conic-gradient(rgba(255, 255, 255, 0.08) 0 100%)"';const ae=[...t].filter(i=>i.bestScore!==void 0).sort((i,u)=>(u.bestScore??0)-(i.bestScore??0)).slice(0,6),Te=Math.max(1,...ae.map(i=>i.bestScore??0)),Be=ae.length?ae.map(i=>{const u=i.bestScore??0,j=Math.max(6,Math.round(u/Te*100));return`
+      `}}else Y='<p class="muted">Pas encore de temps de jeu enregistré.</p>',te='style="--donut: conic-gradient(rgba(255, 255, 255, 0.08) 0 100%)"';const ae=[...t].filter(i=>i.bestScore!==void 0).sort((i,v)=>(v.bestScore??0)-(i.bestScore??0)).slice(0,6),Te=Math.max(1,...ae.map(i=>i.bestScore??0)),Ue=ae.length?ae.map(i=>{const v=i.bestScore??0,j=Math.max(6,Math.round(v/Te*100));return`
             <div class="score-row">
               <div class="score-info">
                 <strong>${i.title}</strong>
                 <span class="muted small">${A(i.timePlayedMs)} joués</span>
               </div>
               <div class="score-bar"><span style="width:${j}%"></span></div>
-              <div class="score-value">${X(u)}</div>
+              <div class="score-value">${X(v)}</div>
             </div>
           `}).join(""):'<p class="muted">Aucun score enregistré pour le moment.</p>';return`
     <section class="card stats-kpi">
@@ -265,8 +263,8 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
             <span class="kpi-icon">🎮</span>
             <span class="kpi-label">Sessions</span>
           </div>
-          <strong>${X(n)}</strong>
-          <p class="muted small">${h} victoires · ${y} défaites</p>
+          <strong>${X(r)}</strong>
+          <p class="muted small">${h} victoires · ${b} défaites</p>
         </div>
         <div class="kpi-card" style="--kpi-accent: var(--chart-3)">
           <div class="kpi-top">
@@ -289,8 +287,8 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
             <span class="kpi-icon">🏆</span>
             <span class="kpi-label">Succès</span>
           </div>
-          <strong>${r}/${b}</strong>
-          <p class="muted small">${m}% complétés</p>
+          <strong>${n}/${f}</strong>
+          <p class="muted small">${u}% complétés</p>
         </div>
         <div class="kpi-card" style="--kpi-accent: var(--chart-6)">
           <div class="kpi-top">
@@ -316,7 +314,7 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
           <div class="curve-head">
             <div>
               <h3>Niveaux & XP</h3>
-              <p class="muted small">Prochain niveau : ${X(v.nextLevelXP)} XP</p>
+              <p class="muted small">Prochain niveau : ${X(m.nextLevelXP)} XP</p>
             </div>
             <span class="chip ghost">+${X(we)} XP</span>
           </div>
@@ -349,7 +347,7 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
           <div class="curve-metrics">
             <div>
               <span class="label">Sessions</span>
-              <strong>${X(n)}</strong>
+              <strong>${X(r)}</strong>
             </div>
             <div>
               <span class="label">Temps total</span>
@@ -400,12 +398,12 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
             </div>
           </div>
           <div class="score-list">
-            ${Be}
+            ${Ue}
           </div>
         </article>
       </div>
     </section>
-  `}function ys(){var h;const e=v.save,s=Object.entries(e.games||{}),t=oe(e),a=o.lastSyncedAt?Z(o.lastSyncedAt):"Jamais",l=e.playerProfile.lastPlayedGameId&&((h=w.games.find(y=>y.id===e.playerProfile.lastPlayedGameId))==null?void 0:h.title),n=Ae(),S=Se(!!n);return`
+  `}function ys(){var h;const e=m.save,s=Object.entries(e.games||{}),t=oe(e),a=o.lastSyncedAt?Z(o.lastSyncedAt):"Jamais",l=e.playerProfile.lastPlayedGameId&&((h=w.games.find(b=>b.id===e.playerProfile.lastPlayedGameId))==null?void 0:h.title),r=Ae(),S=Se(!!r);return`
     <section class="card">
       <div class="section-head">
         <div>
@@ -417,8 +415,8 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
       </div>
       <div class="profile-identity">
         <div class="avatar-panel">
-          <div class="avatar ${n?"has-image":""}" id="profile-avatar-preview">
-            ${n?`<img src="${n}" alt="Avatar" />`:e.playerProfile.avatar||"🎮"}
+          <div class="avatar ${r?"has-image":""}" id="profile-avatar-preview">
+            ${r?`<img src="${r}" alt="Avatar" />`:e.playerProfile.avatar||"🎮"}
           </div>
           <p class="muted small" id="profile-avatar-helper">${S}</p>
           <label class="file-drop">
@@ -426,7 +424,7 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
             <strong>Image Supabase</strong>
             <span class="muted small">PNG/JPG · 1.5 Mo max</span>
           </label>
-          <button class="btn ghost danger" id="profile-avatar-clear" type="button" ${n?"":"disabled"}>Revenir à l'emoji</button>
+          <button class="btn ghost danger" id="profile-avatar-clear" type="button" ${r?"":"disabled"}>Revenir à l'emoji</button>
         </div>
         <div class="profile-form two-cols">
           <label>Pseudo <input id="player-name" value="${e.playerProfile.name}" disabled /></label>
@@ -502,10 +500,10 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
         </div>
       </div>
       <div class="save-list">
-        ${s.length?s.map(([y,P])=>`
+        ${s.length?s.map(([b,P])=>`
           <div class="save-row">
             <div>
-              <strong>${y}</strong>
+              <strong>${b}</strong>
               <p class="muted small">v${P.saveSchemaVersion} · Dernier : ${Z(P.lastPlayedAt)}</p>
             </div>
             <div class="chips-row">
@@ -516,7 +514,7 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
         `).join(""):"<p class='muted'>Aucune sauvegarde par jeu pour le moment.</p>"}
       </div>
     </section>
-  `}function R(){if(!o.ready||!o.user){re.innerHTML=ps(),bs();return}if(!o.hydrated){re.innerHTML=us();return}re.innerHTML=`
+  `}function N(){if(!o.ready||!o.user){re.innerHTML=ps(),bs();return}if(!o.hydrated){re.innerHTML=us();return}re.innerHTML=`
     <div class="layout">
       ${cs()}
       ${vs()}
@@ -525,4 +523,4 @@ import{a as Re,b as Ne,d as Xe,e as Ge,f as Je,o as Fe,g as fe,w as ye,u as le,c
       ${C==="stats"?fs():""}
       ${C==="profile"?ys():""}
     </div>
-  `,$s()}function bs(){const e=document.getElementById("gate-login"),s=document.getElementById("gate-register");e==null||e.addEventListener("click",async()=>{var l,n;const t=((l=document.getElementById("gate-identifier"))==null?void 0:l.value)||"",a=((n=document.getElementById("gate-password"))==null?void 0:n.value)||"";await V("login",{identifier:t,password:a})}),s==null||s.addEventListener("click",async()=>{var l,n;const t=((l=document.getElementById("gate-identifier"))==null?void 0:l.value)||"",a=((n=document.getElementById("gate-password"))==null?void 0:n.value)||"";await V("register",{identifier:t,password:a})})}function $s(){document.querySelectorAll(".nav-btn").forEach(d=>{d.addEventListener("click",()=>{C=d.dataset.tab,R()})});const e=document.getElementById("open-profile");e==null||e.addEventListener("click",()=>{C="profile",R()});const s=document.getElementById("player-name"),t=document.getElementById("player-avatar");s&&t&&C!=="profile"&&(s.addEventListener("change",()=>ge(s.value,(t==null?void 0:t.value)||"🎮")),t.addEventListener("change",()=>ge((s==null?void 0:s.value)||"Joueur",t.value))),document.querySelectorAll(".help-btn").forEach(d=>{d.addEventListener("click",()=>{const c=d.dataset.help,p=$e.find($=>$.id===c);p&&f(p.uiText.help,"info")})}),document.querySelectorAll(".favorite-btn").forEach(d=>{d.addEventListener("click",()=>{const c=d.dataset.game;c&&is(c)})});const a=document.getElementById("export-save");a==null||a.addEventListener("click",rs);const l=document.getElementById("reset-save");l==null||l.addEventListener("click",()=>he()),document.querySelectorAll(".reset-game").forEach(d=>{d.addEventListener("click",()=>{const c=d.dataset.game;he(c)})});const n=document.getElementById("import-btn"),S=document.getElementById("import-text");n==null||n.addEventListener("click",()=>S&&ns(S.value));const h=document.getElementById("cloud-login"),y=document.getElementById("cloud-register"),P=document.getElementById("cloud-logout"),r=document.getElementById("cloud-save"),b=document.getElementById("cloud-load");h==null||h.addEventListener("click",async()=>{var p,$;const d=((p=document.getElementById("cloud-identifier"))==null?void 0:p.value)||"",c=(($=document.getElementById("cloud-password"))==null?void 0:$.value)||"";await V("login",{identifier:d,password:c})}),y==null||y.addEventListener("click",async()=>{var p,$;const d=((p=document.getElementById("cloud-identifier"))==null?void 0:p.value)||"",c=(($=document.getElementById("cloud-password"))==null?void 0:$.value)||"";await V("register",{identifier:d,password:c})}),P==null||P.addEventListener("click",async()=>{await V("logout"),B=null,U=!1,J()}),r==null||r.addEventListener("click",ls),b==null||b.addEventListener("click",os);const m=document.getElementById("profile-avatar-upload"),T=document.getElementById("profile-avatar-clear"),L=document.getElementById("profile-save");m==null||m.addEventListener("change",d=>{var $;const c=d.target,p=($=c.files)==null?void 0:$[0];if(p){if(!p.type.startsWith("image/")){f("Seules les images sont autorisées.","error"),c.value="";return}if(p.size>1.5*1024*1024){f("Image trop lourde (1.5 Mo max).","error"),c.value="";return}J(),B=p,_=URL.createObjectURL(p),U=!1,ne()}}),T==null||T.addEventListener("click",()=>{U=!0,B=null,J(),ne()}),L==null||L.addEventListener("click",async()=>{const d=document.getElementById("player-avatar"),c=((d==null?void 0:d.value)||"🎮").slice(0,4),p=v.save.playerProfile.avatarStoragePath;let $=v.save.playerProfile.avatarUrl,N=p;if(B){const x=await Ye(B,p||void 0);if(!x.url||!x.path||x.error){f(x.error||"Upload avatar impossible","error");return}$=x.url,N=x.path}else U&&($=void 0,N=void 0,p&&o.ready&&o.user&&await Qe(p));le(x=>{x.playerProfile.avatar=c,x.playerProfile.avatarUrl=$,x.playerProfile.avatarStoragePath=N,x.playerProfile.avatarType=$?"image":"emoji"}),B=null,U=!1,J(),f("Profil mis à jour","success"),M()});const g=document.getElementById("search-games"),I=document.getElementById("filter-fav"),E=Array.from(document.querySelectorAll(".chip-btn[data-category]")),k=document.getElementById("clear-filters");g==null||g.addEventListener("input",()=>{Q=g.value,R()}),E.forEach(d=>{d.addEventListener("click",()=>{G=d.dataset.category||"all",R()})}),I==null||I.addEventListener("click",()=>{O=!O,R()}),k==null||k.addEventListener("click",()=>{Q="",G="all",O=!1,R()}),ne()}function M(){if(!o.ready||!o.user||!o.hydrated){R();return}const e=fe();ue||(ie=e.save.globalLevel,ue=!0),v=e,Ee(xe(w.hubTheme)),R()}window.addEventListener("pageshow",()=>{M()});document.addEventListener("visibilitychange",()=>{document.visibilityState==="visible"&&M()});M();
+  `,$s()}function bs(){const e=document.getElementById("gate-login"),s=document.getElementById("gate-register");e==null||e.addEventListener("click",async()=>{var l,r;const t=((l=document.getElementById("gate-identifier"))==null?void 0:l.value)||"",a=((r=document.getElementById("gate-password"))==null?void 0:r.value)||"";await _("login",{identifier:t,password:a})}),s==null||s.addEventListener("click",async()=>{var l,r;const t=((l=document.getElementById("gate-identifier"))==null?void 0:l.value)||"",a=((r=document.getElementById("gate-password"))==null?void 0:r.value)||"";await _("register",{identifier:t,password:a})})}function $s(){document.querySelectorAll(".nav-btn").forEach(d=>{d.addEventListener("click",()=>{C=d.dataset.tab,N()})});const e=document.getElementById("open-profile");e==null||e.addEventListener("click",()=>{C="profile",N()});const s=document.getElementById("player-name"),t=document.getElementById("player-avatar");s&&t&&C!=="profile"&&(s.addEventListener("change",()=>ge(s.value,(t==null?void 0:t.value)||"🎮")),t.addEventListener("change",()=>ge((s==null?void 0:s.value)||"Joueur",t.value))),document.querySelectorAll(".help-btn").forEach(d=>{d.addEventListener("click",()=>{const c=d.dataset.help,p=$e.find($=>$.id===c);p&&y(p.uiText.help,"info")})}),document.querySelectorAll(".favorite-btn").forEach(d=>{d.addEventListener("click",()=>{const c=d.dataset.game;c&&is(c)})});const a=document.getElementById("export-save");a==null||a.addEventListener("click",rs);const l=document.getElementById("reset-save");l==null||l.addEventListener("click",()=>he()),document.querySelectorAll(".reset-game").forEach(d=>{d.addEventListener("click",()=>{const c=d.dataset.game;he(c)})});const r=document.getElementById("import-btn"),S=document.getElementById("import-text");r==null||r.addEventListener("click",()=>S&&ns(S.value));const h=document.getElementById("cloud-login"),b=document.getElementById("cloud-register"),P=document.getElementById("cloud-logout"),n=document.getElementById("cloud-save"),f=document.getElementById("cloud-load");h==null||h.addEventListener("click",async()=>{var p,$;const d=((p=document.getElementById("cloud-identifier"))==null?void 0:p.value)||"",c=(($=document.getElementById("cloud-password"))==null?void 0:$.value)||"";await _("login",{identifier:d,password:c})}),b==null||b.addEventListener("click",async()=>{var p,$;const d=((p=document.getElementById("cloud-identifier"))==null?void 0:p.value)||"",c=(($=document.getElementById("cloud-password"))==null?void 0:$.value)||"";await _("register",{identifier:d,password:c})}),P==null||P.addEventListener("click",async()=>{await _("logout"),U=null,B=!1,J()}),n==null||n.addEventListener("click",ls),f==null||f.addEventListener("click",os);const u=document.getElementById("profile-avatar-upload"),T=document.getElementById("profile-avatar-clear"),L=document.getElementById("profile-save");u==null||u.addEventListener("change",d=>{var $;const c=d.target,p=($=c.files)==null?void 0:$[0];if(p){if(!p.type.startsWith("image/")){y("Seules les images sont autorisées.","error"),c.value="";return}if(p.size>1.5*1024*1024){y("Image trop lourde (1.5 Mo max).","error"),c.value="";return}J(),U=p,V=URL.createObjectURL(p),B=!1,ne()}}),T==null||T.addEventListener("click",()=>{B=!0,U=null,J(),ne()}),L==null||L.addEventListener("click",async()=>{const d=document.getElementById("player-avatar"),c=((d==null?void 0:d.value)||"🎮").slice(0,4),p=m.save.playerProfile.avatarStoragePath;let $=m.save.playerProfile.avatarUrl,R=p;if(U){const x=await Ye(U,p||void 0);if(!x.url||!x.path||x.error){y(x.error||"Upload avatar impossible","error");return}$=x.url,R=x.path}else B&&($=void 0,R=void 0,p&&o.ready&&o.user&&await Qe(p));le(x=>{x.playerProfile.avatar=c,x.playerProfile.avatarUrl=$,x.playerProfile.avatarStoragePath=R,x.playerProfile.avatarType=$?"image":"emoji"}),U=null,B=!1,J(),y("Profil mis à jour","success"),M()});const g=document.getElementById("search-games"),I=document.getElementById("filter-fav"),E=Array.from(document.querySelectorAll(".chip-btn[data-category]")),k=document.getElementById("clear-filters");g==null||g.addEventListener("input",()=>{Q=g.value,N()}),E.forEach(d=>{d.addEventListener("click",()=>{G=d.dataset.category||"all",N()})}),I==null||I.addEventListener("click",()=>{O=!O,N()}),k==null||k.addEventListener("click",()=>{Q="",G="all",O=!1,N()}),ne()}function M(){if(!o.ready||!o.user||!o.hydrated){N();return}const e=fe();ue||(ie=e.save.globalLevel,ue=!0),m=e,Ee(xe(w.hubTheme)),N()}window.addEventListener("pageshow",()=>{M()});document.addEventListener("visibilitychange",()=>{document.visibilityState==="visible"&&M()});M();
