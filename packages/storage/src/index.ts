@@ -221,3 +221,7 @@ export function subscribeToSaveChanges(listener: SaveListener) {
     if (idx >= 0) saveListeners.splice(idx, 1);
   };
 }
+
+if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  import("./cloud");
+}

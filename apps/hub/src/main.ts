@@ -1486,4 +1486,14 @@ function refresh() {
   renderHub();
 }
 
+window.addEventListener("pageshow", () => {
+  refresh();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    refresh();
+  }
+});
+
 refresh();
