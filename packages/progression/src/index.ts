@@ -129,7 +129,9 @@ function unlockEligibleAchievements(
       if (achievement.rewardXP) {
         state.globalXP += achievement.rewardXP;
       }
-      emitEvent({ type: "ACHIEVEMENT_UNLOCKED", payload: { achievementId: achievement.id } });
+      const event: GameEvent = { type: "ACHIEVEMENT_UNLOCKED", payload: { achievementId: achievement.id } };
+      markProgressionHandled(event);
+      emitEvent(event);
     }
   });
 }
