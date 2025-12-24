@@ -6,6 +6,9 @@ import { getAuthState, subscribe as subscribeCloud } from "@storage/cloud";
 const basePath = import.meta.env.BASE_URL || "/";
 const app = document.getElementById("app")!;
 let cloudState = getAuthState();
+let authChecked = false;
+let currentView: "checking" | "gate" | "denied" | "secret" | null = null;
+let lastDeniedMessage = "";
 
 const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 
@@ -20,6 +23,25 @@ function renderGate() {
             <p class="lead">Chargement de ta sauvegarde avant l'accès au secret.</p>
             <div class="hero-actions">
               <a class="btn ghost" href="${withBasePath("/", basePath)}">Retour au hub</a>
+            </div>
+          </div>
+        </header>
+      </main>
+    </div>
+  `;
+}
+
+function renderChecking() {
+  app.innerHTML = `
+    <div class="page">
+      <main class="shell">
+        <header class="hero">
+          <div class="hero-content">
+            <p class="overline">Vérification</p>
+            <h1>Contrôle d'accès en cours</h1>
+            <p class="lead">On vérifie si ce compte a le droit d'entrer.</p>
+            <div class="hero-actions">
+              <a class="btn primary" href="${withBasePath("/", basePath)}">Retour au hub</a>
             </div>
           </div>
         </header>
@@ -61,6 +83,55 @@ function getCloudIdentifier(user: typeof cloudState.user): string | null {
 function isAlexAccount(user: typeof cloudState.user): boolean {
   const identifier = getCloudIdentifier(user);
   return identifier?.trim().toLowerCase() === ALEX_SECRET.requiredName.trim().toLowerCase();
+}
+
+function showChecking() {
+  if (currentView === "checking") return;
+  currentView = "checking";
+  renderChecking();
+}
+
+function showGate() {
+  if (currentView === "gate") return;
+  currentView = "gate";
+  renderGate();
+}
+
+function showDenied(message: string) {
+  if (currentView === "denied" && lastDeniedMessage === message) return;
+  currentView = "denied";
+  lastDeniedMessage = message;
+  renderAccessDenied(message);
+}
+
+function showSecret() {
+  if (currentView === "secret") return;
+  currentView = "secret";
+  renderSecretPage();
+}
+
+function evaluateAccess() {
+  if (!cloudState.ready) {
+    showDenied("Supabase n'est pas configuré pour vérifier l'identité.");
+    return;
+  }
+  if (!authChecked) {
+    showChecking();
+    return;
+  }
+  if (!cloudState.user) {
+    showDenied("Connecte-toi au cloud depuis le hub pour déverrouiller l'accès.");
+    return;
+  }
+  if (!isAlexAccount(cloudState.user)) {
+    showDenied("Tu n'es pas connecté avec le compte Alex.");
+    return;
+  }
+  if (!cloudState.hydrated) {
+    showGate();
+    return;
+  }
+  showSecret();
 }
 
 function renderSecretPage() {
@@ -343,20 +414,10 @@ function startFireworks() {
   });
 }
 
-if (!cloudState.ready) {
-  renderAccessDenied("Supabase n'est pas configuré pour vérifier l'identité.");
-} else if (!cloudState.user) {
-  renderAccessDenied("Connecte-toi au cloud depuis le hub pour déverrouiller l'accès.");
-} else if (!isAlexAccount(cloudState.user)) {
-  renderAccessDenied("Tu n'es pas connecté avec le compte Alex.");
-} else if (!cloudState.hydrated) {
-  renderGate();
-  subscribeCloud((state) => {
-    cloudState = state;
-    if (cloudState.user && cloudState.hydrated) {
-      window.location.reload();
-    }
-  });
-} else {
-  renderSecretPage();
-}
+subscribeCloud((state) => {
+  cloudState = state;
+  authChecked = true;
+  evaluateAccess();
+});
+
+evaluateAccess();
