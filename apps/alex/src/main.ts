@@ -322,9 +322,7 @@ function startFireworks() {
   let animating = false;
 
   const tick = () => {
-    context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(5, 6, 12, 0.1)";
-    context.fillRect(0, 0, width, height);
+    context.clearRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
     const gravity = reducedMotion ? 0.028 : 0.035;
 
@@ -342,26 +340,17 @@ function startFireworks() {
         continue;
       }
 
-      const outerGlow = particle.size * 6.2;
-      context.globalAlpha = particle.alpha * 0.22;
+      const glowSize = particle.size * 3.2;
+      context.globalAlpha = particle.alpha * 0.55;
       context.fillStyle = particle.color;
-      context.shadowBlur = 50 * intensity;
-      context.shadowColor = particle.color;
-      context.beginPath();
-      context.arc(particle.x, particle.y, outerGlow, 0, Math.PI * 2);
-      context.fill();
-
-      const glowSize = particle.size * 3.4;
-      context.globalAlpha = particle.alpha * 0.7;
-      context.fillStyle = particle.color;
-      context.shadowBlur = 34 * intensity;
+      context.shadowBlur = 28 * intensity;
       context.shadowColor = particle.color;
       context.beginPath();
       context.arc(particle.x, particle.y, glowSize, 0, Math.PI * 2);
       context.fill();
 
-      context.globalAlpha = particle.alpha * 0.95;
-      context.shadowBlur = 18 * intensity;
+      context.globalAlpha = particle.alpha;
+      context.shadowBlur = 12 * intensity;
       context.beginPath();
       context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
       context.fill();
