@@ -696,16 +696,6 @@ function renderAchievements() {
         </div>
         <div class="pill accent">✨ ${progress}%</div>
       </div>
-      <div class="achievement-spotlight">
-        <div class="card achievement-progress">
-          <p class="eyebrow">Progression</p>
-          <h3>${unlocked.size} succès</h3>
-          <div class="progress-ring" style="--progress:${progress}">
-            <span>${progress}%</span>
-          </div>
-          <p class="muted small">${total} objectifs pour une collection premium.</p>
-        </div>
-      </div>
       <div class="stack">${list}</div>
     </section>
   `;

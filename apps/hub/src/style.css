@@ -835,9 +835,6 @@ textarea:focus {
     width: 100%;
     justify-content: center;
   }
-  .achievement-spotlight {
-    grid-template-columns: 1fr;
-  }
 }
 
 .badge {
@@ -892,12 +889,6 @@ textarea:focus {
   z-index: 1;
 }
 
-.achievement-spotlight {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 14px;
-  margin: 12px 0 18px;
-}
 
 .achievement-message textarea {
   width: 100%;
@@ -921,41 +912,6 @@ textarea:focus {
   font-weight: 600;
 }
 
-.achievement-progress {
-  display: grid;
-  gap: 6px;
-  align-content: center;
-  text-align: center;
-}
-
-.progress-ring {
-  --progress: 0;
-  width: 140px;
-  height: 140px;
-  margin: 6px auto 8px;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--color-secondary) calc(var(--progress) * 1%),
-    rgba(255, 255, 255, 0.15) 0
-  );
-  position: relative;
-  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-}
-
-.progress-ring::after {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, rgba(7, 19, 41, 0.88), rgba(7, 19, 41, 0.62));
-}
-
-.progress-ring span {
-  position: relative;
-  z-index: 1;
-  font-weight: 800;
-  font-size: 20px;
-}
 
 .achievement {
   display: flex;
