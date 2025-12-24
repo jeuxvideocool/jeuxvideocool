@@ -16,10 +16,20 @@
     "controls": ["P1 : W pour sauter", "P2 : Flèche haut pour sauter"]
   },
   "difficultyParams": {
-    "jumpForce": 0.03,
-    "boostForce": 0.05,
-    "gravity": 1.25,
-    "ropeStiffness": 0.7
+    "jumpForce": 0.055,
+    "boostForce": 0.075,
+    "gravity": 0.9,
+    "ropeStiffness": 0.55,
+    "ropeLength": 90,
+    "ropeDamping": 0.12,
+    "sideForce": 0.018,
+    "coyoteTimeMs": 140,
+    "jumpCooldownMs": 160,
+    "bodyAirFriction": 0.03,
+    "limbAirFriction": 0.04,
+    "bodyRestitution": 0.12,
+    "limbRestitution": 0.18,
+    "idleDamping": 0.85
   },
   "input": {
     "keys": {

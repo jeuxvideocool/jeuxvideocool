@@ -50,9 +50,6 @@ const {
   Vector,
 } = Matter;
 
-const engine = Engine.create({ gravity: { x: 0, y: config?.difficultyParams.gravity ?? 1.1 } });
-const runner = Runner.create();
-
 type Fighter = {
   body: Matter.Body;
   head: Matter.Body;
@@ -73,12 +70,34 @@ const state = {
   decor: [] as { x: number; y: number; r: number; alpha: number }[],
   spotlights: [] as { x: number; y: number; w: number; h: number; alpha: number }[],
   grounded: new Map<string, number>(),
+  lastGroundedAt: new Map<string, number>(),
+  lastJumpAt: new Map<string, number>(),
 };
 
 const keys = {
   p1: config?.input.keys.p1Jump || "KeyW",
   p2: config?.input.keys.p2Jump || "ArrowUp",
 };
+
+const physicsParams = {
+  jumpForce: config?.difficultyParams.jumpForce ?? 0.055,
+  boostForce: config?.difficultyParams.boostForce ?? 0.075,
+  gravity: config?.difficultyParams.gravity ?? 0.9,
+  ropeStiffness: config?.difficultyParams.ropeStiffness ?? 0.55,
+  ropeLength: config?.difficultyParams.ropeLength ?? 90,
+  ropeDamping: config?.difficultyParams.ropeDamping ?? 0.12,
+  sideForce: config?.difficultyParams.sideForce ?? 0.018,
+  coyoteTimeMs: config?.difficultyParams.coyoteTimeMs ?? 140,
+  jumpCooldownMs: config?.difficultyParams.jumpCooldownMs ?? 160,
+  bodyAirFriction: config?.difficultyParams.bodyAirFriction ?? 0.03,
+  limbAirFriction: config?.difficultyParams.limbAirFriction ?? 0.04,
+  bodyRestitution: config?.difficultyParams.bodyRestitution ?? 0.12,
+  limbRestitution: config?.difficultyParams.limbRestitution ?? 0.18,
+  idleDamping: config?.difficultyParams.idleDamping ?? 0.85,
+};
+
+const engine = Engine.create({ gravity: { x: 0, y: physicsParams.gravity } });
+const runner = Runner.create();
 
 const mobileControls = createMobileControlManager({
   gameId: GAME_ID,
@@ -119,22 +138,22 @@ window.addEventListener("resize", resize);
 function createFighter(x: number, label: string, img: HTMLImageElement, color: string): Fighter {
   const body = Bodies.rectangle(x, state.height * 0.45, 50, 70, {
     friction: 0.8,
-    restitution: 0.02,
-    frictionAir: 0.015,
+    restitution: physicsParams.bodyRestitution,
+    frictionAir: physicsParams.bodyAirFriction,
     density: 0.002,
     label: `${label}-body`,
   });
   const head = Bodies.circle(x, state.height * 0.35, 16, {
     friction: 0.2,
-    restitution: 0.1,
-    frictionAir: 0.02,
+    restitution: physicsParams.limbRestitution,
+    frictionAir: physicsParams.limbAirFriction,
     density: 0.001,
     label: `${label}-head`,
   });
-  const hand = Bodies.circle(x + rand(-10, 10), state.height * 0.48, 10, {
+  const hand = Bodies.circle(x + rand(-4, 4), state.height * 0.48, 10, {
     friction: 0.3,
-    restitution: 0.05,
-    frictionAir: 0.02,
+    restitution: physicsParams.limbRestitution,
+    frictionAir: physicsParams.limbAirFriction,
     density: 0.001,
     label: `${label}-hand`,
   });
@@ -164,6 +183,10 @@ function createFighter(x: number, label: string, img: HTMLImageElement, color: s
 function buildWorld() {
   World.clear(engine.world, false);
   state.grounded.clear();
+  state.lastGroundedAt.clear();
+  state.lastJumpAt.clear();
+  engine.gravity.x = 0;
+  engine.gravity.y = physicsParams.gravity;
   const ground = Bodies.rectangle(state.width / 2, state.height - 20, state.width, 40, {
     isStatic: true,
     label: "ground",
@@ -188,9 +211,9 @@ function buildWorld() {
   const rope = Constraint.create({
     bodyA: f1.hand,
     bodyB: f2.hand,
-    stiffness: config?.difficultyParams.ropeStiffness ?? 0.6,
-    length: 40,
-    damping: 0.05,
+    stiffness: physicsParams.ropeStiffness,
+    length: physicsParams.ropeLength,
+    damping: physicsParams.ropeDamping,
     label: "rope",
   });
   Composite.add(engine.world, [rope]);
@@ -213,20 +236,28 @@ function buildWorld() {
   }));
 }
 
-function jump(fighter: Fighter) {
-  if (!isGrounded(fighter)) return;
-  const jumpForce = config?.difficultyParams.jumpForce ?? 0.08;
-  const boostForce = config?.difficultyParams.boostForce ?? 0.12;
-  const forceY = jumpForce + (fighter.head.position.y > fighter.body.position.y ? boostForce : 0);
-  const cappedForce = clamp(forceY, 0, 0.12);
-  Body.applyForce(fighter.body, fighter.body.position, { x: rand(-0.005, 0.005), y: -cappedForce });
-  Body.applyForce(fighter.head, fighter.head.position, { x: 0, y: -cappedForce * 0.6 });
-  Body.applyForce(fighter.hand, fighter.hand.position, { x: 0, y: -cappedForce * 0.4 });
+function jump(fighter: Fighter, opponent?: Fighter) {
+  if (!canJump(fighter)) return;
+  const key = fighter.label.slice(0, 2);
+  const now = performance.now();
+  state.lastJumpAt.set(key, now);
+  const headAbove = fighter.head.position.y < fighter.body.position.y;
+  const boost = headAbove ? physicsParams.boostForce : physicsParams.boostForce * 0.4;
+  const forceY = clamp(physicsParams.jumpForce + boost, 0, 0.12);
+  const direction = opponent ? Math.sign(opponent.body.position.x - fighter.body.position.x) : 0;
+  const lateral = direction * physicsParams.sideForce;
+  Body.applyForce(fighter.body, fighter.body.position, { x: lateral, y: -forceY });
+  Body.applyForce(fighter.head, fighter.head.position, { x: lateral * 0.4, y: -forceY * 0.6 });
+  Body.applyForce(fighter.hand, fighter.hand.position, { x: lateral * 0.8, y: -forceY * 0.4 });
 }
 
 function handleInput() {
-  if (input.isDown(keys.p1)) jump(state.fighters[0]);
-  if (input.isDown(keys.p2)) jump(state.fighters[1]);
+  const p1Down = input.isDown(keys.p1);
+  const p2Down = input.isDown(keys.p2);
+  if (p1Down) jump(state.fighters[0], state.fighters[1]);
+  else dampenIdle(state.fighters[0]);
+  if (p2Down) jump(state.fighters[1], state.fighters[0]);
+  else dampenIdle(state.fighters[1]);
 }
 
 function detectHeadHit() {
@@ -461,6 +492,9 @@ function trackGrounded(a: Matter.Body, b: Matter.Body, entering: boolean) {
   if (!isFighterPart(a) || b.label !== "ground") return;
   const key = a.label.slice(0, 2); // p1 or p2
   const current = state.grounded.get(key) || 0;
+  if (entering) {
+    state.lastGroundedAt.set(key, performance.now());
+  }
   state.grounded.set(key, entering ? current + 1 : Math.max(0, current - 1));
 }
 
@@ -468,6 +502,29 @@ function isGrounded(fighter: Fighter) {
   const key = fighter.label.slice(0, 2);
   const groundedCount = state.grounded.get(key) || 0;
   return groundedCount > 0;
+}
+
+function canJump(fighter: Fighter) {
+  const key = fighter.label.slice(0, 2);
+  const now = performance.now();
+  const lastGroundedAt = state.lastGroundedAt.get(key) ?? -Infinity;
+  const lastJumpAt = state.lastJumpAt.get(key) ?? -Infinity;
+  const grounded = isGrounded(fighter);
+  return (
+    (grounded || now - lastGroundedAt <= physicsParams.coyoteTimeMs) &&
+    now - lastJumpAt >= physicsParams.jumpCooldownMs
+  );
+}
+
+function dampenIdle(fighter: Fighter) {
+  if (!isGrounded(fighter)) return;
+  const part = fighter.body;
+  const nextX = part.velocity.x * physicsParams.idleDamping;
+  if (Math.abs(nextX) < 0.02) {
+    Body.setVelocity(part, { x: 0, y: part.velocity.y });
+  } else {
+    Body.setVelocity(part, { x: nextX, y: part.velocity.y });
+  }
 }
 
 function clampFightersInRing() {
