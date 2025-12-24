@@ -171,9 +171,6 @@ const badges = [
   "Achievement validé malgré l’âge",
 ];
 
-const psLine =
-  "PS : si on te demande ton cadeau, dis que c’est cet achievement. À ce stade, c’est plus durable qu’un corps en parfait état. :P";
-
   const backLink = withBasePath("/", basePath);
 
   app.innerHTML = `
@@ -259,16 +256,6 @@ const psLine =
 </article>
 
 
-        <section class="callout">
-          <div>
-            <span class="callout-label">PS</span>
-            <p>${psLine}</p>
-          </div>
-          <div class="callout-seal">
-            <span>${displayName}</span>
-            <em>Accès débloqué</em>
-          </div>
-        </section>
       </main>
     </div>
   `;
@@ -335,7 +322,9 @@ function startFireworks() {
   let animating = false;
 
   const tick = () => {
-    context.clearRect(0, 0, width, height);
+    context.globalCompositeOperation = "source-over";
+    context.fillStyle = "rgba(5, 6, 12, 0.1)";
+    context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = "lighter";
     const gravity = reducedMotion ? 0.028 : 0.035;
 
@@ -353,17 +342,26 @@ function startFireworks() {
         continue;
       }
 
-      const glowSize = particle.size * 2.1;
-      context.globalAlpha = particle.alpha * 0.45;
+      const outerGlow = particle.size * 6.2;
+      context.globalAlpha = particle.alpha * 0.22;
       context.fillStyle = particle.color;
-      context.shadowBlur = 16 * intensity;
+      context.shadowBlur = 50 * intensity;
+      context.shadowColor = particle.color;
+      context.beginPath();
+      context.arc(particle.x, particle.y, outerGlow, 0, Math.PI * 2);
+      context.fill();
+
+      const glowSize = particle.size * 3.4;
+      context.globalAlpha = particle.alpha * 0.7;
+      context.fillStyle = particle.color;
+      context.shadowBlur = 34 * intensity;
       context.shadowColor = particle.color;
       context.beginPath();
       context.arc(particle.x, particle.y, glowSize, 0, Math.PI * 2);
       context.fill();
 
-      context.globalAlpha = particle.alpha;
-      context.shadowBlur = 0;
+      context.globalAlpha = particle.alpha * 0.95;
+      context.shadowBlur = 18 * intensity;
       context.beginPath();
       context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
       context.fill();
