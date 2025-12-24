@@ -13,6 +13,9 @@
   --launch-accent-2: #7dd3fc;
   --launch-shadow: 0 30px 70px rgba(0, 0, 0, 0.38);
   --launch-radius: 22px;
+  --launch-title-size: clamp(32px, 4.2vw, 56px);
+  --launch-text-size: clamp(14px, 1.4vw, 18px);
+  --launch-label-size: clamp(12px, 1vw, 14px);
 }
 
 .launch-overlay {
@@ -20,7 +23,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 2vw, 24px);
+  padding: clamp(18px, 3vw, 36px);
   background: var(--launch-bg);
   backdrop-filter: blur(14px) saturate(120%);
   pointer-events: all;
@@ -30,18 +33,18 @@
 }
 
 .launch-card {
-  width: min(980px, 92vw);
-  max-height: min(90vh, 980px);
+  width: min(1120px, 94vw);
+  max-height: min(92vh, 1040px);
   background: var(--launch-card);
   border: 1px solid var(--launch-border);
   border-radius: var(--launch-radius);
-  padding: clamp(18px, 3vw, 28px);
+  padding: clamp(22px, 3.6vw, 40px);
   box-shadow: var(--launch-shadow);
   color: var(--launch-text);
   font-family: "Space Grotesk", "Sora", sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: clamp(16px, 2vw, 26px);
   overflow: auto;
   animation: launchRise 0.35s ease both;
 }
@@ -49,7 +52,7 @@
 .launch-head {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .launch-brand {
@@ -62,9 +65,9 @@
 .launch-badge {
   text-transform: uppercase;
   letter-spacing: 0.24em;
-  font-size: 11px;
+  font-size: clamp(11px, 1vw, 13px);
   font-weight: 600;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--launch-border);
@@ -78,7 +81,7 @@
 
 .launch-title {
   margin: 0;
-  font-size: clamp(28px, 3.4vw, 42px);
+  font-size: var(--launch-title-size);
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
@@ -86,20 +89,20 @@
 .launch-subtitle {
   margin: 0;
   color: var(--launch-muted);
-  font-size: 14px;
+  font-size: var(--launch-text-size);
 }
 
 .launch-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .launch-section {
   background: var(--launch-surface);
   border: 1px solid var(--launch-border);
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: clamp(14px, 2vw, 20px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -124,7 +127,7 @@
 
 .launch-section-title {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--launch-label-size);
   text-transform: uppercase;
   letter-spacing: 0.22em;
   color: var(--launch-muted);
@@ -133,14 +136,14 @@
 .launch-text {
   margin: 0;
   color: var(--launch-text);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--launch-text-size);
+  line-height: 1.6;
 }
 
 .launch-note {
   margin: 0;
   color: var(--launch-muted);
-  font-size: 13px;
+  font-size: clamp(12px, 1.2vw, 15px);
   line-height: 1.4;
 }
 
@@ -151,13 +154,13 @@
 
 .launch-row {
   display: grid;
-  grid-template-columns: minmax(110px, 140px) 1fr;
-  gap: 12px;
+  grid-template-columns: minmax(130px, 160px) 1fr;
+  gap: 14px;
   align-items: center;
 }
 
 .launch-row-label {
-  font-size: 12px;
+  font-size: var(--launch-label-size);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--launch-muted);
@@ -186,7 +189,7 @@
   border: 1px solid var(--launch-border);
   background: rgba(255, 255, 255, 0.06);
   border-radius: 12px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   color: var(--launch-text);
   font-weight: 600;
   cursor: pointer;
@@ -194,7 +197,7 @@
   flex-direction: column;
   gap: 2px;
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-  min-width: 120px;
+  min-width: 140px;
   text-align: left;
 }
 
@@ -209,11 +212,11 @@
 }
 
 .launch-option-title {
-  font-size: 13px;
+  font-size: clamp(13px, 1.3vw, 16px);
 }
 
 .launch-option-meta {
-  font-size: 11px;
+  font-size: clamp(11px, 1vw, 13px);
   font-weight: 500;
   color: var(--launch-muted);
 }
@@ -230,11 +233,11 @@
 }
 
 .launch-chip {
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 12px;
+  font-size: clamp(12px, 1.1vw, 14px);
   color: var(--launch-text);
 }
 
@@ -247,7 +250,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--launch-border);
   background: rgba(255, 255, 255, 0.06);
@@ -258,12 +261,12 @@
   border: none;
   color: var(--launch-text);
   font-weight: 600;
-  width: 72px;
+  width: 84px;
   outline: none;
 }
 
 .launch-input span {
-  font-size: 12px;
+  font-size: clamp(11px, 1vw, 13px);
   color: var(--launch-muted);
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -279,12 +282,12 @@
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--launch-border);
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 12px 14px;
 }
 
 .launch-metric span {
   display: block;
-  font-size: 11px;
+  font-size: clamp(11px, 1vw, 13px);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--launch-muted);
@@ -292,7 +295,7 @@
 
 .launch-metric strong {
   display: block;
-  font-size: 18px;
+  font-size: clamp(18px, 2vw, 24px);
   margin-top: 4px;
 }
 
@@ -306,7 +309,7 @@
 .launch-btn {
   border: none;
   border-radius: 14px;
-  padding: 12px 18px;
+  padding: 14px 22px;
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -315,6 +318,7 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
+  min-height: 48px;
 }
 
 .launch-btn.primary {
@@ -360,11 +364,20 @@
 
 @media (max-width: 720px) {
   .launch-card {
-    width: min(520px, 92vw);
+    width: min(640px, 96vw);
+    padding: 18px;
   }
 
   .launch-row {
     grid-template-columns: 1fr;
+  }
+
+  .launch-title {
+    font-size: clamp(28px, 7vw, 40px);
+  }
+
+  .launch-subtitle {
+    font-size: clamp(13px, 3.6vw, 16px);
   }
 
   .launch-actions {
