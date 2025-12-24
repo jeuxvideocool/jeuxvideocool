@@ -60,7 +60,7 @@ function getCloudIdentifier(user: typeof cloudState.user): string | null {
 
 function isAlexAccount(user: typeof cloudState.user): boolean {
   const identifier = getCloudIdentifier(user);
-  return identifier?.trim().toLowerCase() === ALEX_SECRET.requiredName;
+  return identifier?.trim().toLowerCase() === ALEX_SECRET.requiredName.trim().toLowerCase();
 }
 
 function renderSecretPage() {

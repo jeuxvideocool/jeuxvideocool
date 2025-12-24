@@ -139,7 +139,8 @@ function unlockEligibleAchievements(
 export function canAccessAlexPage(state: SaveState): boolean {
   const normalizedName = state.playerProfile.name?.trim().toLowerCase();
   const hasAchievement = state.achievementsUnlocked.includes(ALEX_SECRET.achievementId);
-  return hasAchievement && state.globalXP >= ALEX_SECRET.minXP && normalizedName === ALEX_SECRET.requiredName;
+  const requiredName = ALEX_SECRET.requiredName.trim().toLowerCase();
+  return hasAchievement && state.globalXP >= ALEX_SECRET.minXP && normalizedName === requiredName;
 }
 
 function handleStreaks(state: SaveState, event: GameEvent) {
