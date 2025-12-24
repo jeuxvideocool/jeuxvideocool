@@ -28,6 +28,41 @@ function renderGate() {
   `;
 }
 
+function renderAccessDenied(message: string) {
+  app.innerHTML = `
+    <div class="page">
+      <main class="shell">
+        <header class="hero">
+          <div class="hero-content">
+            <p class="overline">Accès restreint</p>
+            <h1>Page réservée au compte Alex</h1>
+            <p class="lead">${message}</p>
+            <div class="hero-actions">
+              <a class="btn primary" href="${withBasePath("/", basePath)}">Retour au hub</a>
+            </div>
+          </div>
+        </header>
+      </main>
+    </div>
+  `;
+}
+
+function getCloudIdentifier(user: typeof cloudState.user): string | null {
+  if (!user) return null;
+  const metaId = (user.user_metadata as { identifier?: string } | undefined)?.identifier;
+  if (metaId) return metaId;
+  const email = (user.email as string | undefined) || "";
+  if (!email) return null;
+  if (email.endsWith("@user.local")) return email.replace("@user.local", "");
+  const at = email.indexOf("@");
+  return at > 0 ? email.slice(0, at) : email;
+}
+
+function isAlexAccount(user: typeof cloudState.user): boolean {
+  const identifier = getCloudIdentifier(user);
+  return identifier?.trim().toLowerCase() === ALEX_SECRET.requiredName;
+}
+
 function renderSecretPage() {
   const snapshot = getProgressionSnapshot();
   const save = snapshot.save;
@@ -308,8 +343,12 @@ function startFireworks() {
   });
 }
 
-if (!cloudState.ready || !cloudState.user) {
-  window.location.replace(authLink);
+if (!cloudState.ready) {
+  renderAccessDenied("Supabase n'est pas configuré pour vérifier l'identité.");
+} else if (!cloudState.user) {
+  renderAccessDenied("Connecte-toi au cloud depuis le hub pour déverrouiller l'accès.");
+} else if (!isAlexAccount(cloudState.user)) {
+  renderAccessDenied("Tu n'es pas connecté avec le compte Alex.");
 } else if (!cloudState.hydrated) {
   renderGate();
   subscribeCloud((state) => {
